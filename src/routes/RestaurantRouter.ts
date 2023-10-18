@@ -5,5 +5,9 @@ const router: Router = express.Router();
 
 router.get("/", Restaurant.defaultFunction);
 
+router.get("/all", Restaurant.getAllRestaurants);
+
+router.get("/best", Restaurant.getBestRestaurants);
+
 
 export default router;

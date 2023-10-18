@@ -3,11 +3,16 @@ import baseRouter from './src/routes/BaseRouter';
 import { connectToDatabase } from './src/services/Database';
 import dotenv from 'dotenv';
 import HttpStatus from './src/constants/HttpStatus';
+var cors = require('cors');
 dotenv.config();
 
 const port = process.env.PORT;
 
 const app: Express = express();
+
+app.use(cors({
+    origin: '*'
+}));
 
 if(process.env.NODE_ENV === "dev") {
     app.use((req, res, next) => {
@@ -56,7 +61,7 @@ connectToDatabase()
 
     })
     .catch((err) => {
-      console.log("[server]: Server failed to start");
+      console.log("[server]: Server failed to start with error: ", err);
       process.exit(1);
     });
 

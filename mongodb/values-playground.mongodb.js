@@ -23,13 +23,13 @@ db.getCollection(MessageCollection).insertMany([
 ]);
 
 db.getCollection(RestaurantCollection).insertMany([
-  { "_id": ObjectId("64a685757acccfac3d045ad9"), "ownerId": ObjectId("64a685757acccfac3d045af3"), "name": "McDonald's Champs-Élysées", "position": [48.87287753220859, 2.299091242896418], "adresse": "15 rue du tertre", "note": 38 },
-  { "_id": ObjectId("64a685757acccfac3d045ada"), "ownerId": ObjectId("64a685757acccfac3d045af3"), "name": "McDonald's Montmartre", "position": [48.873452, 2.297869], "adresse": "15 avenue des Champs-Élysées", "note": 42 },
-  { "_id": ObjectId("64a685757acccfac3d045adb"), "ownerId": ObjectId("64a685757acccfac3d045af4"), "name": "Burger King Champs-Élysées", "position": [48.871365, 2.300729], "adresse": "15 rue du Chêne", "note": 45 },
-  { "_id": ObjectId("64a685757acccfac3d045adc"), "ownerId": ObjectId("64a685757acccfac3d045af4"), "name": "Burger King Montmartre", "position": [48.884597, 2.339918], "adresse": "165 avenue des Bizneuil", "note": 31 },
-  { "_id": ObjectId("64a685757acccfac3d045add"), "ownerId": ObjectId("64a685757acccfac3d045af5"), "name": "KFC Montmartre", "position": [48.890217, 2.346131], "adresse": "1 avenue du Monmartre", "note": 39 },
-  { "_id": ObjectId("64a685757acccfac3d045ade"), "ownerId": ObjectId("64a685757acccfac3d045af6"), "name": "Kebab Express", "position": [48.875621, 2.337450], "adresse": "35 avenue du kebab", "note": 46 },
-  { "_id": ObjectId("64a685757acccfac3d045adf"), "ownerId": ObjectId("64a685757acccfac3d045af7"), "name": "Pizza Express", "position": [48.871916, 2.329340], "adresse": "15 rue de la pizza", "note": 40 }
+  { "_id": ObjectId("64a685757acccfac3d045ad9"), "ownerId": ObjectId("64a685757acccfac3d045af3"), "name": "McDonald's Champs-Élysées", "position": [48.87287753220859, 2.299091242896418], "adresse": "15 rue du tertre", foodtype:"local_pizza", "note": 38 },
+  { "_id": ObjectId("64a685757acccfac3d045ada"), "ownerId": ObjectId("64a685757acccfac3d045af3"), "name": "McDonald's Montmartre", "position": [48.873452, 2.297869], "adresse": "15 avenue des Champs-Élysées", foodtype:"lunch_dining", "note": 42 },
+  { "_id": ObjectId("64a685757acccfac3d045adb"), "ownerId": ObjectId("64a685757acccfac3d045af4"), "name": "Burger King Champs-Élysées", "position": [48.871365, 2.300729], "adresse": "15 rue du Chêne", foodtype:"fastfood", "note": 45 },
+  { "_id": ObjectId("64a685757acccfac3d045adc"), "ownerId": ObjectId("64a685757acccfac3d045af4"), "name": "Burger King Montmartre", "position": [48.884597, 2.339918], "adresse": "165 avenue des Bizneuil", foodtype:"restaurant", "note": 31 },
+  { "_id": ObjectId("64a685757acccfac3d045add"), "ownerId": ObjectId("64a685757acccfac3d045af5"), "name": "KFC Montmartre", "position": [48.890217, 2.346131], "adresse": "1 avenue du Monmartre", foodtype:"restaurant","note": 39 },
+  { "_id": ObjectId("64a685757acccfac3d045ade"), "ownerId": ObjectId("64a685757acccfac3d045af6"), "name": "Kebab Express", "position": [48.875621, 2.337450], "adresse": "35 avenue du kebab", foodtype:"local_pizza", "note": 46 },
+  { "_id": ObjectId("64a685757acccfac3d045adf"), "ownerId": ObjectId("64a685757acccfac3d045af7"), "name": "Pizza Express", "position": [48.871916, 2.329340], "adresse": "15 rue de la pizza", foodtype:"lunch_dining", "note": 40 }
 ]);
 
 db.getCollection(UserCollection).insertMany([
