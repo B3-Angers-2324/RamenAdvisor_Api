@@ -4,7 +4,9 @@ import User from "../controllers/UserController"
 
 const router: Router = express.Router();
 
-router.get("/login", User.login);
+router.post("/login", User.login);
+
+router.post("/register", User.register);
 
 // load middleware for all routes to test user login
 router.use(UserMiddleware.userLoginMiddleware);

@@ -9,7 +9,7 @@ export default class Owner{
         public phone: string,
         public siret: string,
         public companyName: string,
-        public socialAdress: string,
+        public socialAdresse: string,
         public id?: ObjectId,
     ){}
 }

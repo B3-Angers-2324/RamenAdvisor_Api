@@ -45,24 +45,26 @@ if(process.env.NODE_ENV === "dev") {
 
 connectToDatabase()
     .then(() => {
+
+        app.use(express.json()); // Middleware pour analyser le corps JSON
       
-      // app.use() //for middleware
+        // app.use() //for middleware
 
-      app.use("/api/v1", baseRouter);
+        app.use("/api/v1", baseRouter);
 
-      // add response for 404 routes
-      app.use((_: Request, res: Response) => {
-        res.status(HttpStatus.NOT_FOUND).json({"message": "Route not found"});
-      });
+        // add response for 404 routes
+        app.use((_: Request, res: Response) => {
+            res.status(HttpStatus.NOT_FOUND).json({"message": "Route not found"});
+        });
 
-      app.listen(port, () => {
-        console.log(`[server]:\x1b[33m Server is running on \x1b[34m${process.env.NODE_ENV}\x1b[33m mode at \x1b[34mhttp://localhost:${port}`);
-      });
+        app.listen(port, () => {
+            console.log(`[server]:\x1b[33m Server is running on \x1b[34m${process.env.NODE_ENV}\x1b[33m mode at \x1b[34mhttp://localhost:${port}`);
+        });
 
-    })
-    .catch((err) => {
-      console.log("[server]: Server failed to start with error: ", err);
-      process.exit(1);
-    });
+        })
+        .catch((err) => {
+        console.log("[server]: Server failed to start with error: ", err);
+        process.exit(1);
+        });
 
 
