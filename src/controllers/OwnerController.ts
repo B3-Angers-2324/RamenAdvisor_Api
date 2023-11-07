@@ -31,10 +31,9 @@ async function register(req: Request, res: Response){
             firstName: req.body.firstName,
             lastName: req.body.lastName,
             email: req.body.email,
-            password: req.body.password,
-            phone: req.body.phone,
-            siret: req.body.siret,
             companyName: req.body.companyName,
+            password: req.body.password,
+            siret: req.body.siret,
             socialAdresse: req.body.socialAdresse
         };
 
@@ -51,8 +50,12 @@ async function register(req: Request, res: Response){
 
         const addedOwner = await OwnerServices.addOwner(newOwner);
 
+        console.log(addedOwner)
+
         if(addedOwner){
-            res.status(HttpStatus.CREATED).json({"message": "Owner added successfully"});
+            const secret = process.env.JWT_SECRET_OWNER || "ASecretPhrase";
+            const token = jwt.sign({_id: addedOwner.insertedId?.toString()}, secret, {expiresIn: process.env.JWT_EXPIRES_IN});
+            res.status(HttpStatus.CREATED).json({"token": token});
         }else{
             res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while adding owner"});
         }
