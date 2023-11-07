@@ -45,8 +45,35 @@ async function getAll(): Promise<User[]> {
     }
 }
 
+async function getOne(id: string): Promise<User | null> {
+    try {
+        const user = await collections.user?.findOne({ _id: new ObjectId(id) });
+        if (user) {
+            return new User(
+                user.firstName,
+                user.lastName,
+                user.brithDay,
+                user.email,
+                user.phone,
+                user.sexe,
+                user.password,
+                user.ville,
+                user.address,
+                user.ban,
+                user._id
+            );
+        } else {
+            return null;
+        }
+    } catch (err) {
+        throw err;
+    }
+
+}
+
 export default {
     getOneUser,
     addUser,
-    getAll
+    getAll,
+    getOne
 } as const;

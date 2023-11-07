@@ -5,5 +5,6 @@ const router: Router = express.Router();
 
 router.get("/", Message.defaultFunction);
 
+router.get("/restaurant/:uid", Message.getMessagesForRestaurant);
 
 export default router;

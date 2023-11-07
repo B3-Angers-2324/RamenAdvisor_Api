@@ -16,7 +16,7 @@ db.createCollection(
     {
         validator: { $jsonSchema: {
             bsonType: "object",
-            required: ["userId", "restaurantId", "message", "note"],
+            required: ["userId", "restaurantId", "message", "note", "date"],
             properties: {
                 userId: {
                     bsonType: "objectId",
@@ -33,6 +33,10 @@ db.createCollection(
                 note: {
                     bsonType: "int",
                     description: "must be a int and is required"
+                },
+                date: {
+                    bsonType: "date",
+                    description: "must be a date and is required"
                 }
             }
         }}
