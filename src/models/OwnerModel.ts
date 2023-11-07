@@ -6,7 +6,6 @@ export default class Owner{
         public lastName: string,
         public email: string,
         public password: string,
-        public phone: string,
         public siret: string,
         public companyName: string,
         public socialAdresse: string,
