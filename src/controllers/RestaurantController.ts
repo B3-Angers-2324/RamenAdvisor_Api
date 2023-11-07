@@ -17,26 +17,23 @@ const getAllRestaurants = (req: Request, res: Response) => {
  * @param res The response to the client
  */
 const getBestRestaurants = async (req: Request, res: Response) => {
-    console.log(req.query.limit);
     try{
         let restaurant: { 
             id: ObjectId;
             name: string;
-            address: string;
             foodtype:string,
             note: number;
             position: any;
-            image:string
+            images: string[]
         }[] = [];
         (await Service.queryBestRestaurants(parseInt(req.query.limit as string))).forEach((element) => {
             restaurant.push({
                 id: element._id,
                 name: element.name,
-                address: element.address,
                 foodtype: element.foodtype,
                 note: element.note,
                 position: element.position,
-                image: "https://random.imagecdn.app/200/200"
+                images: element.images
             });
         });
         res.status(HttpStatus.OK).json({
@@ -48,9 +45,25 @@ const getBestRestaurants = async (req: Request, res: Response) => {
     }
 }
 
+/**
+ * Function to get one restaurant by its id
+ * @param req The request from the client
+ * @param res The response to the client
+ */
+const getRestaurantById = async (req: Request, res: Response) =>{
+    try{
+        let restaurant = await Service.queryRestaurantById(req.params.uid);
+        res.status(HttpStatus.OK).json({
+            obj: restaurant
+        });
+    }catch(e){
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
+    }
+}
 
 export default {
     defaultFunction,
     getAllRestaurants,
-    getBestRestaurants
+    getBestRestaurants,
+    getRestaurantById
 };

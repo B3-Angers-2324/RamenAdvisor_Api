@@ -11,11 +11,19 @@ const queryBestRestaurants = async (limit : number) => {
     if (restaurants==undefined){
         throw new Error("No restaurants found");
     }
-    console.log(restaurants);
     return restaurants;
+}
+
+const queryRestaurantById = async (id : string) => {
+    let restaurant = await collections.restaurant?.findOne({_id: new ObjectId(id)});
+    if (restaurant==undefined){
+        throw new Error("No restaurant found");
+    }
+    return restaurant;
 }
 
 
 export default {
-    queryBestRestaurants
+    queryBestRestaurants,
+    queryRestaurantById
 } as const;

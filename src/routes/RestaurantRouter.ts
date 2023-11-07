@@ -9,5 +9,7 @@ router.get("/all", Restaurant.getAllRestaurants);
 
 router.get("/best", Restaurant.getBestRestaurants);
 
+router.get("/id/:uid", Restaurant.getRestaurantById);
+
 
 export default router;
