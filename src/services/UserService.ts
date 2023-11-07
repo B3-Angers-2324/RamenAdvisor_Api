@@ -33,6 +33,7 @@ async function getAll(): Promise<User[]> {
                 element.sexe,
                 element.password,
                 element.ville,
+                element.address,
                 element.ban,
                 element._id
             ));

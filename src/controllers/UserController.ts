@@ -35,6 +35,8 @@ async function register(req: Request, res: Response){
             email: req.body.email,
             phone: req.body.phone,
             sexe: req.body.sexe,
+            ville: req.body.ville,
+            address: req.body.address,
             password: req.body.password,
             ban: false
         };
@@ -53,7 +55,9 @@ async function register(req: Request, res: Response){
         const addedUser = await UserServices.addUser(newUser);
 
         if(addedUser){
-            res.status(HttpStatus.CREATED).json({"message": "User added successfully"});
+            const secret = process.env.JWT_SECRET_USER || "ASecretPhrase";
+            const token = jwt.sign({_id: addedUser.insertedId?.toString()}, secret, {expiresIn: process.env.JWT_EXPIRES_IN});
+            res.status(HttpStatus.CREATED).json({"token": token});
         }else{
             res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while adding user"});
         }

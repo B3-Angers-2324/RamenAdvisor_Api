@@ -11,6 +11,7 @@ export default class User{
         public password: string,
         public ban: boolean,
         public ville?: string,
+        public address?: string,
         public id?: ObjectId,
     ){}
 }
