@@ -44,7 +44,7 @@ db.createCollection(
     {
         validator: { $jsonSchema: {
             bsonType: "object",
-            required: ["ownerId", "name", "position", "adresse", "foodtype", "note"],
+            required: ["ownerId", "name", "position", "address", "foodtype", "note"],
             properties: {
                 ownerId: {
                     bsonType: "objectId",
@@ -58,7 +58,7 @@ db.createCollection(
                     bsonType: "array",
                     description: "must be a array and is required"
                 },
-                adresse: {
+                address: {
                     bsonType: "string",
                     description: "must be a string and is required"
                 },
@@ -71,7 +71,12 @@ db.createCollection(
                     minimum: 0,
                     maximum: 50,
                     description: "must be a int and is required"
-                }
+                },
+                //Need to be changed to Images type
+                images: {
+                    bsonType: "array",
+                    description: "must be a array of string"
+                },
             }
         }}
     }

@@ -24,7 +24,7 @@ ENV NODE_ENV=prod
 #Copy dependency list
 COPY package.json ./
 #Install dependencies
-RUN npm install --only=production
+RUN npm install --omit=dev
 #Copy the builded files from the build phase
 COPY --from=build /app/dist ./dist
 #Expose the port
