@@ -139,7 +139,7 @@ db.createCollection(
     {
         validator: { $jsonSchema: {
             bsonType: "object",
-            required: ["firstName", "lastName", "email", "password", "phone", "siret", "companyName", "socialAdresse"],
+            required: ["firstName", "lastName", "email", "password", "siret", "companyName", "socialAdresse"],
             properties: {
                 firstName: {
                     bsonType: "string",
@@ -154,10 +154,6 @@ db.createCollection(
                     description: "must be a string and is required"
                 },
                 password: {
-                    bsonType: "string",
-                    description: "must be a string and is required"
-                },
-                phone: {
                     bsonType: "string",
                     description: "must be a string and is required"
                 },
