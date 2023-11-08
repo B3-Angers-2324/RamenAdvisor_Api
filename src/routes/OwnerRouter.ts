@@ -11,7 +11,7 @@ router.post("/register", Owner.register);
 // load middleware for all routes to test owner login
 router.use(OwnerMiddleware.ownerLoginMiddleware);
 
-router.get("/", Owner.defaultFunction);
+router.get("/restaurants", Owner.getRestaurantsByOwner);
 
 
 export default router;
