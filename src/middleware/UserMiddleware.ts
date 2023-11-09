@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import HttpStatus from "../constants/HttpStatus";
 import jwt from "jsonwebtoken";
 import dotenv from 'dotenv';
-import { TRequest } from '../routes/types/types';
+import { TRequest } from '../controllers/types/types';
 dotenv.config();
 
 
