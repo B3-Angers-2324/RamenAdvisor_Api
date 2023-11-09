@@ -4,6 +4,8 @@ import jwt from "jsonwebtoken";
 import OwnerServices from "../services/OwnerService";
 import Owner from "../models/OwnerModel";
 import dotenv from 'dotenv';
+import RestaurantService from "../services/RestaurantService";
+import { TRequest } from "./types/types";
 dotenv.config();
 
 async function login(req: Request, res: Response){
@@ -64,13 +66,23 @@ async function register(req: Request, res: Response){
     }
 }
 
-async function defaultFunction(req: Request, res: Response){
-    res.status(HttpStatus.OK).json({"message": "Default owner route"});
+async function getRestaurantsByOwner(req: TRequest, res: Response){
+    try{
+        let id = req.token?._id;
+        const restaurants = await RestaurantService.queryRestaurantsByOwner(id);
+        if(restaurants){
+            res.status(HttpStatus.OK).json({"restaurants": restaurants});
+        }else{
+            res.status(HttpStatus.NOT_FOUND).json({"message": "No restaurant found"});
+        }
+    }catch(error){
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while getting restaurants"});
+    }
 }
 
 
 export default {
     login,
     register,
-    defaultFunction
+    getRestaurantsByOwner,
 };

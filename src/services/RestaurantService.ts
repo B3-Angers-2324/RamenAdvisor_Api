@@ -22,8 +22,17 @@ const queryRestaurantById = async (id : string) => {
     return restaurant;
 }
 
+const queryRestaurantsByOwner = async (id : string) => {
+    let restaurants = await collections.restaurant?.find({ownerId: new ObjectId(id)}).toArray();
+    if (restaurants==undefined){
+        throw new Error("No restaurants found");
+    }
+    return restaurants;
+}
+
 
 export default {
     queryBestRestaurants,
-    queryRestaurantById
+    queryRestaurantById,
+    queryRestaurantsByOwner
 } as const;
