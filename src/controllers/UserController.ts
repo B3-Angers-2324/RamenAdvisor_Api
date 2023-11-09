@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { TRequest } from "../routes/types/types";
+import { TRequest } from "../controllers/types/types";
 import User from "../models/UserModel";
 import jwt from "jsonwebtoken";
 import UserServices from "../services/UserService";
