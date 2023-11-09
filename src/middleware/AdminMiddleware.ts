@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import HttpStatus from "../constants/HttpStatus"
 
 const adminLoginMiddleware = (req: Request, res: Response, next: NextFunction) => {
-    console.log("Admin login middleware");
     // check if admin is logged in and change condition
     if (req.query.admin === "true") {
         next();

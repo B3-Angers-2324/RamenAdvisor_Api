@@ -52,7 +52,6 @@ async function register(req: Request, res: Response){
 
         const addedOwner = await OwnerServices.addOwner(newOwner);
 
-        console.log(addedOwner)
 
         if(addedOwner){
             const secret = process.env.JWT_SECRET_OWNER || "ASecretPhrase";

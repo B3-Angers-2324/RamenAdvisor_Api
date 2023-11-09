@@ -33,7 +33,6 @@ const getMessagesForRestaurant = async (req: Request, res: Response) => {
             let userInfo = await UserService.getOne(element.userId);
             //If there is no user throw an error
             if (userInfo === undefined || userInfo === null) throw new Error("User not found");
-            console.log(element);
             messages.push({
                 id: element._id.toString(),
                 user: {

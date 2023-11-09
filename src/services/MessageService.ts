@@ -8,7 +8,6 @@ async function queryMessagesForRestaurant(restaurantId:string, limit:number, off
         limit: limit,
         skip: offset
     }).toArray();
-    console.log(result);
     return result;
 }
 
