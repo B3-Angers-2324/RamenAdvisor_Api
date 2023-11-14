@@ -11,5 +11,9 @@ router.get("/best", Restaurant.getBestRestaurants);
 
 router.get("/id/:uid", Restaurant.getRestaurantById);
 
+router.post("/", Restaurant.createRestaurant);
+
+router.put("/id/:uid", Restaurant.updateRestaurant);
+
 
 export default router;

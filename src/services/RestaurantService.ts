@@ -30,9 +30,27 @@ const queryRestaurantsByOwner = async (id : string) => {
     return restaurants;
 }
 
+const createRestaurant = async (restaurant : Restaurant): Promise<any> => {
+    console.log(restaurant)
+    let result = await collections.restaurant?.insertOne(restaurant);
+    if (result==undefined){
+        throw new Error("Error while creating restaurant");
+    }
+    return result;
+}
+
+const updateRestaurant = async (id: string, restaurant : Restaurant) => {
+    let result = await collections.restaurant?.updateOne({_id: new ObjectId(id) }, {$set: restaurant});
+    if (result==undefined){
+        throw new Error("Error while updating restaurant");
+    }
+    return result;
+}
 
 export default {
     queryBestRestaurants,
     queryRestaurantById,
-    queryRestaurantsByOwner
+    queryRestaurantsByOwner,
+    createRestaurant,
+    updateRestaurant
 } as const;

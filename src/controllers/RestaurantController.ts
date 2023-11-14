@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import Service from "../services/RestaurantService";
 import HttpStatus from "../constants/HttpStatus";
 import { ObjectId } from "mongodb";
+import { TRequest } from "./types/types";
+import OwnerMiddleware from "../middleware/OwnerMiddleware";
 
 const defaultFunction = (req: Request, res: Response) => {
     res.status(HttpStatus.OK).json({"message": "Default restaurant route"});
@@ -61,9 +63,36 @@ const getRestaurantById = async (req: Request, res: Response) =>{
     }
 }
 
+const createRestaurant = (req: TRequest, res: Response) => {
+    OwnerMiddleware.ownerLoginMiddleware(req, res, async () => {
+        try{
+            req.body.ownerId = new ObjectId((req as any).token._id);
+            req.body.note = 0;
+            let restaurant = await Service.createRestaurant(req.body);
+            res.status(HttpStatus.OK).json({id: restaurant.insertedId?.toString()});
+        }catch(e){
+            console.log(e)
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
+        }
+    });
+}
+
+const updateRestaurant = (req: Request, res: Response) => {
+    OwnerMiddleware.ownerLoginMiddleware(req, res, async () => {
+        try{
+            let restaurant = await Service.updateRestaurant(req.params.uid, req.body);
+            res.status(HttpStatus.OK).json({"message": "Restaurant updated"});
+        }catch(e){
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
+        }
+    });
+}
+
 export default {
     defaultFunction,
     getAllRestaurants,
     getBestRestaurants,
-    getRestaurantById
+    getRestaurantById,
+    createRestaurant,
+    updateRestaurant
 };
