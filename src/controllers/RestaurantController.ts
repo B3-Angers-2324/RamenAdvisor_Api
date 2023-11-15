@@ -4,6 +4,7 @@ import HttpStatus from "../constants/HttpStatus";
 import { ObjectId } from "mongodb";
 import { TRequest } from "./types/types";
 import OwnerMiddleware from "../middleware/OwnerMiddleware";
+import CheckInput from "../tools/CheckInput";
 
 const defaultFunction = (req: Request, res: Response) => {
     res.status(HttpStatus.OK).json({"message": "Default restaurant route"});
@@ -63,9 +64,23 @@ const getRestaurantById = async (req: Request, res: Response) =>{
     }
 }
 
+/**
+ * Function to create a restaurant
+ * @param req The request from the client
+ * @param res The response to the client
+ * @returns
+*/
 const createRestaurant = (req: TRequest, res: Response) => {
     OwnerMiddleware.ownerLoginMiddleware(req, res, async () => {
         try{
+            if(!CheckInput.areNotEmpty([req.body.name, req.body.address, req.body.city, req.body.foodtype, req.body.position, req.body.handicap])){
+                res.status(HttpStatus.BAD_REQUEST).json({"message": "Missing parameters"});
+                return;
+            }
+            if(CheckInput.phone(req.body.phone) == null){
+                res.status(HttpStatus.BAD_REQUEST).json({"message": "Invalid phone number"});
+                return;
+            }
             req.body.ownerId = new ObjectId((req as any).token._id);
             req.body.note = 0;
             let restaurant = await Service.createRestaurant(req.body);
@@ -77,9 +92,23 @@ const createRestaurant = (req: TRequest, res: Response) => {
     });
 }
 
+/**
+ * Function to update a restaurant
+ * @param req The request from the client
+ * @param res The response to the client
+ * @returns
+*/
 const updateRestaurant = (req: Request, res: Response) => {
     OwnerMiddleware.ownerLoginMiddleware(req, res, async () => {
         try{
+            if(!CheckInput.areNotEmpty([req.body.name, req.body.address, req.body.city, req.body.foodtype, req.body.position, req.body.handicap])){
+                res.status(HttpStatus.BAD_REQUEST).json({"message": "Missing parameters"});
+                return;
+            }
+            if(CheckInput.phone(req.body.phone) == null){
+                res.status(HttpStatus.BAD_REQUEST).json({"message": "Invalid phone number"});
+                return;
+            }
             let restaurant = await Service.updateRestaurant(req.params.uid, req.body);
             res.status(HttpStatus.OK).json({"message": "Restaurant updated"});
         }catch(e){
