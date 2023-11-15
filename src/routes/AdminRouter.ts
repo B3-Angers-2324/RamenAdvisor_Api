@@ -4,7 +4,7 @@ import Admin from "../controllers/AdminController"
 
 const router: Router = express.Router();
 
-router.get("/login", Admin.login);
+router.post("/login", Admin.login);
 
 // load middleware for all routes to test admin login
 router.use(adminMiddleware.adminLoginMiddleware);
