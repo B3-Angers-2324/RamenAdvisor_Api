@@ -82,7 +82,11 @@ const createRestaurant = (req: TRequest, res: Response) => {
                 return;
             }
             req.body.ownerId = new ObjectId((req as any).token._id);
-            req.body.note = 0;
+            req.body.note = 10;
+            req.body.images = [
+                "https://picsum.photos/1000/1000",
+                "https://picsum.photos/1000/1000"
+              ];
             let restaurant = await Service.createRestaurant(req.body);
             res.status(HttpStatus.OK).json({id: restaurant.insertedId?.toString()});
         }catch(e){
