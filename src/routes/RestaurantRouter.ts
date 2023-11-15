@@ -11,5 +11,7 @@ router.get("/best", Restaurant.getBestRestaurants);
 
 router.get("/id/:uid", Restaurant.getRestaurantById);
 
+router.get("/search", Restaurant.getRestaurantSearch);
+
 
 export default router;

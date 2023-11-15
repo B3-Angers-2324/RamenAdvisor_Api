@@ -48,7 +48,7 @@ db.createCollection(
     {
         validator: { $jsonSchema: {
             bsonType: "object",
-            required: ["ownerId", "name", "position", "address", "foodtype", "note"],
+            required: ["ownerId", "name", "position", "address", "foodtype", "accessible", "note"],
             properties: {
                 ownerId: {
                     bsonType: "objectId",
@@ -70,6 +70,10 @@ db.createCollection(
                     bsonType: "string",
                     description: "must be a string and is required"
                 },
+                accessible: {
+                    bsonType: "bool",
+                    description: "must be a bool and is required"
+                },
                 note: {
                     bsonType: "int",
                     minimum: 0,
@@ -85,6 +89,9 @@ db.createCollection(
         }}
     }
 );
+
+db.RestaurantCollection.createIndex({position: "2dsphere"});
+db.RestaurantCollection.createIndex({name: "text"});
 
 db.createCollection(
     UserCollection,
