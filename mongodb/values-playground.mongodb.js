@@ -6,8 +6,10 @@ const UserCollection = "users";
 const OwnerCollection = "owners";
 const ModeratorCollection = "moderators";
 const AdminCollection = "admins";
+const FoodtypeCollection = "foodtypes";
 
 use(database);
+
 
 db.getCollection(RestaurantCollection).insertMany([
   { "_id": ObjectId("64a685757acccfac3d045ad9"), "ownerId": ObjectId("64a685757acccfac3d045af3"), "name": "Loin du Pot", "position": [47.472270716783584, -0.556831383954351], "address": "9, Rue Baudriere, Angers", foodtype:"local_pizza", "note": 38, "images": ["https://picsum.photos/1000/1000","https://picsum.photos/1000/1000"]},
@@ -64,7 +66,7 @@ db.getCollection(ModeratorCollection).insertMany([
 ]);
 
 db.getCollection(AdminCollection).insertMany([
-  { "_id": ObjectId("64a685757acccfac3d045aff"), "firstName": "Bernard", "lastName": "Tapis", "email": "bernard.tapis@gmail.com", "password": "Argent" },
+  { "_id": ObjectId("64a685757acccfac3d045aff"), "firstName": "Bernard", "lastName": "Tapis", "email": "bernard.tapis@gmail.com", "password": "9adfb0a6d03beb7141d8ec2708d6d9fef9259d12cd230d50f70fb221ae6cabd5" },
   { "_id": ObjectId("64a685757acccfac3d045b00"), "firstName": "Marie", "lastName": "Pierre", "email": "marie.pierre@gmail.com", "password": "Secret123" },
   { "_id": ObjectId("64a685757acccfac3d045b01"), "firstName": "Philippe", "lastName": "Leroux", "email": "philippe.leroux@gmail.com", "password": "Confidentiel" },
 ]);

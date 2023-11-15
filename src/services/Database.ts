@@ -8,6 +8,7 @@ export const collections: {
     message?: mongoDB.Collection,
     moderator?: mongoDB.Collection,
     admin?: mongoDB.Collection,
+    foodtype?: mongoDB.Collection,
 } = {};
 
 export async function connectToDatabase(){
@@ -22,6 +23,7 @@ export async function connectToDatabase(){
     const messageCollection: mongoDB.Collection = db.collection("messages");
     const moderatorCollection: mongoDB.Collection = db.collection("moderators");
     const adminCollection: mongoDB.Collection = db.collection("admins");
+    const foodtypeCollection: mongoDB.Collection = db.collection("foodtypes");
 
     collections.restaurant = restaurantCollection;
     collections.owner = ownerCollection;
@@ -29,6 +31,7 @@ export async function connectToDatabase(){
     collections.message = messageCollection;
     collections.moderator = moderatorCollection;
     collections.admin = adminCollection;
+    collections.foodtype = foodtypeCollection;
 
     console.log(`[Server]: Successfully connected to database: ${db.databaseName}`);
 }

@@ -6,10 +6,35 @@ const UserCollection = "users";
 const OwnerCollection = "owners";
 const ModeratorCollection = "moderators";
 const AdminCollection = "admins";
+const FoodtypeCollection = "foodtypes";
 
 use(database);
 
 db.dropDatabase();
+
+db.createCollection(
+    FoodtypeCollection,
+    {
+        validator: { $jsonSchema: {
+            bsonType: "object",
+            required: ["name", "svg", "mimetype"],
+            properties: {
+                name: {
+                    bsonType: "string",
+                    description: "must be a string and is required"
+                },
+                svg: {
+                    bsonType: "binData",
+                    description: "must be a string and is required"
+                },
+                mimetype: {
+                    bsonType: "string",
+                    description: "must be a string and is required"
+                }
+            }
+        }}
+    }
+);
 
 db.createCollection(
     MessageCollection,
