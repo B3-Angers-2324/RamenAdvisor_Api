@@ -71,9 +71,40 @@ async function getOne(id: string): Promise<User | null> {
 
 }
 
+async function getUserById(id: string): Promise<any> {
+    try{
+        const user = await collections.user?.findOne({_id: new ObjectId(id)});
+        return user;
+    }catch(error){
+        throw error;
+    }
+
+}
+
+async function updateUser(id: string, user: User): Promise<any> {
+    try{
+        const result = await collections.user?.updateOne({_id: new ObjectId(id)}, {$set: user});
+        return result;
+    }catch(error){
+        throw error;
+    }
+}
+
+async function deleteUser(id: string): Promise<any> {
+    try{
+        const result = await collections.user?.deleteOne({_id: new ObjectId(id)});
+        return result;
+    }catch(error){
+        throw error;
+    }
+}
+
 export default {
     getOneUser,
     addUser,
     getAll,
-    getOne
+    getOne,
+    getUserById,
+    updateUser,
+    deleteUser
 } as const;

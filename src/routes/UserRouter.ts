@@ -13,7 +13,11 @@ router.use(UserMiddleware.userLoginMiddleware);
 
 router.get("/", User.getAll);
 
-router.get("/otherRoute", User.defaultFunction);
+router.get("/profile", User.getUserProfile);
+
+router.patch("/profile", User.updateUserProfile);
+
+router.delete("/profile", User.deleteUserProfile);
 
 
 export default router;
