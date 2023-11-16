@@ -7,4 +7,6 @@ router.get("/", Message.defaultFunction);
 
 router.get("/restaurant/:uid", Message.getMessagesForRestaurant);
 
+router.put("/report/:uid", Message.reportMessage);
+
 export default router;

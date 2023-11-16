@@ -1,6 +1,7 @@
 import { Request, Response, query } from "express";
 import Service from "../services/MessageService";
 import UserService from "../services/UserService";
+import ReportService from "../services/ReportService";
 import HttpStatus from "../constants/HttpStatus";
 
 async function defaultFunction(req: Request, res: Response){
@@ -13,6 +14,7 @@ const getMessagesForRestaurant = async (req: Request, res: Response) => {
         let messages: {
             id: string;
             user: {
+                id: string;
                 firstName: string;
                 lastName: string;
                 img: string;
@@ -32,10 +34,11 @@ const getMessagesForRestaurant = async (req: Request, res: Response) => {
         await Promise.all(restaurant.map(async (element) => {
             let userInfo = await UserService.getOne(element.userId);
             //If there is no user throw an error
-            if (userInfo === undefined || userInfo === null) throw new Error("User not found");
+            if (userInfo === undefined || userInfo === null || userInfo.id===undefined) throw new Error("User not found");
             messages.push({
                 id: element._id.toString(),
                 user: {
+                    id:userInfo.id.toString(),
                     firstName: userInfo.firstName, //JeanMarc DuPontavisMarin
                     lastName: userInfo.lastName,
                     img: "http://thispersondoesnotexist.com/"
@@ -55,8 +58,36 @@ const getMessagesForRestaurant = async (req: Request, res: Response) => {
     }
 };
 
+const reportMessage = async (req: Request, res: Response) => {
+    try{
+        //Retrieve the report if it exists
+        let report = await ReportService.getReportByMessageId(req.params.uid);
+        // If not create a new one
+        if (report === null) {
+            //and add it to the database
+            await ReportService.addReport({
+                userId: req.body.userId,
+                restaurantId: req.body.restaurantId,
+                messageId: req.body.messageId,
+                date_first: new Date(),
+                nbReport: 1
+            });
+        }else{
+            //If it exists, update the report
+            report.nbReport++;
+            await ReportService.updateReport(report);
+        }
+        //Send the response
+        res.status(HttpStatus.OK).json({"message": "Report added"});
+    }catch(e){
+        console.log(e);
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
+    }
+}
+
 
 export default {
     defaultFunction,
-    getMessagesForRestaurant
+    getMessagesForRestaurant,
+    reportMessage
 };

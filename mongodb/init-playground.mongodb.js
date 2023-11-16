@@ -6,6 +6,7 @@ const UserCollection = "users";
 const OwnerCollection = "owners";
 const ModeratorCollection = "moderators";
 const AdminCollection = "admins";
+const ReportCollection = "reports";
 
 use(database);
 
@@ -224,6 +225,38 @@ db.createCollection(
                 password: {
                     bsonType: "string",
                     description: "must be a string and is required"
+                }
+            }
+        }}
+    }
+);
+
+db.createCollection(
+    ReportCollection,
+    {
+        validator: { $jsonSchema: {
+            bsonType: "object",
+            required: ["userId", "restaurantId", "messageId", "date_first", "nbReport"],
+            properties: {
+                userId: {
+                    bsonType: "objectId",
+                    description: "The Id of the user who wrote the message, must be a int and is required"
+                },
+                restaurantId: {
+                    bsonType: "objectId",
+                    description: "The id of the restaurant where the message is written ,must be a int and is required"
+                },
+                messageId: {
+                    bsonType: "objectId",
+                    description: "The id of the message ,must be a int and is required"
+                },
+                date_first: {
+                    bsonType: "date",
+                    description: "The date of the first report, must be a date and is required"
+                },
+                nbReport: {
+                    bsonType: "int",
+                    description: "The number of report, must be a int and is required"
                 }
             }
         }}

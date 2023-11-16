@@ -76,3 +76,12 @@ db.getCollection(OwnerCollection).insertMany([
   {"_id": ObjectId("64a685757acccfac3d045af6"), "firstName": "Maria", "lastName": "Garcia", "email": "maria.garcia@gmail.com", "password": "p@9adfb0a6d03beb7141d8ec2708d6d9fef9259d12cd230d50f70fb221ae6cabd5", "phone": "1231231234", "siret": "77777777777", "companyName": "KEBAB", "socialAdresse": "5 Pizzeria Lane"},
   {"_id": ObjectId("64a685757acccfac3d045af7"), "firstName": "Alice", "lastName": "Smith", "email": "alice.smith@gmail.com", "password": "9adfb0a6d03beb7141d8ec2708d6d9fef9259d12cd230d50f70fb221ae6cabd5", "phone": "9876543210", "siret": "12345678901", "companyName": "PIZZA", "socialAdresse": "123 Main Street"},
 ]);
+
+
+//Add reports
+
+db.getCollection("reports").insertMany([
+  { "_id": ObjectId("64a685757acccfac3d045b02"), "userId": ObjectId("64a685757acccfac3d045ae0"), "restaurantId": ObjectId("64a685757acccfac3d045ad9"), "messageId": ObjectId("64a685757acccfac3d045acf") ,"date_first": new Date("2022-01-01") ,"nbReport":3},
+  { "_id": ObjectId("64a685757acccfac3d045b03"), "userId": ObjectId("64a685757acccfac3d045ae1"), "restaurantId": ObjectId("64a685757acccfac3d045ada"), "messageId": ObjectId("64a685757acccfac3d045ad3") ,"date_first": new Date("2022-01-02") ,"nbReport":2},
+  { "_id": ObjectId("64a685757acccfac3d045b04"), "userId": ObjectId("64a685757acccfac3d045ae2"), "restaurantId": ObjectId("64a685757acccfac3d045adb"), "messageId": ObjectId("64a685757acccfac3d045ad8") ,"date_first": new Date("2022-01-03") ,"nbReport":1},
+]);
