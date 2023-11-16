@@ -3,6 +3,7 @@ import { MongoClient, ObjectId, MongoClientOptions } from 'mongodb';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import ReportService from '../../src/services/ReportService';
 import Report from '../../src/models/ReportModel';
+import {describe, expect, beforeAll, afterAll, afterEach, it, test} from '@jest/globals'
 
 describe('ReportService', () => {
     let connection: MongoClient;
@@ -40,7 +41,7 @@ describe('ReportService', () => {
 
             const reports = await connection.db().collection('reports').find().toArray();
             expect(reports).toHaveLength(1);
-            expect(reports[0]).toMatchObject(report);
+            expect(reports[0]).toMatchObject(report as unknown as Record<string, unknown>);
         });
     });
 
@@ -58,7 +59,7 @@ describe('ReportService', () => {
 
             const result = await ReportService.getReportByMessageId('123');
 
-            expect(result).toMatchObject(report);
+            expect(result).toMatchObject(report as unknown as Record<string, unknown>);
         });
     });
 
@@ -73,7 +74,7 @@ describe('ReportService', () => {
             };
     
             await connection.db().collection('reports').insertOne(report);
-    
+
             const updatedReport: Report = {
                 userId: new ObjectId('123'),
                 restaurantId: new ObjectId('123'),
@@ -81,12 +82,12 @@ describe('ReportService', () => {
                 nbReport: 2,
                 date_first: new Date(),
             };
-    
+
             await ReportService.updateReport(updatedReport);
-    
+
             const reports = await connection.db().collection('reports').find().toArray();
             expect(reports).toHaveLength(1);
-            expect(reports[0]).toMatchObject(updatedReport);
+            expect(reports[0]).toMatchObject(updatedReport as unknown as Record<string, unknown>);
         });
     });
 });
