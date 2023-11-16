@@ -39,12 +39,16 @@ const getBestRestaurants = async (req: Request, res: Response) => {
                 images: element.images
             });
         });
+        if (restaurant.length == 0){
+            throw new Error("No restaurant found");
+        }
         res.status(HttpStatus.OK).json({
             number: restaurant.length,
             obj: restaurant
         });
-    }catch(e){
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
+    }catch(e : Error|any){
+        if (e.message == "No restaurant found") res.status(HttpStatus.NOT_FOUND).json({"message": "No restaurant found"});
+        else res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
     }
 }
 

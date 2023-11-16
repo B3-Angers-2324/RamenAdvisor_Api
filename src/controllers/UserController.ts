@@ -9,6 +9,9 @@ dotenv.config();
 
 async function login(req: Request, res: Response){
     try{
+        // check if email and password are provided if not return 400
+
+        if (!req.body.email || !req.body.password) throw new Error("Email and password are required");
         const user = await UserServices.getOneUser(req.body.email);
         if(user){
             if(user.password === req.body.password){
@@ -16,18 +19,33 @@ async function login(req: Request, res: Response){
                 const token = jwt.sign({_id: user._id?.toString()}, secret, {expiresIn: process.env.JWT_EXPIRES_IN});
                 res.status(HttpStatus.OK).json({"token": token});
             }else{
-                res.status(HttpStatus.UNAUTHORIZED).json({"message": "Wrong password"});
+                throw new Error("Wrong password");
             }
         }else{
-            res.status(HttpStatus.NOT_FOUND).json({"message": "User not found"});
+            throw new Error("User not found");
         }
-    }catch(error){
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while logging in"});
+    }catch(error : Error|any){
+        switch(error.message) {
+            case "Email and password are required":
+                res.status(HttpStatus.BAD_REQUEST).json({"message": error.message});
+                break;
+            case "Wrong password":
+                res.status(HttpStatus.UNAUTHORIZED).json({"message": error.message});
+                break;
+            case "User not found":
+                res.status(HttpStatus.NOT_FOUND).json({"message": error.message});
+                break;
+            default:
+                res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while logging in"});
+        }
     }
 }
 
 async function register(req: Request, res: Response){
     try{
+        //check if all fields are provided if not return 400
+        if (!req.body.firstName || !req.body.lastName || !req.body.birthDay || !req.body.email || !req.body.phone || !req.body.sexe || !req.body.ville || !req.body.address || !req.body.password) throw new Error("All fields are required");
+
         let newUser : User = {
             firstName: req.body.firstName,
             lastName: req.body.lastName,
@@ -42,14 +60,12 @@ async function register(req: Request, res: Response){
         };
 
         if(!newUser.email.match(/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/)) {
-            res.status(HttpStatus.BAD_REQUEST).json({"message": "Email format is not correct"});
-            return;
+            throw new Error("Email format is not correct");
         }
 
         const user = await UserServices.getOneUser(newUser.email);
         if(user){
-            res.status(HttpStatus.CONFLICT).json({"message": "User already exists"});
-            return;
+            throw new Error("User already exists");
         }
 
         const addedUser = await UserServices.addUser(newUser);
@@ -59,10 +75,13 @@ async function register(req: Request, res: Response){
             const token = jwt.sign({_id: addedUser.insertedId?.toString()}, secret, {expiresIn: process.env.JWT_EXPIRES_IN});
             res.status(HttpStatus.CREATED).json({"token": token});
         }else{
-            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while adding user"});
+            throw new Error("Error while adding user");
         }
-    }catch(error){
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while adding user, check if all fields are correct"});
+    }catch(error : Error|any){
+        if (error.message === "All fields are required") res.status(HttpStatus.BAD_REQUEST).json({"message": error.message});
+        else if (error.message === "Email format is not correct") res.status(HttpStatus.BAD_REQUEST).json({"message": error.message});
+        else if (error.message === "User already exists") res.status(HttpStatus.CONFLICT).json({"message": error.message});
+        else res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while adding user, check if all fields are correct"});
     }
 }
 
