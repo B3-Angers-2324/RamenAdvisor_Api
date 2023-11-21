@@ -21,7 +21,9 @@ jest.mock('../../src/controllers/UserController', () => ({
     login: jest.fn((req, res : Response) => res.json()),
     register: jest.fn((req, res : Response) => res.json()),
     getAll: jest.fn((req, res : Response) => res.json()),
-    defaultFunction: jest.fn((req, res : Response) => res.json())
+    getUserProfile: jest.fn((req, res : Response) => res.json()),
+    updateUserProfile: jest.fn((req, res : Response) => res.json()),
+    deleteUserProfile: jest.fn((req, res : Response) => res.json())
 }));
 
 describe('Test the /user paths', () => {
