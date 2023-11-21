@@ -6,14 +6,6 @@ import { CustomError, TRequest } from "./types/types";
 import OwnerMiddleware from "../middleware/OwnerMiddleware";
 import CheckInput from "../tools/CheckInput";
 
-const defaultFunction = (req: Request, res: Response) => {
-    res.status(HttpStatus.OK).json({"message": "Default restaurant route"});
-}
-
-const getAllRestaurants = (req: Request, res: Response) => {
-    res.status(HttpStatus.OK).json({"message": "Get all restaurants"});
-}
-
 /**
  * Function to get the best restaurants in the database
  * @param req The request from the client
@@ -58,12 +50,13 @@ const getBestRestaurants = async (req: Request, res: Response) => {
  */
 const getRestaurantById = async (req: Request, res: Response) =>{
     try{
+        if (req.params.uid === undefined) throw new CustomError("Missing parameters", HttpStatus.BAD_REQUEST);
         let restaurant = await Service.queryRestaurantById(req.params.uid);
         res.status(HttpStatus.OK).json({
             obj: restaurant
         });
-    }catch(e){
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
+    }catch(e : CustomError|any){
+        res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.message? e.message : "Internal server error"});
     }
 }
 
@@ -77,12 +70,10 @@ const createRestaurant = (req: TRequest, res: Response) => {
     OwnerMiddleware.ownerLoginMiddleware(req, res, async () => {
         try{
             if(!CheckInput.areNotEmpty([req.body.name, req.body.address, req.body.city, req.body.foodtype, req.body.position, req.body.handicap])){
-                res.status(HttpStatus.BAD_REQUEST).json({"message": "Missing parameters"});
-                return;
+                throw(new CustomError("Missing parameters", HttpStatus.BAD_REQUEST));
             }
-            if(CheckInput.phone(req.body.phone) == null){
-                res.status(HttpStatus.BAD_REQUEST).json({"message": "Invalid phone number"});
-                return;
+            if(!CheckInput.phone(req.body.phone)){
+                throw(new CustomError("Invalid phone number", HttpStatus.BAD_REQUEST));
             }
             req.body.ownerId = new ObjectId((req as any).token._id);
             req.body.note = 10;
@@ -92,11 +83,10 @@ const createRestaurant = (req: TRequest, res: Response) => {
               ];
             let restaurant = await Service.createRestaurant(req.body);
             res.status(HttpStatus.OK).json({id: restaurant.insertedId?.toString()});
-        }catch(e){
-            console.log(e)
-            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
+        }catch(e : CustomError|any){
+            res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.message? e.message : "Internal server error"});
         }
-    });
+        });
 }
 
 /**
@@ -109,24 +99,21 @@ const updateRestaurant = (req: Request, res: Response) => {
     OwnerMiddleware.ownerLoginMiddleware(req, res, async () => {
         try{
             if(!CheckInput.areNotEmpty([req.body.name, req.body.address, req.body.city, req.body.foodtype, req.body.position, req.body.handicap])){
-                res.status(HttpStatus.BAD_REQUEST).json({"message": "Missing parameters"});
-                return;
+                throw(new CustomError("Missing parameters", HttpStatus.BAD_REQUEST));
             }
-            if(CheckInput.phone(req.body.phone) == null){
-                res.status(HttpStatus.BAD_REQUEST).json({"message": "Invalid phone number"});
-                return;
+            if(!CheckInput.phone(req.body.phone)){
+                throw new CustomError("Invalid phone number", HttpStatus.BAD_REQUEST);
             }
-            let restaurant = await Service.updateRestaurant(req.params.uid, req.body);
+            await Service.updateRestaurant(req.params.uid, req.body);
             res.status(HttpStatus.OK).json({"message": "Restaurant updated"});
-        }catch(e){
-            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
+        }catch(e : CustomError|any){
+            console.log(e);
+            res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.message? e.message : "Internal server error"});
         }
     });
 }
 
 export default {
-    defaultFunction,
-    getAllRestaurants,
     getBestRestaurants,
     getRestaurantById,
     createRestaurant,

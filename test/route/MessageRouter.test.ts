@@ -1,52 +1,44 @@
 import app from '../../app'
 import supertest from 'supertest'
 import {describe, expect, test, beforeAll, afterAll, it, afterEach, jest} from '@jest/globals';
-import RestaurantController from "../../src/controllers/RestaurantController"
+import MessageController from "../../src/controllers/MessageController"
 
 const request = supertest(app);
 
 const base_url = '/api/v1';
 
 // Mock the UserController module
-jest.mock('../../src/controllers/RestaurantController', () => ({
-    defaultFunction: jest.fn((req, res : Response) => res.json()),
-    getAllRestaurants: jest.fn((req, res : Response) => res.json()),
-    getBestRestaurants: jest.fn((req, res : Response) => res.json()),
-    getRestaurantById: jest.fn((req, res : Response) => res.json()),
-    createRestaurant: jest.fn((req, res : Response) => res.json()),
-    updateRestaurant: jest.fn((req, res : Response) => res.json())
+jest.mock('../../src/controllers/MessageController', () => ({
+    getMessagesForRestaurant: jest.fn((req, res : Response) => res.json()),
+    reportMessage: jest.fn((req, res : Response) => res.json()),
+    getReportedMessages: jest.fn((req, res : Response) => res.json()),
+    deleteReport: jest.fn((req, res : Response) => res.json()),
 }));
 
 describe('Test the /restaurant paths', () => {
     //Login test
-    test('The /all route with a get should call the function on the controller', async () => {
+    test('The /message/restaurant/:uid route with a get should call the function on the controller', async () => {
         // Make a POST request to the /user/login endpoint
-        await request.get(`${base_url}/restaurant/all`);
+        await request.get(`${base_url}/message/restaurant/:uid`);
         // Assert that UserController.login was called
-        expect(RestaurantController.getAllRestaurants).toHaveBeenCalled();
+        expect(MessageController.getMessagesForRestaurant).toHaveBeenCalled();
     });
-    test('The /best route with a get should call the function on the controller', async () => {
+    test('The /message/report/:uid route with a get should call the function on the controller', async () => {
         // Make a POST request to the /user/login endpoint
-        await request.get(`${base_url}/restaurant/best`);
+        await request.put(`${base_url}/message/report/:uid`);
         // Assert that UserController.login was called
-        expect(RestaurantController.getBestRestaurants).toHaveBeenCalled();
+        expect(MessageController.reportMessage).toHaveBeenCalled();
     });
-    test('The /id/:uid route with a get should call the function on the controller', async () => {
+    test('The /message/reported route with a get should call the function on the controller', async () => {
         // Make a POST request to the /user/login endpoint
-        await request.get(`${base_url}/restaurant/id/123`);
+        await request.get(`${base_url}/message/reported`);
         // Assert that UserController.login was called
-        expect(RestaurantController.getRestaurantById).toHaveBeenCalled();
+        expect(MessageController.getReportedMessages).toHaveBeenCalled();
     });
-    test('The / route should with a post call the function on the controller', async () => {
+    test('The /message/report/:uid route with a delete should call the function on the controller', async () => {
         // Make a POST request to the /user/login endpoint
-        await request.post(`${base_url}/restaurant`);
+        await request.delete(`${base_url}/message/report/:uid`);
         // Assert that UserController.login was called
-        expect(RestaurantController.createRestaurant).toHaveBeenCalled();
-    });
-    test('The /id/:uid route with a put should call the function on the controller', async () => {
-        // Make a POST request to the /user/login endpoint
-        await request.put(`${base_url}/restaurant/id/123`);
-        // Assert that UserController.login was called
-        expect(RestaurantController.updateRestaurant).toHaveBeenCalled();
+        expect(MessageController.deleteReport).toHaveBeenCalled();
     });
 });

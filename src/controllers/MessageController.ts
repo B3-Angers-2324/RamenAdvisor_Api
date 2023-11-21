@@ -5,10 +5,6 @@ import ReportService from "../services/ReportService";
 import HttpStatus from "../constants/HttpStatus";
 import AdminMiddleware from "../middleware/AdminMiddleware";
 
-async function defaultFunction(req: Request, res: Response){
-    res.status(HttpStatus.OK).json({"message": "Default message route"});
-}
-
 const getMessagesForRestaurant = async (req: Request, res: Response) => {
     try{
         //Set the response type and the variable to store the messages
@@ -24,9 +20,10 @@ const getMessagesForRestaurant = async (req: Request, res: Response) => {
             date: Date;
             note: number;
         }[] = [];
+        if (req.params.uid===undefined) throw new CustomError("No id provided", HttpStatus.BAD_REQUEST);
         //REtrieve the limit and offset from the query
-        let limit = req.query.limit ? parseInt(req.query.limit.toString()) : 10;
-        let offset = req.query.offset ? parseInt(req.query.offset.toString()) : 0;
+        let limit = (req.query && req.query.limit) ? parseInt(req.query.limit.toString()) : 10;
+        let offset = (req.query && req.query.offset) ? parseInt(req.query.offset.toString()) : 0;
         
         //Retrieve the messages from the database
         (await MessageService.queryMessagesForRestaurant(req.params.uid,limit,offset))?.forEach(element => {
@@ -48,16 +45,18 @@ const getMessagesForRestaurant = async (req: Request, res: Response) => {
             number: messages.length,
             obj: messages
         });
-    }catch(e){
-        console.log(e);
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
+    }catch(e: CustomError|any){
+        res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.message});
     }
 };
 
 const reportMessage = async (req: Request, res: Response) => {
     try{
+        if (req.params.uid===undefined) throw new CustomError("No id provided", HttpStatus.BAD_REQUEST);
+        if (req.body === undefined || req.body.userId===undefined || req.body.restaurantId===undefined || req.body.messageId===undefined) throw new CustomError("Missing field in body", HttpStatus.BAD_REQUEST);
         //Retrieve the report if it exists
         let report = await ReportService.getReportByMessageId(req.params.uid);
+        //TODO: check that what the user sent in the body is correct
         // If not create a new one
         if (report === null) {
             //and add it to the database
@@ -75,9 +74,8 @@ const reportMessage = async (req: Request, res: Response) => {
         }
         //Send the response
         res.status(HttpStatus.OK).json({"message": "Report added"});
-    }catch(e){
-        console.log(e);
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
+    }catch(e: CustomError|any){
+        res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.message});
     }
 }
 
@@ -128,7 +126,6 @@ const deleteReport = async (req: Request, res: Response) => {
 
 
 export default {
-    defaultFunction,
     getMessagesForRestaurant,
     reportMessage,
     getReportedMessages,
