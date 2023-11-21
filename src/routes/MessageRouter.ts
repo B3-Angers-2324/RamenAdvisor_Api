@@ -9,4 +9,8 @@ router.get("/restaurant/:uid", Message.getMessagesForRestaurant);
 
 router.put("/report/:uid", Message.reportMessage);
 
+router.get("/reported/", Message.getReportedMessages);
+
+router.delete("/report/:uid", Message.deleteReport);
+
 export default router;

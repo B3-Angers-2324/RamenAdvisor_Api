@@ -11,6 +11,18 @@ async function queryMessagesForRestaurant(restaurantId:string, limit:number, off
     return result;
 }
 
+async function queryOne(messageId:string) {
+    const result = await collections.message?.findOne({_id: new ObjectId(messageId)});
+    return result;
+}
+
+async function deleteMessage(messageId:string) {
+    const result = await collections.message?.deleteOne({_id: new ObjectId(messageId)});
+    return result;
+}
+
 export default {
-    queryMessagesForRestaurant  
+    queryMessagesForRestaurant,
+    queryOne,
+    deleteMessage
 } as const;

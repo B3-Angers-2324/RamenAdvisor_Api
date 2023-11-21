@@ -9,8 +9,7 @@ const adminLoginMiddleware = (req: TRequest, res: Response, next: NextFunction) 
         const token = req.headers.authorization?.replace("Bearer ", "");
 
         if(!token){
-            res.status(HttpStatus.UNAUTHORIZED).json({"message": "You are not authorized to view this page"});
-            return;
+            throw new Error("No token provided");
         }
 
         const secret = process.env.JWT_SECRET_ADMIN || "ASecretPhrase";
