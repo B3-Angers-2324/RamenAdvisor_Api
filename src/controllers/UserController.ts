@@ -157,7 +157,6 @@ async function updateUserProfile(req: TRequest, res: Response){
             res.status(HttpStatus.NOT_FOUND).json({"message": "User not found"});
         }
     }catch(error){
-        console.log(error);
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while updating user information"});
     }
 }

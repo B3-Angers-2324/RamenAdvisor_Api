@@ -107,7 +107,6 @@ const updateRestaurant = (req: Request, res: Response) => {
             await Service.updateRestaurant(req.params.uid, req.body);
             res.status(HttpStatus.OK).json({"message": "Restaurant updated"});
         }catch(e : CustomError|any){
-            console.log(e);
             res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.message? e.message : "Internal server error"});
         }
     });
