@@ -13,7 +13,5 @@ router.use(UserMiddleware.userLoginMiddleware);
 
 router.get("/", UserController.getAll);
 
-router.get("/otherRoute", UserController.defaultFunction);
-
 
 export default router;
