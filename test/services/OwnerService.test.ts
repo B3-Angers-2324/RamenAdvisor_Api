@@ -1,6 +1,4 @@
-import app from '../../app'
 import * as db from '../utils/dbHandler'
-import supertest from 'supertest'
 import {describe, expect, test, beforeAll, afterAll, afterEach} from '@jest/globals';
 import { collections } from '../../src/services/Database';
 import { Collection, Document } from 'mongodb';
@@ -8,9 +6,10 @@ import mongoose from 'mongoose';
 
 import OwnerService from '../../src/services/OwnerService';
 
-const request = supertest(app)
-
 describe('Test all OwnerService function', () => {
+  const ownerCollection = mongoose.connection.collection('owners');
+  collections.owner = ownerCollection as unknown as Collection<Document>;
+
   beforeAll(async () => {
       await db.connect()
   });
@@ -23,14 +22,12 @@ describe('Test all OwnerService function', () => {
   
   describe('Test if getOneOwner work correctely', () => {
     test('getOneOwner of owner with email', async () => {
-        const ownerCollection = mongoose.connection.collection('owners');
-        collections.owner = ownerCollection as unknown as Collection<Document>;
 
         const ownersData = [
             {
             firstName: 'test1',
             lastName: 'test1',
-            email: 'j1@gmail.com',
+            email: 'owner1@gmail.com',
             password: 'test1',
             siret: 'test1',
             companyName: 'test1',
@@ -40,40 +37,38 @@ describe('Test all OwnerService function', () => {
         
         await db.addDatasToCollection(ownerCollection, ownersData);
 
-        const res = await OwnerService.getOneOwner('j1@gmail.com');
-        const res2 = await OwnerService.getOneOwner('j2@gmail.com');
-
-        // todo : add more test
-
-        // Vérifiez que les résultats sont ceux que vous attendez
+        // l'utilisateur existe
+        const res = await OwnerService.getOneOwner('owner1@gmail.com');
         expect(res).not.toBeNull();
+
+        // l'utilisateur n'existe pas
+        const res2 = await OwnerService.getOneOwner('owner2@gmail.com');
         expect(res2).toBeNull();
     });
   })
 
   describe('Test if addOwner work correctely', () => {
-    test('addOwner of owner with email', async () => {
-        const ownerCollection = mongoose.connection.collection('owners');
-        collections.owner = ownerCollection as unknown as Collection<Document>;
+    test('addOwner with valid owner data', async () => {
+  
+      const validOwnerData = {
+        firstName: 'test1',
+        lastName: 'test1',
+        email: 'owner3@gmail.com',
+        password: 'test1',
+        siret: 'test1',
+        companyName: 'test1',
+        socialAdresse: 'test1',
+      };
 
-        const ownersData = [
-          {
-          firstName: 'test1',
-          lastName: 'test1',
-          email: 'j1@gmail.com',
-          password: 'test1',
-          siret: 'test1',
-          companyName: 'test1',
-          socialAdresse: 'test1',
-          }
-        ];
+      await OwnerService.addOwner(validOwnerData);
 
-        const res = await OwnerService.addOwner(ownersData[0]);
-        
-        //todo : add more test
+      // l'utilisateur existe
+      const res = await OwnerService.getOneOwner('owner3@gmail.com');
+      expect(res).not.toBeNull();
 
-        // Vérifiez que les résultats sont ceux que vous attendez
-        expect(res).not.toBeNull();
+      // l'utilisateur n'existe pas
+      const res2 = await OwnerService.getOneOwner('owner4@gmail.com');
+      expect(res2).toBeNull();
     });
   })
 })

@@ -6,7 +6,7 @@ export default class Restaurant{
         public address: string,
         public note: number, //--
         public position: any,
-        public image: string,
+        public images: any,
         public foodtype: string,
         public id?: ObjectId,
         public city?: string,

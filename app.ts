@@ -47,10 +47,6 @@ app.use(express.json()); // Middleware pour analyser le corps JSON
 
 app.use("/api/v1", baseRouter);
 
-app.get('/', async (req: Request, res: Response): Promise<Response> => {
-    return res.status(200).send({message: 'Hello World!'})
- })
-
 // add response for 404 routes
 app.use((_: Request, res: Response) => {
     res.status(HttpStatus.NOT_FOUND).json({"message": "Route not found"});

@@ -103,7 +103,7 @@ db.createCollection(
                     description: "must be a string and is required"
                 },
                 birthDay: {
-                    bsonType: "string",
+                    bsonType: "date",
                     description: "must be a string and is required"
                 },
                 email: {

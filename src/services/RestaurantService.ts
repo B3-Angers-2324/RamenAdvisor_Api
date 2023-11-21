@@ -31,7 +31,6 @@ const queryRestaurantsByOwner = async (id : string) => {
 }
 
 const createRestaurant = async (restaurant : Restaurant): Promise<any> => {
-    console.log(restaurant)
     let result = await collections.restaurant?.insertOne(restaurant);
     if (result==undefined){
         throw new Error("Error while creating restaurant");
