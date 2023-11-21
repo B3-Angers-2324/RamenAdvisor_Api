@@ -36,6 +36,7 @@ describe('Test all UserService function', () => {
             ban: false,
             ville: 'Angers',
             address: 'test1',
+            image: 'urlImage1',
         },
         {
             firstName: 'test3',
@@ -48,6 +49,7 @@ describe('Test all UserService function', () => {
             ban: false,
             ville: 'Angers',
             address: 'test3',
+            image: 'urlImage3',
         },
     ];
 

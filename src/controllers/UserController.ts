@@ -56,6 +56,7 @@ async function register(req: Request, res: Response){
             ville: req.body.ville,
             address: req.body.address,
             password: req.body.password,
+            image: "http://thispersondoesnotexist.com/",
             ban: false
         };
 

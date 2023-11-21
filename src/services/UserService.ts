@@ -35,7 +35,7 @@ async function getAll(): Promise<User[]> {
                 element.ville,
                 element.address,
                 element.ban,
-                element._id
+                element._id.toString()
             ));
         } else {
             return [];
@@ -60,7 +60,7 @@ async function getOne(id: string): Promise<User | null> {
                 user.ville,
                 user.address,
                 user.ban,
-                user._id
+                user._id.toString()
             );
         } else {
             return null;
