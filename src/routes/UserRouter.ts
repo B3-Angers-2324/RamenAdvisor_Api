@@ -1,19 +1,19 @@
 import express, { Router } from 'express';
 import UserMiddleware from '../middleware/UserMiddleware';
-import User from "../controllers/UserController"
+import UserController from "../controllers/UserController"
 
 const router: Router = express.Router();
 
-router.post("/login", User.login);
+router.post("/login", UserController.login);
 
-router.post("/register", User.register);
+router.post("/register", UserController.register);
 
 // load middleware for all routes to test user login
 router.use(UserMiddleware.userLoginMiddleware);
 
-router.get("/", User.getAll);
+router.get("/", UserController.getAll);
 
-router.get("/otherRoute", User.defaultFunction);
+router.get("/otherRoute", UserController.defaultFunction);
 
 
 export default router;

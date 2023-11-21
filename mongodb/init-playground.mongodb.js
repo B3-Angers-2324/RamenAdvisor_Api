@@ -92,7 +92,7 @@ db.createCollection(
     {
         validator: { $jsonSchema: {
             bsonType: "object",
-            required: ["firstName", "lastName", "birthDay", "email", "phone", "sexe", "password", "ville", "ban"],
+            required: ["firstName", "lastName", "birthDay", "email", "phone", "sexe", "password", "ville", "ban", "image"],
             properties: {
                 firstName: {
                     bsonType: "string",
@@ -129,6 +129,10 @@ db.createCollection(
                 ban: {
                     bsonType: "bool",
                     description: "must be a bool and is required"
+                },
+                image: {
+                    bsonType: "string",
+                    description: "must be a string and is required"
                 }
             }
         }}

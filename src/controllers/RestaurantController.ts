@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import Service from "../services/RestaurantService";
 import HttpStatus from "../constants/HttpStatus";
 import { ObjectId } from "mongodb";
-import { TRequest } from "./types/types";
+import { CustomError, TRequest } from "./types/types";
 import OwnerMiddleware from "../middleware/OwnerMiddleware";
 import CheckInput from "../tools/CheckInput";
 
@@ -29,7 +29,7 @@ const getBestRestaurants = async (req: Request, res: Response) => {
             position: any;
             images: string[]
         }[] = [];
-        (await Service.queryBestRestaurants(parseInt(req.query.limit as string))).forEach((element) => {
+        (await Service.queryBestRestaurants(parseInt(req.query.limit as string)))?.forEach((element) => {
             restaurant.push({
                 id: element._id,
                 name: element.name,
@@ -39,12 +39,15 @@ const getBestRestaurants = async (req: Request, res: Response) => {
                 images: element.images
             });
         });
+        if (restaurant.length == 0){
+            throw new CustomError("No restaurant found", HttpStatus.NOT_FOUND);
+        }
         res.status(HttpStatus.OK).json({
             number: restaurant.length,
             obj: restaurant
         });
-    }catch(e){
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
+    }catch(e : CustomError|any){
+        res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.message? e.message : "Internal server error"});
     }
 }
 
