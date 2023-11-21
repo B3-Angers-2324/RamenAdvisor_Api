@@ -11,9 +11,11 @@ router.post("/register", UserController.register);
 // load middleware for all routes to test user login
 router.use(UserMiddleware.userLoginMiddleware);
 
-router.get("/", UserController.getAll);
+router.get("/profile", UserController.getUserProfile);
 
-router.get("/otherRoute", UserController.defaultFunction);
+router.patch("/profile", UserController.updateUserProfile);
+
+router.delete("/profile", UserController.deleteUserProfile);
 
 
 export default router;

@@ -22,12 +22,7 @@ async function login(req: Request, res: Response){
     }
 }
 
-async function defaultFunction(req: Request, res: Response){
-    res.status(HttpStatus.OK).json({"message": "Default admin route"});
-}
-
 
 export default {
-    login,
-    defaultFunction
+    login
 };

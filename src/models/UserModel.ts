@@ -8,11 +8,11 @@ export default class User{
         public email: string,
         public phone: string,
         public sexe: string,
-        public password: string,
-        public ban: boolean,
         public image: string,
+        public ban?: boolean,
         public ville?: string,
         public address?: string,
+        public password?: string,
         public _id?: ObjectId,
     ){}
 }

@@ -69,6 +69,29 @@ describe('Test all ReportService function', () => {
     });
   });
 
+  describe("Test if getReportById  work correctely", () => {
+    test('getReportById with valid reportId', async () => {
+      const validReportData = {
+        _id: new ObjectId('64a685757acccfac3d045ad9'),
+        userId: new ObjectId('64a685757acccfac3d045ad9'),
+        restaurantId: new ObjectId('64a685757acccfac3d045ad9'),
+        messageId: new ObjectId('64a685757acccfac3d045ad9'),
+        nbReport: 1,
+        date_first: new Date(),
+      };
+
+      await db.addDatasToCollection(reportCollection, [validReportData]);
+
+      // le report existe
+      const result = await ReportService.getReportById("64a685757acccfac3d045ad9");
+      expect(result).not.toBeNull();
+
+      // le report n'existe pas
+      const result2 = await ReportService.getReportById("64a685757acccfac3d045ad8");
+      expect(result2).toBeNull();
+    });
+  });
+
   describe("Test if updateReport work correctely", () => {
     test('updateReport with valid report data', async () => {
       let reportData = {
@@ -94,6 +117,29 @@ describe('Test all ReportService function', () => {
       const result2 = await reportCollection.findOne({_id: new ObjectId('64a685757acccfac3d045ad8')});
       expect(result2).toBeNull();
 
+    });
+  });
+
+  describe("Test if deleteReport work correctely", () => {
+    test('deleteReport with valid reportId', async () => {
+      const validReportData = {
+        _id: new ObjectId('64a685757acccfac3d045ad9'),
+        userId: new ObjectId('64a685757acccfac3d045ad9'),
+        restaurantId: new ObjectId('64a685757acccfac3d045ad9'),
+        messageId: new ObjectId('64a685757acccfac3d045ad9'),
+        nbReport: 1,
+        date_first: new Date(),
+      };
+
+      await db.addDatasToCollection(reportCollection, [validReportData]);
+
+      const exist = reportCollection.findOne({_id: new ObjectId('64a685757acccfac3d045ad9')});
+      expect(exist).not.toBeNull();
+
+      // delete report
+      await ReportService.deleteReport("64a685757acccfac3d045ad9");
+      const result = await reportCollection.findOne({_id: new ObjectId('64a685757acccfac3d045ad9')});
+      expect(result).toBeNull();
     });
   });
 });

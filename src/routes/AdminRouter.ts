@@ -10,7 +10,4 @@ router.post("/login", Admin.login);
 router.use(adminMiddleware.adminLoginMiddleware);
 
 
-router.get("/", Admin.defaultFunction);
-
-
 export default router;

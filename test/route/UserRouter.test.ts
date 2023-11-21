@@ -21,7 +21,9 @@ jest.mock('../../src/controllers/UserController', () => ({
     login: jest.fn((req, res : Response) => res.json()),
     register: jest.fn((req, res : Response) => res.json()),
     getAll: jest.fn((req, res : Response) => res.json()),
-    defaultFunction: jest.fn((req, res : Response) => res.json())
+    getUserProfile: jest.fn((req, res : Response) => res.json()),
+    updateUserProfile: jest.fn((req, res : Response) => res.json()),
+    deleteUserProfile: jest.fn((req, res : Response) => res.json())
 }));
 
 describe('Test the /user paths', () => {
@@ -38,13 +40,5 @@ describe('Test the /user paths', () => {
         const response = await request.post(`${base_url}/user/register`)
         // Assert that UserController.login was called
         expect(UserController.register).toHaveBeenCalled();
-    });
-
-    test('The /otherRoute route should call the getAll function on the controller', async () => {
-        // Make a POST request to the /user/login endpoint
-        await request.get(`${base_url}/user/`)
-        // Assert that UserController.login was called
-        expect(UserController.getAll).toHaveBeenCalled();
-        expect(UserMiddleware.userLoginMiddleware).toHaveBeenCalled();
     });
 });

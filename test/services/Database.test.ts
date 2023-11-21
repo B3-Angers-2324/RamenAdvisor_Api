@@ -1,11 +1,10 @@
 import app from '../../app'
 import * as db from '../utils/dbHandler'
 import supertest from 'supertest'
-import {describe, expect, test, beforeAll, afterAll, afterEach} from '@jest/globals';
+import {describe, expect, test, beforeAll, afterAll, afterEach, jest} from '@jest/globals';
 import { collections, connectToDatabase } from '../../src/services/Database';
 import { Collection, Document } from 'mongodb';
 import mongoose from 'mongoose';
-import { jest } from '@jest/globals';
 
 const request = supertest(app)
 

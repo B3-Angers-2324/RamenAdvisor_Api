@@ -2,9 +2,9 @@ import {describe, expect, test, beforeAll, afterAll, beforeEach, afterEach, jest
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import HttpStatus from '../../src/constants/HttpStatus';
-import adminLoginMiddleware from '../../src/middleware/AdminMiddleware';
+import UserMiddleware from '../../src/middleware/UserMiddleware';
 
-describe('adminLoginMiddleware', () => {
+describe('userLoginMiddleware', () => {
   let req: Request;
   let res: Response;
   let next: NextFunction;
@@ -26,11 +26,11 @@ describe('adminLoginMiddleware', () => {
     const token = 'validToken';
     req.headers = { authorization: `Bearer ${token}` };
 
-    const secret = process.env.JWT_SECRET_ADMIN || 'ASecretPhrase';
+    const secret = process.env.JWT_SECRET_USER || 'ASecretPhrase';
     const decode = { userId: '123' };
     jest.spyOn(jwt, 'verify').mockImplementation(() => decode);
 
-    adminLoginMiddleware.adminLoginMiddleware(req, res, next);
+    UserMiddleware.userLoginMiddleware(req, res, next);
 
     expect(jwt.verify).toHaveBeenCalledWith(token, secret);
     expect((req as any).token).toEqual(decode);
@@ -40,7 +40,7 @@ describe('adminLoginMiddleware', () => {
   });
 
   test('should return UNAUTHORIZED status and error message if no token is provided', () => {
-    adminLoginMiddleware.adminLoginMiddleware(req, res, next);
+    UserMiddleware.userLoginMiddleware(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(HttpStatus.UNAUTHORIZED);
     expect(res.json).toHaveBeenCalledWith({ message: 'You are not authorized to view this page' });
@@ -51,12 +51,12 @@ describe('adminLoginMiddleware', () => {
     const token = 'invalidToken';
     req.headers = { authorization: `Bearer ${token}` };
 
-    const secret = process.env.JWT_SECRET_ADMIN || 'ASecretPhrase';
+    const secret = process.env.JWT_SECRET_USER || 'ASecretPhrase';
     jest.spyOn(jwt, 'verify').mockImplementation(() => {
       throw new Error('Invalid token');
     });
 
-    adminLoginMiddleware.adminLoginMiddleware(req, res, next);
+    UserMiddleware.userLoginMiddleware(req, res, next);
 
     expect(jwt.verify).toHaveBeenCalledWith(token, secret);
     expect(res.status).toHaveBeenCalledWith(HttpStatus.UNAUTHORIZED);
