@@ -1,7 +1,6 @@
 import { Request, Response, query } from "express";
 import { CustomError } from "./types/types";
 import MessageService from "../services/MessageService";
-import UserService from "../services/UserService";
 import ReportService from "../services/ReportService";
 import HttpStatus from "../constants/HttpStatus";
 import AdminMiddleware from "../middleware/AdminMiddleware";
@@ -28,6 +27,7 @@ const getMessagesForRestaurant = async (req: Request, res: Response) => {
         //REtrieve the limit and offset from the query
         let limit = req.query.limit ? parseInt(req.query.limit.toString()) : 10;
         let offset = req.query.offset ? parseInt(req.query.offset.toString()) : 0;
+        
         //Retrieve the messages from the database
         (await MessageService.queryMessagesForRestaurant(req.params.uid,limit,offset))?.forEach(element => {
             messages.push({
@@ -91,7 +91,7 @@ const getReportedMessages = async (req: Request, res: Response) => {
             let messages = await ReportService.queryReportedMessages(limit,offset);
             //Send the response
             res.status(HttpStatus.OK).json({
-                number: messages.length,
+                number: messages?.length,
                 obj: messages
             });
         }catch(e : Error|any){
