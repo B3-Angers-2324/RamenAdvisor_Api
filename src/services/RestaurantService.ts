@@ -9,16 +9,13 @@ const queryBestRestaurants = async (limit : number) => {
         limit: limit 
     }).toArray();
     if (restaurants==undefined){
-        throw new Error("No restaurants found");
+        throw new Error("No restaurants found", );
     }
     return restaurants;
 }
 
 const queryRestaurantById = async (id : string) => {
     let restaurant = await collections.restaurant?.findOne({_id: new ObjectId(id)});
-    if (restaurant==undefined){
-        throw new Error("No restaurant found");
-    }
     return restaurant;
 }
 
@@ -46,10 +43,19 @@ const updateRestaurant = async (id: string, restaurant : Restaurant) => {
     return result;
 }
 
+const restaurantExistsById = async (id: string) => {
+    try{
+        return (await collections.restaurant?.findOne({_id: new ObjectId(id)})==null)? false : true;
+    }catch(e){
+        return false;
+    }
+}
+
 export default {
     queryBestRestaurants,
     queryRestaurantById,
     queryRestaurantsByOwner,
     createRestaurant,
-    updateRestaurant
+    updateRestaurant,
+    restaurantExistsById
 } as const;

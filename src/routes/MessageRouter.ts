@@ -11,4 +11,6 @@ router.get("/reported/", Message.getReportedMessages);
 
 router.delete("/report/:uid", Message.deleteReport);
 
+router.post("/restaurant/:uid", Message.addMessage)
+
 export default router;

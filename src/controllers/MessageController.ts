@@ -1,9 +1,12 @@
 import { Request, Response, query } from "express";
-import { CustomError } from "./types/types";
+import { CustomError, TRequest } from "./types/types";
 import MessageService from "../services/MessageService";
 import ReportService from "../services/ReportService";
 import HttpStatus from "../constants/HttpStatus";
 import AdminMiddleware from "../middleware/AdminMiddleware";
+import UserMiddleware from "../middleware/UserMiddleware";
+import RestaurantService from "../services/RestaurantService";
+import { ObjectId } from "mongodb";
 
 const getMessagesForRestaurant = async (req: Request, res: Response) => {
     try{
@@ -124,10 +127,44 @@ const deleteReport = async (req: Request, res: Response) => {
     });
 }
 
+const addMessage = async (req: TRequest, res: Response) => {
+    UserMiddleware.userLoginMiddleware(req,res,async ()=>{
+        try{
+            if (req.params.uid===undefined) throw new CustomError("No restaurant provided", HttpStatus.BAD_REQUEST);
+            //check if the restaurant exists
+            if (!(await RestaurantService.restaurantExistsById(req.params.uid))) throw new CustomError("Restaurant not found", HttpStatus.NOT_FOUND);
+            //Check if the user has already sent a message within the last 24h
+            let lastMessage = await MessageService.lasTimeUserSentMessage(req.token._id,req.params.uid);
+            if (lastMessage!==null && lastMessage!==undefined){
+                let now = new Date();
+                let diff = now.getTime() - lastMessage.date.getTime();
+                let hours = diff / (1000 * 60 * 60);
+                if (hours < 24) throw new CustomError("You can't send more than one message per day", HttpStatus.BAD_REQUEST);
+            }
+            if (req.body === undefined || req.body.message===undefined || req.body.note===undefined) throw new CustomError("Missing field in body", HttpStatus.BAD_REQUEST);
+            //Create the message
+            let message = {
+                userId: new ObjectId(req.token._id),
+                restaurantId: new ObjectId(req.params.uid),
+                message: req.body.message,
+                date: new Date(),
+                note: parseInt(req.body.note)
+            };
+            //Add the message to the database
+            await MessageService.addMessage(message);
+            //Send the response
+            res.status(HttpStatus.OK).json({"message": "Message added"});
+        }catch(e: CustomError|any){
+            res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.message? e.message : "Internal server error"});
+        }
+    });
+}
+
 
 export default {
     getMessagesForRestaurant,
     reportMessage,
     getReportedMessages,
-    deleteReport
+    deleteReport,
+    addMessage
 };

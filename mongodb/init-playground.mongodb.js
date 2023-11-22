@@ -33,6 +33,8 @@ db.createCollection(
                 },
                 note: {
                     bsonType: "int",
+                    minimum: 1,
+                    maximum: 5,
                     description: "must be a int and is required"
                 },
                 date: {
