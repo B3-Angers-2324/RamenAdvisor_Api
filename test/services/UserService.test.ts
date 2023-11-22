@@ -109,4 +109,164 @@ describe('Test all UserService function', () => {
             expect(res2).toBeNull();
         })
     })
+
+
+
+
+    describe('Test if getUserById works correctly', () => {
+        test('getUserById with valid id', async () => {
+          const userId = '64a685757acccfac3d045ad9';
+          const userData = {
+            _id: new ObjectId(userId),
+            firstName: 'test1',
+            lastName: 'test1',
+            birthDay: new Date('1999-01-01'),
+            email: 'user1@gmail.com',
+            phone: '0123456789',
+            sexe: 'homme',
+            password: 'test1',
+            ban: false,
+            ville: 'Angers',
+            address: 'test1',
+            image: 'urlImage1',
+          };
+      
+          // Add owner to the collection
+          await db.addDatasToCollection(userCollection, [userData]);
+      
+          // Call getOwnerById
+          const result = await UserService.getUserById(userId);
+      
+          // Check if the result matches the owner data
+          expect(result).toEqual(userData);
+        });
+      
+        test('getUserById with invalid id', async () => {
+          const invaliduserId = '64a685757acccfac3d045ad5';
+      
+          // Call getOwnerById
+          const result = await UserService.getUserById(invaliduserId);
+      
+          // Check if the result is null
+          expect(result).toBeNull();
+        });
+    });
+    
+    
+    
+    describe('Test if updateUser works correctly', () => {
+        test('updateUser with valid id and user data', async () => {
+            const userId = '64a685757acccfac3d045ad9';
+            const updatedUser = {
+                firstName: 'updateName',
+                lastName: 'update',
+                birthDay: new Date('1999-01-01'),
+                email: 'update@gmail.com',
+                phone: '0123456789',
+                sexe: 'update',
+                password: 'update',
+                ban: true,
+                ville: 'update',
+                address: 'update',
+                image: 'update',
+            };
+        
+            // Add owner to the collection
+            await db.addDatasToCollection(userCollection, [
+            {
+                _id: new ObjectId(userId),
+                firstName: 'test1',
+                lastName: 'test1',
+                birthDay: new Date('1999-01-01'),
+                email: 'user1@gmail.com',
+                phone: '0123456789',
+                sexe: 'homme',
+                password: 'test1',
+                ban: false,
+                ville: 'Angers',
+                address: 'test1',
+                image: 'urlImage1',
+            },
+            ]);
+        
+            // Update owner
+            const result = await UserService.updateUser(userId, updatedUser);
+        
+            // Check if the update was successful
+            expect(result).toBeDefined();
+            expect(result.modifiedCount).toBe(1);
+        
+            // Check if the owner was updated correctly
+            const res = await userCollection.findOne({ _id: new ObjectId(userId) });
+            expect(res).toEqual(expect.objectContaining(updatedUser));
+        });
+        
+        test('updateUser with invalid id', async () => {
+            const invaliduserId = '64a685757acccfac3d045ad5';
+            const updatedUser = {
+                firstName: 'updateName',
+                lastName: 'update',
+                birthDay: new Date('1999-01-01'),
+                email: 'update@gmail.com',
+                phone: '0123456789',
+                sexe: 'update',
+                password: 'update',
+                ban: true,
+                ville: 'update',
+                address: 'update',
+                image: 'update',
+            };
+        
+            const result = await UserService.updateUser(invaliduserId, updatedUser);
+
+            //check if the update was not successful
+            expect(result).toBeDefined();
+        });
+        });
+
+
+        describe('Test if deleteUser works correctly', () => {
+        test('deleteUser with valid id', async () => {
+            const userId = '64a685757acccfac3d045ad9';
+        
+            // Add owner to the collection
+            await db.addDatasToCollection(userCollection, [
+            {
+                _id: new ObjectId(userId),
+                firstName: 'test1',
+                lastName: 'test1',
+                birthDay: new Date('1999-01-01'),
+                email: 'user1@gmail.com',
+                phone: '0123456789',
+                sexe: 'homme',
+                password: 'test1',
+                ban: false,
+                ville: 'Angers',
+                address: 'test1',
+                image: 'urlImage1',
+            },
+            ]);
+        
+            // Call deleteOwner
+            const result = await UserService.deleteUser(userId);
+        
+            // Check if the delete was successful
+            expect(result).toBeDefined();
+            expect(result.deletedCount).toBe(1);
+        
+            // Check if the owner was deleted from the collection
+            const res = await userCollection.findOne({ _id: new ObjectId(userId) });
+            expect(res).toBeNull();
+        });
+        
+        test('deleteUser with invalid id', async () => {
+            const invaliduserId = '64a685757acccfac3d045ad5';
+        
+            const result = await UserService.deleteUser(invaliduserId);
+        
+            // Check if the delete was not successful
+            expect(result).toBeDefined();
+            expect(result.deletedCount).toBe(0);
+        });
+    });
 })

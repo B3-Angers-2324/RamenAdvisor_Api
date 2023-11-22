@@ -41,4 +41,26 @@ describe('Test the /user paths', () => {
         // Assert that UserController.login was called
         expect(UserController.register).toHaveBeenCalled();
     });
+
+    // Profile tests
+    test('The /profile route should call the getUserProfile function on the controller', async () => {
+        // Make a GET request to the /user/profile endpoint
+        const response = await request.get(`${base_url}/user/profile`);
+        // Assert that UserController.getUserProfile was called
+        expect(UserController.getUserProfile).toHaveBeenCalled();
+    });
+
+    test('The /profile route should call the updateUserProfile function on the controller', async () => {
+        // Make a PATCH request to the /user/profile endpoint
+        const response = await request.patch(`${base_url}/user/profile`);
+        // Assert that UserController.updateUserProfile was called
+        expect(UserController.updateUserProfile).toHaveBeenCalled();
+    });
+
+    test('The /profile route should call the deleteUserProfile function on the controller', async () => {
+        // Make a DELETE request to the /user/profile endpoint
+        const response = await request.delete(`${base_url}/user/profile`);
+        // Assert that UserController.deleteUserProfile was called
+        expect(UserController.deleteUserProfile).toHaveBeenCalled();
+    });
 });

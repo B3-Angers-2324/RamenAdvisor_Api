@@ -103,12 +103,12 @@ async function updateOwnerProfile(req: TRequest, res: Response){
             return;
         }
         // check if phone number is valid
-        if(CheckInput.phone(req.body.phone) == null){
+        if(!CheckInput.phone(req.body.phone)){
             res.status(HttpStatus.BAD_REQUEST).json({"message": "Invalid phone number"});
             return;
         }
         // check if email is valid
-        if(CheckInput.email(req.body.email) == null){
+        if(!CheckInput.email(req.body.email)){
             res.status(HttpStatus.BAD_REQUEST).json({"message": "Email format is not correct"});
             return;
         }

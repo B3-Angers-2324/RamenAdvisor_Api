@@ -45,4 +45,25 @@ describe('Test the /owner paths', () => {
         expect(OwnerController.getRestaurantsByOwner).toHaveBeenCalled();
         expect(OwnerMiddleware.ownerLoginMiddleware).toHaveBeenCalled();
     });
+
+    test('The /profile route with a get should call the function on the controller', async () => {
+        // Make a GET request to the /owner/profile endpoint
+        await request.get(`${base_url}/owner/profile`);
+        // Assert that OwnerController.getOwnerProfile was called
+        expect(OwnerController.getOwnerProfile).toHaveBeenCalled();
+    });
+
+    test('The /profile route with a patch should call the function on the controller', async () => {
+        // Make a PATCH request to the /owner/profile endpoint
+        await request.patch(`${base_url}/owner/profile`);
+        // Assert that OwnerController.updateOwnerProfile was called
+        expect(OwnerController.updateOwnerProfile).toHaveBeenCalled();
+    });
+
+    test('The /profile route with a delete should call the function on the controller', async () => {
+        // Make a DELETE request to the /owner/profile endpoint
+        await request.delete(`${base_url}/owner/profile`);
+        // Assert that OwnerController.deleteOwnerProfile was called
+        expect(OwnerController.deleteOwnerProfile).toHaveBeenCalled();
+    });
 });

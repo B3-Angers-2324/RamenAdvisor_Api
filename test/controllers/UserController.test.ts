@@ -5,6 +5,7 @@ import HttpStatus from '../../src/constants/HttpStatus';
 import UserServices from '../../src/services/UserService';
 import UserController from '../../src/controllers/UserController';
 import CheckInput from '../../src/tools/CheckInput';
+import { TRequest } from '../../src/controllers/types/types';
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -318,5 +319,396 @@ describe('UserController - getAll', () => {
     expect(UserServices.getAll).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
     expect(res.json).toHaveBeenCalledWith({ error });
+  });
+});
+
+
+
+describe('UserController - getUserProfile', () => {
+  test('should return user profile if user exists', async () => {
+    const req = {
+      token: {
+        _id: 'userId',
+      },
+    } as TRequest;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+    const user = {
+      _id: 'userId',
+      name: 'John Doe',
+      email: 'john.doe@example.com',
+    };
+  
+    (UserServices.getUserById as jest.Mock).mockResolvedValue(user as never);
+  
+    await UserController.getUserProfile(req, res);
+  
+    expect(UserServices.getUserById).toHaveBeenCalledWith(req.token?._id);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.OK);
+    expect(res.json).toHaveBeenCalledWith({ user });
+  });
+  
+  test('should return not found status if user does not exist', async () => {
+    const req = {
+      token: {
+        _id: 'userId',
+      },
+    } as TRequest;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+  
+    (UserServices.getUserById as jest.Mock).mockResolvedValue(null as never);
+  
+    await UserController.getUserProfile(req, res);
+  
+    expect(UserServices.getUserById).toHaveBeenCalledWith(req.token?._id);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.NOT_FOUND);
+    expect(res.json).toHaveBeenCalledWith({ message: 'User not found' });
+  });
+  
+  test('should return internal server error status if an error occurs', async () => {
+    const req = {
+      token: {
+        _id: 'userId',
+      },
+    } as TRequest;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+  
+    (UserServices.getUserById as jest.Mock).mockRejectedValue(new Error('Some error') as never);
+  
+    await UserController.getUserProfile(req, res);
+  
+    expect(UserServices.getUserById).toHaveBeenCalledWith(req.token?._id);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Error while getting user information' });
+  });
+});
+
+
+//------------------------------------------------------------
+
+
+describe('UserController - updateUserProfile', () => {
+  test('should update user profile and return success message', async () => {
+    const req = {
+      token: {
+        _id: 'userId',
+      },
+      body: {
+        firstName: 'John',
+        lastName: 'Doe',
+        birthDay: '1990-01-01',
+        email: 'john.doe@example.com',
+        phone: '1234567890',
+        sexe: 'male',
+        ville: 'New York',
+        address: '123 Main St',
+      },
+    } as TRequest;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+  
+    (CheckInput.areNotEmpty as jest.Mock).mockReturnValue(true);
+    (CheckInput.phone as jest.Mock).mockReturnValue(true);
+    (CheckInput.email as jest.Mock).mockReturnValue(true);
+    (UserServices.getUserById as jest.Mock).mockResolvedValue({ _id: 'userId' } as never);
+    (UserServices.updateUser as jest.Mock).mockResolvedValue(true as never);
+  
+    await UserController.updateUserProfile(req, res);
+  
+    expect(CheckInput.areNotEmpty).toHaveBeenCalledWith([
+      req.body.firstName,
+      req.body.lastName,
+      req.body.birthDay,
+      req.body.email,
+      req.body.phone,
+      req.body.sexe,
+      req.body.ville,
+      req.body.address,
+    ]);
+    expect(CheckInput.phone).toHaveBeenCalledWith(req.body.phone);
+    expect(CheckInput.email).toHaveBeenCalledWith(req.body.email);
+    expect(UserServices.getUserById).toHaveBeenCalledWith(req.token?._id);
+    expect(UserServices.updateUser).toHaveBeenCalledWith(req.token?._id, {
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      birthDay: req.body.birthDay,
+      email: req.body.email,
+      phone: req.body.phone,
+      sexe: req.body.sexe,
+      ville: req.body.ville,
+      address: req.body.address,
+      image: 'http://thispersondoesnotexist.com/',
+    });
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.OK);
+    expect(res.json).toHaveBeenCalledWith({ message: 'User information updated' });
+  });
+  
+  test('should return bad request status if any field is missing', async () => {
+    const req = {
+      token: {
+        _id: 'userId',
+      },
+      body: {
+        firstName: '',
+        lastName: '',
+        birthDay: '',
+        email: '',
+        phone: '',
+        sexe: '',
+        ville: '',
+        address: '',
+      },
+    } as TRequest;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+
+    (CheckInput.areNotEmpty as jest.Mock).mockReturnValue(false);
+  
+    await UserController.updateUserProfile(req, res);
+  
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Missing parameters' });
+  });
+  
+  test('should return bad request status if phone number is invalid', async () => {
+    const req = {
+      token: {
+        _id: 'userId',
+      },
+      body: {
+        firstName: 'John',
+        lastName: 'Doe',
+        birthDay: '1990-01-01',
+        email: 'john.doe@example.com',
+        phone: 'invalidPhoneNumber',
+        sexe: 'male',
+        ville: 'New York',
+        address: '123 Main St',
+      },
+    } as TRequest;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+  
+    (CheckInput.areNotEmpty as jest.Mock).mockReturnValue(true);
+    (CheckInput.phone as jest.Mock).mockReturnValue(false);
+  
+    await UserController.updateUserProfile(req, res);
+  
+    expect(CheckInput.areNotEmpty).toHaveBeenCalledWith([
+      req.body.firstName,
+      req.body.lastName,
+      req.body.birthDay,
+      req.body.email,
+      req.body.phone,
+      req.body.sexe,
+      req.body.ville,
+      req.body.address,
+    ]);
+    expect(CheckInput.phone).toHaveBeenCalledWith(req.body.phone);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Invalid phone number' });
+  });
+  
+  test('should return bad request status if email format is incorrect', async () => {
+    const req = {
+      token: {
+        _id: 'userId',
+      },
+      body: {
+        firstName: 'John',
+        lastName: 'Doe',
+        birthDay: '1990-01-01',
+        email: 'invalidEmail',
+        phone: '1234567890',
+        sexe: 'male',
+        ville: 'New York',
+        address: '123 Main St',
+      },
+    } as TRequest;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+  
+    (CheckInput.areNotEmpty as jest.Mock).mockReturnValue(true);
+    (CheckInput.phone as jest.Mock).mockReturnValue(true);
+    (CheckInput.email as jest.Mock).mockReturnValue(false);
+  
+    await UserController.updateUserProfile(req, res);
+  
+    expect(CheckInput.areNotEmpty).toHaveBeenCalledWith([
+      req.body.firstName,
+      req.body.lastName,
+      req.body.birthDay,
+      req.body.email,
+      req.body.phone,
+      req.body.sexe,
+      req.body.ville,
+      req.body.address,
+    ]);
+    expect(CheckInput.phone).toHaveBeenCalledWith(req.body.phone);
+    expect(CheckInput.email).toHaveBeenCalledWith(req.body.email);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Email format is not correct' });
+  });
+  
+  test('should return not found status if user does not exist', async () => {
+    const req = {
+      token: {
+        _id: 'userId',
+      },
+      body: {
+        firstName: 'John',
+        lastName: 'Doe',
+        birthDay: '1990-01-01',
+        email: 'john.doe@example.com',
+        phone: '1234567890',
+        sexe: 'male',
+        ville: 'New York',
+        address: '123 Main St',
+      },
+    } as TRequest;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+  
+    (CheckInput.areNotEmpty as jest.Mock).mockReturnValue(true);
+    (CheckInput.phone as jest.Mock).mockReturnValue(true);
+    (CheckInput.email as jest.Mock).mockReturnValue(true);
+    (UserServices.getUserById as jest.Mock).mockResolvedValue(null as never);
+  
+    await UserController.updateUserProfile(req, res);
+  
+    expect(CheckInput.areNotEmpty).toHaveBeenCalledWith([
+      req.body.firstName,
+      req.body.lastName,
+      req.body.birthDay,
+      req.body.email,
+      req.body.phone,
+      req.body.sexe,
+      req.body.ville,
+      req.body.address,
+    ]);
+    expect(UserServices.getUserById).toHaveBeenCalledWith(req.token?._id);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.NOT_FOUND);
+    expect(res.json).toHaveBeenCalledWith({ message: 'User not found' });
+  });
+  
+  test('should return internal server error status if an error occurs', async () => {
+    const req = {
+      token: {
+        _id: 'userId',
+      },
+      body: {
+        firstName: 'John',
+        lastName: 'Doe',
+        birthDay: '1990-01-01',
+        email: 'john.doe@example.com',
+        phone: '1234567890',
+        sexe: 'male',
+        ville: 'New York',
+        address: '123 Main St',
+      },
+    } as TRequest;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+  
+    (CheckInput.areNotEmpty as jest.Mock).mockReturnValue(true);
+    (CheckInput.phone as jest.Mock).mockReturnValue(true);
+    (CheckInput.email as jest.Mock).mockReturnValue(true);
+    (UserServices.getUserById as jest.Mock).mockResolvedValue({ _id: 'userId' } as never);
+    (UserServices.updateUser as jest.Mock).mockRejectedValue(new Error('Some error') as never);
+  
+    await UserController.updateUserProfile(req, res);
+  
+    expect(CheckInput.areNotEmpty).toHaveBeenCalledWith([
+      req.body.firstName,
+      req.body.lastName,
+      req.body.birthDay,
+      req.body.email,
+      req.body.phone,
+      req.body.sexe,
+      req.body.ville,
+      req.body.address,
+    ]);
+    expect(CheckInput.phone).toHaveBeenCalledWith(req.body.phone);
+    expect(CheckInput.email).toHaveBeenCalledWith(req.body.email);
+    expect(UserServices.getUserById).toHaveBeenCalledWith(req.token?._id);
+    expect(UserServices.updateUser).toHaveBeenCalledWith(req.token?._id, {
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      birthDay: req.body.birthDay,
+      email: req.body.email,
+      phone: req.body.phone,
+      sexe: req.body.sexe,
+      ville: req.body.ville,
+      address: req.body.address,
+      image: 'http://thispersondoesnotexist.com/',
+    });
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Error while updating user information' });
+  });
+});
+
+
+
+// ---------------------------------------------------------------
+
+describe('UserController - deleteUserProfile', () => {
+  test('should delete user profile and return success message', async () => {
+    const req = {
+      token: {
+        _id: 'userId',
+      },
+    } as TRequest;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+  
+    (UserServices.deleteUser as jest.Mock).mockResolvedValue(true as never);
+  
+    await UserController.deleteUserProfile(req, res);
+  
+    expect(UserServices.deleteUser).toHaveBeenCalledWith(req.token?._id);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.OK);
+    expect(res.json).toHaveBeenCalledWith({ message: 'User deleted' });
+  });
+  
+  test('should return internal server error if an error occurs while deleting user profile', async () => {
+    const req = {
+      token: {
+        _id: 'userId',
+      },
+    } as TRequest;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+  
+    (UserServices.deleteUser as jest.Mock).mockRejectedValue(new Error('Some error') as never);
+  
+    await UserController.deleteUserProfile(req, res);
+  
+    expect(UserServices.deleteUser).toHaveBeenCalledWith(req.token?._id);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Error while deleting user' });
   });
 });

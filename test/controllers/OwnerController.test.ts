@@ -306,3 +306,230 @@ describe('OwnerController - getRestaurantsByOwner', () => {
         expect(res.json).toHaveBeenCalledWith({ message: 'Error while getting restaurants' });
     });
 });
+
+
+// ------------------------------------------------------------
+
+describe('OwnerController - getOwnerProfile', () => {
+  test('should return owner profile if found', async () => {
+    const req = {
+      token: { _id: 'ownerId' },
+    } as TRequest;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+
+    const owner = { name: 'John Doe', email: 'test@example.com' };
+
+    (OwnerServices.getOwnerById as jest.Mock).mockResolvedValue(owner as never);
+
+    await OwnerController.getOwnerProfile(req, res);
+
+    expect(OwnerServices.getOwnerById).toHaveBeenCalledWith(req.token?._id);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.OK);
+    expect(res.json).toHaveBeenCalledWith({ owner });
+  });
+
+  test('should return not found if owner not found', async () => {
+    const req = {
+      token: { _id: 'ownerId' },
+    } as TRequest;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+
+    (OwnerServices.getOwnerById as jest.Mock).mockResolvedValue(null as never);
+
+    await OwnerController.getOwnerProfile(req, res);
+
+    expect(OwnerServices.getOwnerById).toHaveBeenCalledWith(req.token?._id);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.NOT_FOUND);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Owner not found' });
+  });
+
+  test('should return internal server error if an error occurs', async () => {
+    const req = {
+      token: { _id: 'ownerId' },
+    } as TRequest;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+
+    (OwnerServices.getOwnerById as jest.Mock).mockRejectedValue(new Error('Some error') as never);
+
+    await OwnerController.getOwnerProfile(req, res);
+
+    expect(OwnerServices.getOwnerById).toHaveBeenCalledWith(req.token?._id);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Error while getting owner information' });
+  });
+});
+
+
+// ------------------------------------------------------------
+
+describe('OwnerController - updateOwnerProfile', () => {
+  let req: TRequest;
+  let res: Response;
+
+  beforeEach(() => {
+    req = {
+      token: { _id: 'ownerId' },
+      body: {
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'test@example.com',
+        companyName: 'ACME Inc.',
+        password: 'password123',
+        siret: '123456789',
+        socialAdresse: '123 Main St',
+        phone: '1234567890',
+      },
+    } as TRequest;
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('should update owner profile and return success message', async () => {
+    const owner = {
+      _id: 'ownerId',
+    };
+
+    (OwnerServices.getOwnerById as jest.Mock).mockResolvedValue(owner as never);
+    (OwnerServices.updateOwner as jest.Mock).mockResolvedValue(true as never);
+
+    await OwnerController.updateOwnerProfile(req, res);
+
+    expect(OwnerServices.getOwnerById).toHaveBeenCalledWith(req.token?._id);
+    expect(OwnerServices.updateOwner).toHaveBeenCalledWith(req.token?._id, {
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      email: req.body.email,
+      companyName: req.body.companyName,
+      password: req.body.password,
+      socialAdresse: req.body.socialAdresse,
+    });
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.OK);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Owner information updated' });
+  });
+
+  test('should return not found if owner does not exist', async () => {
+    (OwnerServices.getOwnerById as jest.Mock).mockResolvedValue(null as never);
+
+    await OwnerController.updateOwnerProfile(req, res);
+
+    expect(OwnerServices.getOwnerById).toHaveBeenCalledWith(req.token?._id);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.NOT_FOUND);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Owner not found' });
+  });
+
+  test('should return bad request if any required field is missing', async () => {
+    req.body.firstName = '';
+
+    await OwnerController.updateOwnerProfile(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Missing parameters' });
+  });
+
+  test('should return bad request if phone number is invalid', async () => {
+    req.body.phone = '123';
+
+    await OwnerController.updateOwnerProfile(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Invalid phone number' });
+  });
+
+  test('should return bad request if email format is incorrect', async () => {
+    req.body.email = 'invalidemail';
+
+    await OwnerController.updateOwnerProfile(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Email format is not correct' });
+  });
+
+  test('should return internal server error if an error occurs while updating owner information', async () => {
+    const owner = {
+      _id: 'ownerId',
+    };
+
+    (OwnerServices.getOwnerById as jest.Mock).mockResolvedValue(owner as never);
+    (OwnerServices.updateOwner as jest.Mock).mockRejectedValue(new Error('Some error') as never);
+
+    await OwnerController.updateOwnerProfile(req, res);
+
+    expect(OwnerServices.getOwnerById).toHaveBeenCalledWith(req.token?._id);
+    expect(OwnerServices.updateOwner).toHaveBeenCalledWith(req.token?._id, {
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      email: req.body.email,
+      companyName: req.body.companyName,
+      password: req.body.password,
+      socialAdresse: req.body.socialAdresse,
+    });
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Error while updating owner information' });
+  });
+
+  test('should return internal server error if an error occurs', async () => {
+    (OwnerServices.getOwnerById as jest.Mock).mockRejectedValue(new Error('Some error') as never);
+
+    await OwnerController.updateOwnerProfile(req, res);
+
+    expect(OwnerServices.getOwnerById).toHaveBeenCalledWith(req.token?._id);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Error while updating owner information' });
+  });
+});
+
+
+// ------------------------------------------------------------
+
+describe('OwnerController - deleteOwnerProfile', () => {
+  test('should delete owner profile and return success message', async () => {
+    const req = {
+      token: { _id: 'ownerId' },
+    } as TRequest;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+  
+    (OwnerServices.deleteOwner as jest.Mock).mockResolvedValue(true as never);
+  
+    await OwnerController.deleteOwnerProfile(req, res);
+  
+    expect(OwnerServices.deleteOwner).toHaveBeenCalledWith(req.token?._id);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.OK);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Owner deleted' });
+  });
+  
+  test('should return internal server error if an error occurs while deleting owner profile', async () => {
+    const req = {
+      token: { _id: 'ownerId' },
+    } as TRequest;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+  
+    (OwnerServices.deleteOwner as jest.Mock).mockRejectedValue(new Error('Some error') as never);
+  
+    await OwnerController.deleteOwnerProfile(req, res);
+  
+    expect(OwnerServices.deleteOwner).toHaveBeenCalledWith(req.token?._id);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Error while deleting owner' });
+  });
+});
