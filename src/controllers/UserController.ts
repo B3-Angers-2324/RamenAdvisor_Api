@@ -155,7 +155,6 @@ async function updateUserProfile(req: TRequest, res: Response){
         };
 
         const user = await UserServices.getUserById(id);
-        console.log(user);
         if(user){
             const result = await UserServices.updateUser(id, updatedUser);
             if(result){
