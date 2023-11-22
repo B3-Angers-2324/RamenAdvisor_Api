@@ -2,6 +2,11 @@ import { Request, Response } from 'express';
 import MessageController from '../../src/controllers/MessageController';
 import {describe, expect, test, beforeAll, afterAll, it, afterEach, jest} from '@jest/globals';
 
+import MessageService from '../../src/services/MessageService';
+import RestaurantService from '../../src/services/RestaurantService';
+import { ObjectId } from 'mongodb';
+import { TRequest } from '../../src/controllers/types/types';
+
 // Mock the UserController module
 jest.mock('../../src/services/ReportService', () => ({
     getReportByMessageId: jest.fn(async (uid: string) => { 
@@ -28,11 +33,24 @@ jest.mock('../../src/services/MessageService', () => ({
     }),
     deleteMessage: jest.fn(async (uid: string) => {return true;}),
     queryMessagesForRestaurant: jest.fn(async (uid: string, limit: number, offset: number) => (uid=="test_full")?[{_id: "test_message", user: {_id: "user_id", firstName: "test", lastName: "test", image: "test"}, message: "test", date: "2023-11-21T17:06:58.026Z", note: 5}]:[]),
+    lasTimeUserSentMessage: jest.fn(async (userId: string) => {return (userId=="test_user_id")?{date: new Date()}:null;}),
+    addMessage: jest.fn(async (message: any) => { return true;}),
+}));
+
+jest.mock('../../src/services/RestaurantService', () => ({
+    restaurantExistsById: jest.fn(async (uid: string) => { return (uid=="test_full")?true:false;}),
 }));
 
 //Avoid the middleware connection
 jest.mock('../../src/middleware/AdminMiddleware', () => ({
     adminLoginMiddleware: jest.fn( (req: Request, res: Response, next: Function) => { 
+        next(); 
+    }),
+}));
+
+jest.mock('../../src/middleware/UserMiddleware', () => ({
+    userLoginMiddleware: jest.fn( (req: TRequest, res: Response, next: Function) => { 
+        req = Object.assign(req, { token: { _id: "64a685757acccfac3d045af3" } });
         next(); 
     }),
 }));
@@ -62,7 +80,8 @@ describe('Get messages for a restaurant', () => {
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.json).toHaveBeenCalledWith({
             number: 1,
-            obj: [{ id: "test_message", user: { id: "user_id", firstName: "test", lastName: "test", img: "test" }, content: "test", date: "2023-11-21T17:06:58.026Z", note: 5 }]
+            obj: [{ id: "test_message", user: { id: "user_id", firstName: "test", lastName: "test", img: "test" }, content: "test", date: "2023-11-21T17:06:58.026Z", note: 5 }],
+            pageleft: false
         });
     });
     it("Should return a 200 when everything is correct with no limit nor offset", async () => {
@@ -84,7 +103,8 @@ describe('Get messages for a restaurant', () => {
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.json).toHaveBeenCalledWith({
             number: 1,
-            obj: [{ id: "test_message", user: { id: "user_id", firstName: "test", lastName: "test", img: "test" }, content: "test", date: "2023-11-21T17:06:58.026Z", note: 5 }]
+            obj: [{ id: "test_message", user: { id: "user_id", firstName: "test", lastName: "test", img: "test" }, content: "test", date: "2023-11-21T17:06:58.026Z", note: 5 }],
+            pageleft: false
         });
     });
     it ("Should return a empty list when there is no message for that restaurant", async () => {
@@ -110,7 +130,8 @@ describe('Get messages for a restaurant', () => {
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.json).toHaveBeenCalledWith({
             number: 0,
-            obj: []
+            obj: [],
+            pageleft: false
         });
     });
     it ("Should return a 400 list when there is no uid ", async () => {
@@ -414,5 +435,220 @@ describe("Delete a report", () => {
         // Assert
         expect(res.status).toHaveBeenCalledWith(400);
         expect(res.json).toHaveBeenCalledWith({"message": "No id provided"});
+    });
+});
+
+
+describe('Add a message', () => {
+    it("Should return a 200 when everything is correct", async () => {
+        // Arrange
+        const req = {
+            params: {
+                uid: "test_restaurant"
+            },
+            token: {
+                _id: "test_user_id"
+            },
+            body: {
+                message: "test_message",
+                note: "5"
+            }
+        } as unknown as Request;
+        let resolveStatusPromise: (value: unknown) => void;
+        const statusPromise = new Promise(resolve => {
+            resolveStatusPromise = resolve;
+        });
+
+        const resMock = {
+            status: jest.fn().mockImplementation(() => {
+                resolveStatusPromise(null);
+                return resMock;
+            }),
+            json: jest.fn(),
+        } as unknown as Response;
+
+
+        jest.spyOn(RestaurantService, 'restaurantExistsById').mockResolvedValue(true);
+        
+        jest.spyOn(MessageService, 'lasTimeUserSentMessage').mockResolvedValue(null as never);
+
+        jest.spyOn(MessageService, 'addMessage').mockResolvedValue(null as never);
+
+ 
+        // Act
+        await MessageController.addMessage(req, resMock);
+
+        await statusPromise;
+
+        // Assert
+        expect(resMock.status).toHaveBeenCalledWith(200);//-----------------------------------------------
+        expect(resMock.json).toHaveBeenCalledWith({"message": "Message added"});
+    });
+
+    it("Should return a 400 when no restaurant is provided", async () => {
+        // Arrange
+        const req = {
+            params: {},
+            token: {
+                _id: "test_user_id"
+            },
+            body: {
+                message: "test_message",
+                note: "5"
+            }
+        } as unknown as Request;
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+        } as unknown as Response;
+
+        // Act
+        await MessageController.addMessage(req, res);
+
+        // Assert
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({"message": "No restaurant provided"});
+    });
+
+    it("Should return a 404 when the restaurant is not found", async () => {
+        // Arrange
+        const req = {
+            params: {
+                uid: "test_restaurant"
+            },
+            token: {
+                _id: "test_user_id"
+            },
+            body: {
+                message: "test_message",
+                note: "5"
+            }
+        } as unknown as Request;
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+        } as unknown as Response;
+
+        // Mock the restaurantExistsById function
+        jest.spyOn(RestaurantService, 'restaurantExistsById').mockResolvedValue(false);
+
+        // Act
+        await MessageController.addMessage(req, res);
+
+        // Assert
+        expect(res.status).toHaveBeenCalledWith(404);
+        expect(res.json).toHaveBeenCalledWith({"message": "Restaurant not found"});
+    });
+
+    it("Should return a 400 when the user has already sent a message within the last 24 hours", async () => {
+        // Arrange
+        const req = {
+            params: {
+                uid: "test_restaurant"
+            },
+            token: {
+                _id: "test_user_id"
+            },
+            body: {
+                message: "test_message",
+                note: "5"
+            }
+        } as unknown as Request;
+        let resolveStatusPromise: (value: unknown) => void;
+        const statusPromise = new Promise(resolve => {
+            resolveStatusPromise = resolve;
+        });
+
+        const resMock = {
+            status: jest.fn().mockImplementation(() => {
+                resolveStatusPromise(null);
+                return resMock;
+            }),
+            json: jest.fn(),
+        } as unknown as Response;
+
+        // Mock the restaurantExistsById function
+
+        jest.spyOn(RestaurantService, 'restaurantExistsById').mockResolvedValue(true);
+
+        // Mock the lasTimeUserSentMessage function
+        const lastMessage = {
+            _id: new ObjectId(),
+            date: new Date()
+        };
+        jest.spyOn(MessageService, 'lasTimeUserSentMessage').mockResolvedValue(lastMessage);
+
+        // Act
+        await MessageController.addMessage(req, resMock);
+
+        await statusPromise;
+
+        // Assert
+        expect(resMock.status).toHaveBeenCalledWith(400); ///-----------------------------------------------
+        expect(resMock.json).toHaveBeenCalledWith({"message": "You can't send more than one message per day"});
+    });
+
+    it("Should return a 400 when missing field in body", async () => {
+        // Arrange
+        const req = {
+            params: {
+                uid: "test_restaurant"
+            },
+            token: {
+                _id: "test_user_id"
+            },
+            body: {}
+        } as unknown as Request;
+        let resolveStatusPromise: (value: unknown) => void;
+        const statusPromise = new Promise(resolve => {
+            resolveStatusPromise = resolve;
+        });
+
+        const resMock = {
+            status: jest.fn().mockImplementation(() => {
+                resolveStatusPromise(null);
+                return resMock;
+            }),
+            json: jest.fn(),
+        } as unknown as Response;
+
+        // Act
+        await MessageController.addMessage(req, resMock);
+
+        await statusPromise;
+
+        // Assert
+        expect(resMock.status).toHaveBeenCalledWith(400);
+        expect(resMock.json).toHaveBeenCalledWith({"message": "Missing field in body"});
+    });
+
+    it("Should return a 500 when an error occurs", async () => {
+        // Arrange
+        const req = {
+            params: {
+                uid: "test_restaurant"
+            },
+            token: {
+                _id: "test_user_id"
+            },
+            body: {
+                message: "test_message",
+                note: "5"
+            }
+        } as unknown as Request;
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+        } as unknown as Response;
+
+        // Mock the restaurantExistsById function
+        jest.spyOn(RestaurantService, 'restaurantExistsById').mockRejectedValue(new Error("Internal server error"));
+
+        // Act
+        await MessageController.addMessage(req, res);
+
+        // Assert
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.json).toHaveBeenCalledWith({"message": "Internal server error"});
     });
 });
