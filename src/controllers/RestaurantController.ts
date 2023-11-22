@@ -41,7 +41,7 @@ const getBestRestaurants = async (req: Request, res: Response) => {
     }catch(e : CustomError|any){
         res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.message? e.message : "Internal server error"});
     }
-}
+};
 
 /**
  * Function to get one restaurant by its id
@@ -114,10 +114,53 @@ const updateRestaurant = (req: Request, res: Response) => {
         }
     });
 }
+const getRestaurantSearch = async (req: Request, res: Response) => {
+    try{
+        let restaurant: { 
+            id: ObjectId;
+            name: string;
+            foodtype:string,
+            note: number;
+            position: any;
+            images: string[]
+        }[] = [];
+        //Retrive all the query parameters
+        let type = (req.query.type!="none")?req.query.type as string:undefined;
+        let accessible = (req.query.accessible as string == "true"); //Convert the string to boolean
+        let limit = parseInt(req.query.limit as string); 
+        let search = (req.query.search)?req.query.search as string : undefined;
+        //Check if the mandatory parameters are valid
+        if (limit==undefined || accessible==undefined){
+            throw new Error("Invalid parameters");
+        }
+        (await Service.queryRestaurantsWithParam(type, accessible, limit, search)).forEach((element) => {
+            restaurant.push({
+                id: element._id,
+                name: element.name,
+                foodtype: element.foodtype,
+                note: element.note,
+                position: element.position,
+                images: element.images
+            });
+        });
+        res.status(HttpStatus.OK).json({
+            number: restaurant.length,
+            obj: restaurant
+        });
+    }catch(e ){
+        console.log(e);
+        if ((e as Error).message=="No restaurants found"){
+            res.status(HttpStatus.NOT_FOUND).json({"message": "No restaurants found"});
+        }else{
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
+        }
+    }
+}
 
 export default {
     getBestRestaurants,
     getRestaurantById,
     createRestaurant,
-    updateRestaurant
+    updateRestaurant,
+    getRestaurantSearch
 };

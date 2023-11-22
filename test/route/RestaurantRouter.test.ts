@@ -12,7 +12,8 @@ jest.mock('../../src/controllers/RestaurantController', () => ({
     getBestRestaurants: jest.fn((req, res : Response) => res.json()),
     getRestaurantById: jest.fn((req, res : Response) => res.json()),
     createRestaurant: jest.fn((req, res : Response) => res.json()),
-    updateRestaurant: jest.fn((req, res : Response) => res.json())
+    updateRestaurant: jest.fn((req, res : Response) => res.json()),
+    getRestaurantSearch: jest.fn((req, res : Response) => res.json())
 }));
 
 describe('Test the /restaurant paths', () => {

@@ -11,5 +11,7 @@ router.post("/", Restaurant.createRestaurant);
 
 router.put("/id/:uid", Restaurant.updateRestaurant);
 
+router.get("/search", Restaurant.getRestaurantSearch);
+
 
 export default router;
