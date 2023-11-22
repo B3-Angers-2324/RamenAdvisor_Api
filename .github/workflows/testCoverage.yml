@@ -20,6 +20,9 @@ concurrency:
    group: 'pages'
    cancel-in-progress: true
 
+env:
+  DB_CONN: "mongodb://root:rootpassword@localhost:27017/?authSource=admin&readPreference=primary&ssl=false&directConnection=true"
+
 jobs:
    # Single deploy job since we're just deploying
    deploy:
