@@ -151,7 +151,7 @@ const addMessage = async (req: TRequest, res: Response) => {
                 let now = new Date();
                 let diff = now.getTime() - lastMessage.date.getTime();
                 let hours = diff / (1000 * 60 * 60);
-                //if (hours < 24) throw new CustomError("You can't send more than one message per day", HttpStatus.BAD_REQUEST);
+                if (hours < 24) throw new CustomError("You can't send more than one message per day", HttpStatus.BAD_REQUEST);
             }
             if (req.body === undefined || req.body.message===undefined || req.body.note===undefined) throw new CustomError("Missing field in body", HttpStatus.BAD_REQUEST);
             //Create the message
