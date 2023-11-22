@@ -51,7 +51,7 @@ db.createCollection(
     {
         validator: { $jsonSchema: {
             bsonType: "object",
-            required: ["ownerId", "name", "position", "address", "foodtype", "note"],
+            required: ["ownerId", "name", "position", "address", "foodtype", "note", "detailNote"],
             properties: {
                 ownerId: {
                     bsonType: "objectId",
@@ -77,7 +77,26 @@ db.createCollection(
                     bsonType: "int",
                     minimum: 0,
                     maximum: 50,
-                    description: "must be a int and is required"
+                    description: "must be a int and is required",
+                },
+                detailNote: {
+                    bsonType: "array",
+                    items: {
+                        bsonType: "object",
+                        required: ["percentage", "nbNote"],
+                        properties: {
+                            percentage: {
+                                bsonType: "int",
+                                minimum: 0,
+                                maximum: 100,
+                                description: "must be an integer and is required"
+                            },
+                            nbNote: {
+                                bsonType: "int",
+                                description: "must be an integer and is required"
+                            }
+                        }
+                    }
                 },
                 //Need to be changed to Images type
                 images: {

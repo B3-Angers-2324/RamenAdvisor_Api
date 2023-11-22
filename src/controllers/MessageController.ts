@@ -168,10 +168,16 @@ const addMessage = async (req: TRequest, res: Response) => {
 }
 
 
+const getPercentagesPerRestaurant = async (req: Request, res: Response) => {
+    
+}
+
+
 export default {
     getMessagesForRestaurant,
     reportMessage,
     getReportedMessages,
     deleteReport,
-    addMessage
+    addMessage,
+    getPercentagesPerRestaurant
 };
