@@ -145,6 +145,8 @@ const addMessage = async (req: TRequest, res: Response) => {
             if (req.params.uid===undefined) throw new CustomError("No restaurant provided", HttpStatus.BAD_REQUEST);
             //check if the restaurant exists
             if (!(await RestaurantService.restaurantExistsById(req.params.uid))) throw new CustomError("Restaurant not found", HttpStatus.NOT_FOUND);
+            //Check if the body is correct
+            if (req.body === undefined || req.body.message===undefined || req.body.note===undefined) throw new CustomError("Missing field in body", HttpStatus.BAD_REQUEST);
             //Check if the user has already sent a message within the last 24h
             let lastMessage = await MessageService.lasTimeUserSentMessage(req.token._id,req.params.uid);
             if (lastMessage!==null && lastMessage!==undefined){
@@ -153,7 +155,6 @@ const addMessage = async (req: TRequest, res: Response) => {
                 let hours = diff / (1000 * 60 * 60);
                 if (hours < 24) throw new CustomError("You can't send more than one message per day", HttpStatus.BAD_REQUEST);
             }
-            if (req.body === undefined || req.body.message===undefined || req.body.note===undefined) throw new CustomError("Missing field in body", HttpStatus.BAD_REQUEST);
             //Create the message
             let message = {
                 userId: new ObjectId(req.token._id),

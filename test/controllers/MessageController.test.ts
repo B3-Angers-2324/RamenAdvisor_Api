@@ -444,7 +444,7 @@ describe('Add a message', () => {
         // Arrange
         const req = {
             params: {
-                uid: "test_restaurant"
+                uid: "64a685757acccfac3d045ad9"
             },
             token: {
                 _id: "test_user_id"
@@ -490,7 +490,7 @@ describe('Add a message', () => {
         const req = {
             params: {},
             token: {
-                _id: "test_user_id"
+                _id: "64a685757acccfac3d045ad9"
             },
             body: {
                 message: "test_message",
