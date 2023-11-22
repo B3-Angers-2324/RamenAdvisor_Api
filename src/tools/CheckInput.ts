@@ -16,6 +16,10 @@ const password = (input: string) => {
     // return input.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])/);
 }
 
+const dateInferiorToToday = (input: Date) => {
+    return input < new Date();
+}
+
 const isNotEmpty = (input: string) => {
     return input.length > 0;
 }
@@ -35,5 +39,6 @@ export default {
     email,
     password,
     isNotEmpty,
-    areNotEmpty
+    areNotEmpty,
+    dateInferiorToToday
 };

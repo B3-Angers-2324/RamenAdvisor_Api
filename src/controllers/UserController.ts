@@ -47,12 +47,12 @@ async function register(req: Request, res: Response){
         //check if all fields are provided if not return 400
         if (!req.body.firstName || !req.body.lastName || !req.body.birthDay || !req.body.email || !req.body.phone || !req.body.sexe || !req.body.ville || !req.body.address || !req.body.password) throw new Error("All fields are required");
 
-        if(CheckInput.areNotEmpty([req.body.firstName, req.body.lastName, req.body.birthDay, req.body.email, req.body.phone, req.body.sexe, req.body.ville, req.body.address, req.body.password]) === false) throw new Error("All fields are required");
-
+        if(!CheckInput.areNotEmpty([req.body.firstName, req.body.lastName, req.body.birthDay, req.body.email, req.body.phone, req.body.sexe, req.body.ville, req.body.address, req.body.password])) throw new Error("All fields are required");
+        
         let newUser : User = {
             firstName: req.body.firstName,
             lastName: req.body.lastName,
-            birthDay: req.body.birthDay,
+            birthDay: new Date(req.body.birthDay),
             email: req.body.email,
             phone: req.body.phone,
             sexe: req.body.sexe,
@@ -62,20 +62,21 @@ async function register(req: Request, res: Response){
             image: "http://thispersondoesnotexist.com/",
             ban: false
         };
+        
+        if(!CheckInput.email(newUser.email)) throw new Error("Email format is not correct");
+        
+        // if (!CheckInput.password(newUser.password || "")) throw new Error("Password format is not correct");
+        
+        if (!CheckInput.phone(newUser.phone)) throw new Error("Phone format is not correct");
 
-        if (CheckInput.email(newUser.email) === false) throw new Error("Email format is not correct");
-
-        if (CheckInput.password(newUser.password ?? "") === false) throw new Error("Password format is not correct");
-
-        if (CheckInput.phone(newUser.phone) === false) throw new Error("Phone format is not correct");
+        if(!CheckInput.dateInferiorToToday(newUser.birthDay)) throw new Error("Invalid birth day");
 
         const user = await UserServices.getOneUser(newUser.email);
         if(user){
             throw new Error("User already exists");
         }
-
         const addedUser = await UserServices.addUser(newUser);
-
+        
         if(addedUser){
             const secret = process.env.JWT_SECRET_USER || "ASecretPhrase";
             const token = jwt.sign({_id: addedUser.insertedId?.toString()}, secret, {expiresIn: process.env.JWT_EXPIRES_IN});
@@ -86,6 +87,9 @@ async function register(req: Request, res: Response){
     }catch(error : Error|any){
         if (error.message === "All fields are required") res.status(HttpStatus.BAD_REQUEST).json({"message": error.message});
         else if (error.message === "Email format is not correct") res.status(HttpStatus.BAD_REQUEST).json({"message": error.message});
+        else if (error.message === "Password format is not correct") res.status(HttpStatus.BAD_REQUEST).json({"message": error.message});
+        else if (error.message === "Phone format is not correct") res.status(HttpStatus.BAD_REQUEST).json({"message": error.message});
+        else if (error.message === "Invalid birth day") res.status(HttpStatus.BAD_REQUEST).json({"message": error.message});
         else if (error.message === "User already exists") res.status(HttpStatus.CONFLICT).json({"message": error.message});
         else res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while adding user, check if all fields are correct"});
     }
@@ -133,10 +137,15 @@ async function updateUserProfile(req: TRequest, res: Response){
             return;
         }
 
+        if(!CheckInput.dateInferiorToToday(new Date(req.body.birthDay))){
+            res.status(HttpStatus.BAD_REQUEST).json({"message": "Invalid birth day"});
+            return;
+        }
+
         let updatedUser : User = {
             firstName: req.body.firstName,
             lastName: req.body.lastName,
-            birthDay: req.body.birthDay,
+            birthDay: new Date(req.body.birthDay),
             email: req.body.email,
             phone: req.body.phone,
             sexe: req.body.sexe,
@@ -146,6 +155,7 @@ async function updateUserProfile(req: TRequest, res: Response){
         };
 
         const user = await UserServices.getUserById(id);
+        console.log(user);
         if(user){
             const result = await UserServices.updateUser(id, updatedUser);
             if(result){
