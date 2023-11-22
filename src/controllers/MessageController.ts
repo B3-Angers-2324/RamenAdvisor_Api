@@ -29,7 +29,7 @@ const getMessagesForRestaurant = async (req: Request, res: Response) => {
         let offset = (req.query && req.query.offset) ? parseInt(req.query.offset.toString()) : 0;
         
         //Retrieve the messages from the database
-        (await MessageService.queryMessagesForRestaurant(req.params.uid,limit,offset))?.forEach(element => {
+        (await MessageService.queryMessagesForRestaurant(req.params.uid,limit+1,offset))?.forEach(element => {
             messages.push({
                 id: element._id.toString(),
                 user: {
@@ -43,10 +43,17 @@ const getMessagesForRestaurant = async (req: Request, res: Response) => {
                 note: element.note
             });
         });
+        //Check if there is more messages to load
+        let pageleft = false;
+        if (messages.length > limit){
+            messages.pop();
+            pageleft = true;
+        }
         //Send the response
         res.status(HttpStatus.OK).json({
             number: messages.length,
-            obj: messages
+            obj: messages,
+            pageleft: pageleft
         });
     }catch(e: CustomError|any){
         res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.message});
