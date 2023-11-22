@@ -33,6 +33,8 @@ db.createCollection(
                 },
                 note: {
                     bsonType: "int",
+                    minimum: 1,
+                    maximum: 5,
                     description: "must be a int and is required"
                 },
                 date: {
@@ -75,7 +77,26 @@ db.createCollection(
                     bsonType: "int",
                     minimum: 0,
                     maximum: 50,
-                    description: "must be a int and is required"
+                    description: "must be a int and is required",
+                },
+                detailNote: {
+                    bsonType: "array",
+                    items: {
+                        bsonType: "object",
+                        required: ["percentage", "nbNote"],
+                        properties: {
+                            percentage: {
+                                bsonType: "int",
+                                minimum: 0,
+                                maximum: 100,
+                                description: "must be an integer and is required"
+                            },
+                            nbNote: {
+                                bsonType: "int",
+                                description: "must be an integer and is required"
+                            }
+                        }
+                    }
                 },
                 //Need to be changed to Images type
                 images: {

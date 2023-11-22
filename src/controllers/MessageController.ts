@@ -1,9 +1,12 @@
 import { Request, Response, query } from "express";
-import { CustomError } from "./types/types";
+import { CustomError, TRequest } from "./types/types";
 import MessageService from "../services/MessageService";
 import ReportService from "../services/ReportService";
 import HttpStatus from "../constants/HttpStatus";
 import AdminMiddleware from "../middleware/AdminMiddleware";
+import UserMiddleware from "../middleware/UserMiddleware";
+import RestaurantService from "../services/RestaurantService";
+import { ObjectId } from "mongodb";
 
 const getMessagesForRestaurant = async (req: Request, res: Response) => {
     try{
@@ -19,6 +22,10 @@ const getMessagesForRestaurant = async (req: Request, res: Response) => {
             content: string;
             date: Date;
             note: number;
+            detailNote: {
+                percentage: number;
+                nbNote: number;
+            }[];
         }[] = [];
         if (req.params.uid===undefined) throw new CustomError("No id provided", HttpStatus.BAD_REQUEST);
         //REtrieve the limit and offset from the query
@@ -26,7 +33,7 @@ const getMessagesForRestaurant = async (req: Request, res: Response) => {
         let offset = (req.query && req.query.offset) ? parseInt(req.query.offset.toString()) : 0;
         
         //Retrieve the messages from the database
-        (await MessageService.queryMessagesForRestaurant(req.params.uid,limit,offset))?.forEach(element => {
+        (await MessageService.queryMessagesForRestaurant(req.params.uid,limit+1,offset))?.forEach(element => {
             messages.push({
                 id: element._id.toString(),
                 user: {
@@ -37,13 +44,21 @@ const getMessagesForRestaurant = async (req: Request, res: Response) => {
                 },
                 content: element.message,
                 date: element.date,
-                note: element.note
+                note: element.note,
+                detailNote: element.detailNote
             });
         });
+        //Check if there is more messages to load
+        let pageleft = false;
+        if (messages.length > limit){
+            messages.pop();
+            pageleft = true;
+        }
         //Send the response
         res.status(HttpStatus.OK).json({
             number: messages.length,
-            obj: messages
+            obj: messages,
+            pageleft: pageleft
         });
     }catch(e: CustomError|any){
         res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.message});
@@ -124,10 +139,77 @@ const deleteReport = async (req: Request, res: Response) => {
     });
 }
 
+const addMessage = async (req: TRequest, res: Response) => {
+    UserMiddleware.userLoginMiddleware(req,res,async ()=>{
+        try{
+            if (req.params.uid===undefined) throw new CustomError("No restaurant provided", HttpStatus.BAD_REQUEST);
+            //check if the restaurant exists
+            if (!(await RestaurantService.restaurantExistsById(req.params.uid))) throw new CustomError("Restaurant not found", HttpStatus.NOT_FOUND);
+            //Check if the user has already sent a message within the last 24h
+            let lastMessage = await MessageService.lasTimeUserSentMessage(req.token._id,req.params.uid);
+            if (lastMessage!==null && lastMessage!==undefined){
+                let now = new Date();
+                let diff = now.getTime() - lastMessage.date.getTime();
+                let hours = diff / (1000 * 60 * 60);
+                //if (hours < 24) throw new CustomError("You can't send more than one message per day", HttpStatus.BAD_REQUEST);
+            }
+            if (req.body === undefined || req.body.message===undefined || req.body.note===undefined) throw new CustomError("Missing field in body", HttpStatus.BAD_REQUEST);
+            //Create the message
+            let message = {
+                userId: new ObjectId(req.token._id),
+                restaurantId: new ObjectId(req.params.uid),
+                message: req.body.message,
+                date: new Date(),
+                note: parseInt(req.body.note)
+            };
+            //Add the message to the database
+            await MessageService.addMessage(message);
+            //Compute the new note percentage
+            computeNotePercentage(req.params.uid,parseInt(req.body.note));
+            //Send the response
+            res.status(HttpStatus.OK).json({"message": "Message added"});
+        }catch(e: CustomError|any){
+            res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.message? e.message : "Internal server error"});
+        }
+    });
+}
+
+async function computeNotePercentage(restaurantId : string , newNote : number){
+    try{        
+        let restaurant = await RestaurantService.queryRestaurantById(restaurantId);
+        if (restaurant===null || restaurant== undefined) throw new CustomError("Restaurant not found", HttpStatus.NOT_FOUND);
+        //Add the new note to the total note
+        restaurant.detailNote[newNote-1].nbNote++;
+        //Define variable to store the total note and the total percentage
+        let nbNoteTotal = 0;
+        let newPercentage : Array<{percentage: number; nbNote:number}> = [];
+        //Retrieve the total number of note
+        restaurant.detailNote.forEach((element :{percentage: number; nbNote:number}) => {
+            nbNoteTotal += element.nbNote;
+        });
+        //Compute the new global note
+        let newglobalnote = 0;
+        restaurant.detailNote.forEach((element :{percentage: number; nbNote:number}, i :number) => {
+            newglobalnote += (((i+1)*10) * element.nbNote);
+        });
+        newglobalnote = Math.round(newglobalnote / nbNoteTotal);
+        //Update the global note
+        //Compute the new percentage for each note
+        restaurant.detailNote.forEach((element :{percentage: number; nbNote:number},i:number) => {
+            newPercentage.push({"percentage": Math.round((element.nbNote / nbNoteTotal)*100), "nbNote": element.nbNote});
+        });
+        //update the restaurant in the database
+        await RestaurantService.updateRestaurantNote(restaurant._id,newglobalnote,newPercentage);
+    }catch(e){
+        console.log("Error While computing the note : ",e);
+    }
+}
+
 
 export default {
     getMessagesForRestaurant,
     reportMessage,
     getReportedMessages,
-    deleteReport
+    deleteReport,
+    addMessage,
 };

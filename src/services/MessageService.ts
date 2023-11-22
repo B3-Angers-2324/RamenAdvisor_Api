@@ -24,8 +24,20 @@ async function deleteMessage(messageId:string) {
     return result;
 }
 
+async function addMessage(message: Message) {
+    const result = await collections.message?.insertOne(message);
+    return result;
+}
+
+async function lasTimeUserSentMessage(userId: string, restaurantId: string) {
+    const result = await collections.message?.findOne({ userId: new ObjectId(userId), restaurantId: new ObjectId(restaurantId) }, { sort: { date: -1 } });
+    return result;
+}
+
 export default {
     queryMessagesForRestaurant,
     queryOne,
-    deleteMessage
+    deleteMessage,
+    addMessage,
+    lasTimeUserSentMessage
 } as const;

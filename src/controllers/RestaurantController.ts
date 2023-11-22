@@ -52,6 +52,9 @@ const getRestaurantById = async (req: Request, res: Response) =>{
     try{
         if (req.params.uid === undefined) throw new CustomError("Missing parameters", HttpStatus.BAD_REQUEST);
         let restaurant = await Service.queryRestaurantById(req.params.uid);
+        if (restaurant == undefined){
+            throw new CustomError("No restaurant found", HttpStatus.NOT_FOUND);
+        }
         res.status(HttpStatus.OK).json({
             obj: restaurant
         });
