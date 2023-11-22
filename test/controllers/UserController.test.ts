@@ -111,7 +111,7 @@ describe('UserController - register', () => {
       body: {
         firstName: 'John',
         lastName: 'Doe',
-        birthDay: '1990-01-01',
+        birthDay: new Date('1990-01-01'),
         email: 'john.doe@example.com',
         phone: '1234567890',
         sexe: 'male',
@@ -134,7 +134,7 @@ describe('UserController - register', () => {
     const newUser = {
       firstName: 'John',
       lastName: 'Doe',
-      birthDay: '1990-01-01',
+      birthDay: new Date('1990-01-01'),
       email: 'john.doe@example.com',
       phone: '1234567890',
       sexe: 'male',
@@ -149,6 +149,7 @@ describe('UserController - register', () => {
     (CheckInput.email as jest.Mock).mockReturnValue(true);
     (CheckInput.password as jest.Mock).mockReturnValue(true);
     (CheckInput.phone as jest.Mock).mockReturnValue(true);
+    (CheckInput.dateInferiorToToday as jest.Mock).mockReturnValue(true);
     (UserServices.getOneUser as jest.Mock).mockResolvedValue(null as never);
     (UserServices.addUser as jest.Mock).mockResolvedValue({ insertedId: 'userId' } as never);
     (jwt.sign as jest.Mock).mockReturnValue('generatedToken');
@@ -167,7 +168,8 @@ describe('UserController - register', () => {
       req.body.password,
     ]);
     expect(CheckInput.email).toHaveBeenCalledWith(req.body.email);
-    expect(CheckInput.password).toHaveBeenCalledWith(req.body.password);
+    expect(CheckInput.phone).toHaveBeenCalledWith(req.body.phone);
+    expect(CheckInput.dateInferiorToToday).toHaveBeenCalledWith(req.body.birthDay);
     expect(CheckInput.phone).toHaveBeenCalledWith(req.body.phone);
     expect(UserServices.getOneUser).toHaveBeenCalledWith(req.body.email);
     expect(UserServices.addUser).toHaveBeenCalledWith(newUser);
@@ -199,8 +201,8 @@ describe('UserController - register', () => {
   test('should return a bad request status if any field is not valid', async () => {
     (CheckInput.areNotEmpty as jest.Mock).mockReturnValue(true);
     (CheckInput.email as jest.Mock).mockReturnValue(false);
-    (CheckInput.password as jest.Mock).mockReturnValue(false);
     (CheckInput.phone as jest.Mock).mockReturnValue(false);
+    (CheckInput.dateInferiorToToday as jest.Mock).mockReturnValue(false);
 
     await UserController.register(req, res);
 
@@ -222,8 +224,8 @@ describe('UserController - register', () => {
   test('should return a conflict status if the user already exists', async () => {
     (CheckInput.areNotEmpty as jest.Mock).mockReturnValue(true);
     (CheckInput.email as jest.Mock).mockReturnValue(true);
-    (CheckInput.password as jest.Mock).mockReturnValue(true);
     (CheckInput.phone as jest.Mock).mockReturnValue(true);
+    (CheckInput.dateInferiorToToday as jest.Mock).mockReturnValue(true);
     (UserServices.getOneUser as jest.Mock).mockResolvedValue({ _id: 'userId' } as never);
 
     await UserController.register(req, res);
@@ -240,8 +242,8 @@ describe('UserController - register', () => {
       req.body.password,
     ]);
     expect(CheckInput.email).toHaveBeenCalledWith(req.body.email);
-    expect(CheckInput.password).toHaveBeenCalledWith(req.body.password);
     expect(CheckInput.phone).toHaveBeenCalledWith(req.body.phone);
+    expect(CheckInput.dateInferiorToToday).toHaveBeenCalledWith(req.body.birthDay);
     expect(UserServices.getOneUser).toHaveBeenCalledWith(req.body.email);
     expect(res.status).toHaveBeenCalledWith(HttpStatus.CONFLICT);
     expect(res.json).toHaveBeenCalledWith({ message: 'User already exists' });
@@ -250,8 +252,8 @@ describe('UserController - register', () => {
   test('should return an internal server error status if an error occurs', async () => {
     (CheckInput.areNotEmpty as jest.Mock).mockReturnValue(true);
     (CheckInput.email as jest.Mock).mockReturnValue(true);
-    (CheckInput.password as jest.Mock).mockReturnValue(true);
     (CheckInput.phone as jest.Mock).mockReturnValue(true);
+    (CheckInput.dateInferiorToToday as jest.Mock).mockReturnValue(true);
     (UserServices.getOneUser as jest.Mock).mockRejectedValue(new Error('Some error') as never);
     (UserServices.addUser as jest.Mock).mockResolvedValue(null as never);
 
@@ -269,8 +271,8 @@ describe('UserController - register', () => {
       req.body.password,
     ]);
     expect(CheckInput.email).toHaveBeenCalledWith(req.body.email);
-    expect(CheckInput.password).toHaveBeenCalledWith(req.body.password);
     expect(CheckInput.phone).toHaveBeenCalledWith(req.body.phone);
+    expect(CheckInput.dateInferiorToToday).toHaveBeenCalledWith(req.body.birthDay);
     expect(UserServices.getOneUser).toHaveBeenCalledWith(req.body.email);
     expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
     expect(res.json).toHaveBeenCalledWith({ message: 'Error while adding user, check if all fields are correct' });
@@ -404,7 +406,7 @@ describe('UserController - updateUserProfile', () => {
       body: {
         firstName: 'John',
         lastName: 'Doe',
-        birthDay: '1990-01-01',
+        birthDay: new Date('1990-01-01'),
         email: 'john.doe@example.com',
         phone: '1234567890',
         sexe: 'male',
@@ -490,7 +492,7 @@ describe('UserController - updateUserProfile', () => {
       body: {
         firstName: 'John',
         lastName: 'Doe',
-        birthDay: '1990-01-01',
+        birthDay: new Date('1990-01-01'),
         email: 'john.doe@example.com',
         phone: 'invalidPhoneNumber',
         sexe: 'male',
@@ -531,7 +533,7 @@ describe('UserController - updateUserProfile', () => {
       body: {
         firstName: 'John',
         lastName: 'Doe',
-        birthDay: '1990-01-01',
+        birthDay: new Date('1990-01-01'),
         email: 'invalidEmail',
         phone: '1234567890',
         sexe: 'male',
@@ -574,7 +576,7 @@ describe('UserController - updateUserProfile', () => {
       body: {
         firstName: 'John',
         lastName: 'Doe',
-        birthDay: '1990-01-01',
+        birthDay: new Date('1990-01-01'),
         email: 'john.doe@example.com',
         phone: '1234567890',
         sexe: 'male',
@@ -617,7 +619,7 @@ describe('UserController - updateUserProfile', () => {
       body: {
         firstName: 'John',
         lastName: 'Doe',
-        birthDay: '1990-01-01',
+        birthDay: new Date('1990-01-01'),
         email: 'john.doe@example.com',
         phone: '1234567890',
         sexe: 'male',
