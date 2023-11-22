@@ -176,4 +176,20 @@ describe('Test all RestaurantService function', () => {
         });
     });
 
+    describe("Test if restaurantExistsById work correctely", () => {
+        test('restaurantExistsById with valid data', async () => {
+            await db.addDatasToCollection(restaurantCollection, validRestaurantsData);
+
+            // Call the restaurantExistsById function
+            const result = await RestaurantService.restaurantExistsById('64a685757acccfac3d045ad9');
+            
+            // Assert that the result is the expected one
+            expect(result).toBe(true);
+
+            // Test with an invalid id
+            const result2 = await RestaurantService.restaurantExistsById('64a685757acccfac3d045ad8');
+            expect(result2).toBe(false);
+        });
+    });
+
 });

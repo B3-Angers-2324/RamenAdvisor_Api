@@ -22,9 +22,9 @@ describe('Test Admin model', () => {
 // test message model
 describe('Test Message model', () => {
     test('Create new Message', () => {
-        const message = new Message('userId', 'restaurantId', 'message', 30);
-        expect(message.userId).toBe('userId');
-        expect(message.restaurantId).toBe('restaurantId');
+        const message = new Message(new ObjectId("64a685757acccfac3d045aa1"), new ObjectId("64a685757acccfac3d045aa1"), 'message', 30);
+        expect(message.userId.toString()).toBe("64a685757acccfac3d045aa1");
+        expect(message.restaurantId.toString()).toBe("64a685757acccfac3d045aa1");
         expect(message.message).toBe('message');
         expect(message.note).toBe(30);
     });

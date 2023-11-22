@@ -139,4 +139,21 @@ describe('Test all MessageService function', () => {
         });
 
     });
+
+
+    describe("Test addMessage function", () => {
+        test('addMessage with valid message', async () => {
+            const result = await MessageService.addMessage(validMessagesData[0]);
+            expect(result).toBeDefined();
+        });
+    });
+
+    describe("Test lasTimeUserSentMessage function", () => {
+        test('lasTimeUserSentMessage with valid userId and restaurantId', async () => {
+            await db.addDatasToCollection(messageCollection, validMessagesData);
+
+            const result = await MessageService.lasTimeUserSentMessage("64a685757acccfac3d045aa1", "64a685757acccfac3d045aa1");
+            expect(result).not.toBeNull();
+        });
+    });
 });
