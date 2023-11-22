@@ -72,7 +72,7 @@ const createRestaurant = (req: TRequest, res: Response) => {
             if(!CheckInput.areNotEmpty([req.body.name, req.body.address, req.body.city, req.body.foodtype, req.body.position, req.body.handicap])){
                 throw(new CustomError("Missing parameters", HttpStatus.BAD_REQUEST));
             }
-            if(!CheckInput.phone(req.body.phone)){
+            if(req.body.tel != "" && !CheckInput.phone(req.body.tel)){
                 throw(new CustomError("Invalid phone number", HttpStatus.BAD_REQUEST));
             }
             req.body.ownerId = new ObjectId((req as any).token._id);
@@ -101,7 +101,7 @@ const updateRestaurant = (req: Request, res: Response) => {
             if(!CheckInput.areNotEmpty([req.body.name, req.body.address, req.body.city, req.body.foodtype, req.body.position, req.body.handicap])){
                 throw(new CustomError("Missing parameters", HttpStatus.BAD_REQUEST));
             }
-            if(!CheckInput.phone(req.body.phone)){
+            if(req.body.tel != "" && !CheckInput.phone(req.body.tel)){
                 throw new CustomError("Invalid phone number", HttpStatus.BAD_REQUEST);
             }
             await Service.updateRestaurant(req.params.uid, req.body);
