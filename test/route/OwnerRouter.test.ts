@@ -18,7 +18,10 @@ jest.mock('../../src/middleware/OwnerMiddleware', () => ({
 jest.mock('../../src/controllers/OwnerController', () => ({
     login: jest.fn((req, res : Response) => res.json()),
     register: jest.fn((req, res : Response) => res.json()),
-    getRestaurantsByOwner: jest.fn((req, res : Response) => res.json())
+    getRestaurantsByOwner: jest.fn((req, res : Response) => res.json()),
+    getOwnerProfile: jest.fn((req, res : Response) => res.json()),
+    updateOwnerProfile: jest.fn((req, res : Response) => res.json()),
+    deleteOwnerProfile: jest.fn((req, res : Response) => res.json()),
 }));
 
 describe('Test the /owner paths', () => {

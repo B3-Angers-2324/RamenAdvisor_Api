@@ -43,12 +43,11 @@ describe('Test Moderator model', () => {
 // test owner model
 describe('Test Owner model', () => {
     test('Create new Owner', () => {
-        const owner = new Owner('first', 'last', 'email', 'password', 'siret', 'companyName', 'socialAdresse');
+        const owner = new Owner('first', 'last', 'email', 'password', 'companyName', 'socialAdresse');
         expect(owner.firstName).toBe('first');
         expect(owner.lastName).toBe('last');
         expect(owner.password).toBe('password');
         expect(owner.email).toBe('email');
-        expect(owner.siret).toBe('siret');
         expect(owner.companyName).toBe('companyName');
         expect(owner.socialAdresse).toBe('socialAdresse');
     });
