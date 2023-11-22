@@ -20,8 +20,39 @@ async function addOwner(owner: Owner): Promise<any> {
     }
 }
 
+async function getOwnerById(id: string): Promise<any> {
+    try{
+        const owner = await collections.owner?.findOne({_id: new ObjectId(id)});
+        return owner;
+    }catch(error){
+        throw error;
+    }
+
+}
+
+async function updateOwner(id: string, owner: Owner): Promise<any> {
+    try{
+        const result = await collections.owner?.updateOne({_id: new ObjectId(id)}, {$set: owner});
+        return result;
+    }catch(error){
+        throw error;
+    }
+}
+
+async function deleteOwner(id: string): Promise<any> {
+    try{
+        const result = await collections.owner?.deleteOne({_id: new ObjectId(id)});
+        return result;
+    }catch(error){
+        throw error;
+    }
+}
+
 
 export default {
     getOneOwner,
-    addOwner
+    addOwner,
+    getOwnerById,
+    updateOwner,
+    deleteOwner
 } as const;

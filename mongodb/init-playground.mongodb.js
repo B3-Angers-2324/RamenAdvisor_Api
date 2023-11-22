@@ -6,6 +6,7 @@ const UserCollection = "users";
 const OwnerCollection = "owners";
 const ModeratorCollection = "moderators";
 const AdminCollection = "admins";
+const ReportCollection = "reports";
 
 use(database);
 
@@ -32,6 +33,8 @@ db.createCollection(
                 },
                 note: {
                     bsonType: "int",
+                    minimum: 1,
+                    maximum: 5,
                     description: "must be a int and is required"
                 },
                 date: {
@@ -74,7 +77,26 @@ db.createCollection(
                     bsonType: "int",
                     minimum: 0,
                     maximum: 50,
-                    description: "must be a int and is required"
+                    description: "must be a int and is required",
+                },
+                detailNote: {
+                    bsonType: "array",
+                    items: {
+                        bsonType: "object",
+                        required: ["percentage", "nbNote"],
+                        properties: {
+                            percentage: {
+                                bsonType: "int",
+                                minimum: 0,
+                                maximum: 100,
+                                description: "must be an integer and is required"
+                            },
+                            nbNote: {
+                                bsonType: "int",
+                                description: "must be an integer and is required"
+                            }
+                        }
+                    }
                 },
                 //Need to be changed to Images type
                 images: {
@@ -91,7 +113,7 @@ db.createCollection(
     {
         validator: { $jsonSchema: {
             bsonType: "object",
-            required: ["firstName", "lastName", "birthDay", "email", "phone", "sexe", "password", "ville", "ban"],
+            required: ["firstName", "lastName", "birthDay", "email", "phone", "sexe", "password", "ville", "ban", "image"],
             properties: {
                 firstName: {
                     bsonType: "string",
@@ -102,7 +124,7 @@ db.createCollection(
                     description: "must be a string and is required"
                 },
                 birthDay: {
-                    bsonType: "string",
+                    bsonType: "date",
                     description: "must be a string and is required"
                 },
                 email: {
@@ -128,6 +150,10 @@ db.createCollection(
                 ban: {
                     bsonType: "bool",
                     description: "must be a bool and is required"
+                },
+                image: {
+                    bsonType: "string",
+                    description: "must be a string and is required"
                 }
             }
         }}
@@ -224,6 +250,38 @@ db.createCollection(
                 password: {
                     bsonType: "string",
                     description: "must be a string and is required"
+                }
+            }
+        }}
+    }
+);
+
+db.createCollection(
+    ReportCollection,
+    {
+        validator: { $jsonSchema: {
+            bsonType: "object",
+            required: ["userId", "restaurantId", "messageId", "date_first", "nbReport"],
+            properties: {
+                userId: {
+                    bsonType: "objectId",
+                    description: "The Id of the user who wrote the message, must be a int and is required"
+                },
+                restaurantId: {
+                    bsonType: "objectId",
+                    description: "The id of the restaurant where the message is written ,must be a int and is required"
+                },
+                messageId: {
+                    bsonType: "objectId",
+                    description: "The id of the message ,must be a int and is required"
+                },
+                date_first: {
+                    bsonType: "date",
+                    description: "The date of the first report, must be a date and is required"
+                },
+                nbReport: {
+                    bsonType: "int",
+                    description: "The number of report, must be a int and is required"
                 }
             }
         }}
