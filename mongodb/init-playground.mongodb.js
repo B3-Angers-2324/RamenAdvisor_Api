@@ -51,7 +51,7 @@ db.createCollection(
     {
         validator: { $jsonSchema: {
             bsonType: "object",
-            required: ["ownerId", "name", "position", "address", "foodtype", "note", "detailNote"],
+            required: ["ownerId", "name", "position", "address", "foodtype", "note"],
             properties: {
                 ownerId: {
                     bsonType: "objectId",

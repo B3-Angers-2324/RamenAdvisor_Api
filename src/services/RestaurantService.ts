@@ -51,11 +51,21 @@ const restaurantExistsById = async (id: string) => {
     }
 }
 
+const updateRestaurantNote = async (id: ObjectId, note : number, detailNote: Array<{percentage: number; nbNote:number}>) => {
+    console.log(typeof detailNote, typeof detailNote[0]);
+    let result = await collections.restaurant?.updateOne({_id: id }, {$set: {note: note, detailNote: detailNote}});
+    if (result==undefined){
+        throw new Error("Error while updating restaurant");
+    }
+    return result;
+}
+
 export default {
     queryBestRestaurants,
     queryRestaurantById,
     queryRestaurantsByOwner,
     createRestaurant,
     updateRestaurant,
-    restaurantExistsById
+    restaurantExistsById,
+    updateRestaurantNote
 } as const;

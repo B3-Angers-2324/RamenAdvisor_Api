@@ -3,8 +3,6 @@ import Message from "../controllers/MessageController"
 
 const router: Router = express.Router();
 
-router.get("/percentages/restaurant/:uid", Message.getPercentagesPerRestaurant);
-
 router.get("/all/restaurant/:uid", Message.getMessagesForRestaurant);
 
 router.put("/report/:uid", Message.reportMessage);

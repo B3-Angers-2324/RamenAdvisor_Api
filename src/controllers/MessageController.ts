@@ -22,6 +22,10 @@ const getMessagesForRestaurant = async (req: Request, res: Response) => {
             content: string;
             date: Date;
             note: number;
+            detailNote: {
+                percentage: number;
+                nbNote: number;
+            }[];
         }[] = [];
         if (req.params.uid===undefined) throw new CustomError("No id provided", HttpStatus.BAD_REQUEST);
         //REtrieve the limit and offset from the query
@@ -40,7 +44,8 @@ const getMessagesForRestaurant = async (req: Request, res: Response) => {
                 },
                 content: element.message,
                 date: element.date,
-                note: element.note
+                note: element.note,
+                detailNote: element.detailNote
             });
         });
         //Check if there is more messages to load
@@ -146,7 +151,7 @@ const addMessage = async (req: TRequest, res: Response) => {
                 let now = new Date();
                 let diff = now.getTime() - lastMessage.date.getTime();
                 let hours = diff / (1000 * 60 * 60);
-                if (hours < 24) throw new CustomError("You can't send more than one message per day", HttpStatus.BAD_REQUEST);
+                //if (hours < 24) throw new CustomError("You can't send more than one message per day", HttpStatus.BAD_REQUEST);
             }
             if (req.body === undefined || req.body.message===undefined || req.body.note===undefined) throw new CustomError("Missing field in body", HttpStatus.BAD_REQUEST);
             //Create the message
@@ -159,6 +164,8 @@ const addMessage = async (req: TRequest, res: Response) => {
             };
             //Add the message to the database
             await MessageService.addMessage(message);
+            //Compute the new note percentage
+            computeNotePercentage(req.params.uid,parseInt(req.body.note));
             //Send the response
             res.status(HttpStatus.OK).json({"message": "Message added"});
         }catch(e: CustomError|any){
@@ -167,9 +174,35 @@ const addMessage = async (req: TRequest, res: Response) => {
     });
 }
 
-
-const getPercentagesPerRestaurant = async (req: Request, res: Response) => {
-    
+async function computeNotePercentage(restaurantId : string , newNote : number){
+    try{        
+        let restaurant = await RestaurantService.queryRestaurantById(restaurantId);
+        if (restaurant===null || restaurant== undefined) throw new CustomError("Restaurant not found", HttpStatus.NOT_FOUND);
+        //Add the new note to the total note
+        restaurant.detailNote[newNote-1].nbNote++;
+        //Define variable to store the total note and the total percentage
+        let nbNoteTotal = 0;
+        let newPercentage : Array<{percentage: number; nbNote:number}> = [];
+        //Retrieve the total number of note
+        restaurant.detailNote.forEach((element :{percentage: number; nbNote:number}) => {
+            nbNoteTotal += element.nbNote;
+        });
+        //Compute the new global note
+        let newglobalnote = 0;
+        restaurant.detailNote.forEach((element :{percentage: number; nbNote:number}, i :number) => {
+            newglobalnote += (((i+1)*10) * element.nbNote);
+        });
+        newglobalnote = Math.round(newglobalnote / nbNoteTotal);
+        //Update the global note
+        //Compute the new percentage for each note
+        restaurant.detailNote.forEach((element :{percentage: number; nbNote:number},i:number) => {
+            newPercentage.push({"percentage": Math.round((element.nbNote / nbNoteTotal)*100), "nbNote": element.nbNote});
+        });
+        //update the restaurant in the database
+        await RestaurantService.updateRestaurantNote(restaurant._id,newglobalnote,newPercentage);
+    }catch(e){
+        console.log("Error While computing the note : ",e);
+    }
 }
 
 
@@ -179,5 +212,4 @@ export default {
     getReportedMessages,
     deleteReport,
     addMessage,
-    getPercentagesPerRestaurant
 };
