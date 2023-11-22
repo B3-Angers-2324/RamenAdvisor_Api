@@ -17,7 +17,11 @@ const password = (input: string) => {
 }
 
 const dateInferiorToToday = (input: Date) => {
-    return input < new Date();
+    // input inferior to today - 13 years
+    let today = new Date();
+    let dateLimit = new Date();
+    dateLimit.setFullYear(today.getFullYear() - 13);
+    return input < dateLimit;
 }
 
 const isNotEmpty = (input: string) => {
