@@ -6,6 +6,7 @@ import Owner from "../models/OwnerModel";
 import dotenv from 'dotenv';
 import RestaurantService from "../services/RestaurantService";
 import { TRequest } from "./types/types";
+import CheckInput from "../tools/CheckInput";
 dotenv.config();
 
 async function login(req: Request, res: Response){
@@ -79,9 +80,84 @@ async function getRestaurantsByOwner(req: TRequest, res: Response){
     }
 }
 
+async function getOwnerProfile(req: TRequest, res: Response){
+    try{
+        let id = req.token?._id;
+        const owner = await OwnerServices.getOwnerById(id);
+        if(owner){
+            res.status(HttpStatus.OK).json({"owner": owner});
+        }else{
+            res.status(HttpStatus.NOT_FOUND).json({"message": "Owner not found"});
+        }
+    }catch(error){
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while getting owner information"});
+    }
+}
+
+async function updateOwnerProfile(req: TRequest, res: Response){
+    try{
+        let id = req.token?._id;
+        // check if all fields are not empty
+        if(!CheckInput.areNotEmpty([req.body.firstName, req.body.lastName, req.body.email, req.body.companyName, req.body.password, req.body.siret, req.body.socialAdresse])){
+            res.status(HttpStatus.BAD_REQUEST).json({"message": "Missing parameters"});
+            return;
+        }
+        // check if phone number is valid
+        if(CheckInput.phone(req.body.phone) == null){
+            res.status(HttpStatus.BAD_REQUEST).json({"message": "Invalid phone number"});
+            return;
+        }
+        // check if email is valid
+        if(CheckInput.email(req.body.email) == null){
+            res.status(HttpStatus.BAD_REQUEST).json({"message": "Email format is not correct"});
+            return;
+        }
+
+        let updatedOwner : Owner = {
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            email: req.body.email,
+            companyName: req.body.companyName,
+            password: req.body.password,
+            socialAdresse: req.body.socialAdresse
+        };
+
+        const owner = await OwnerServices.getOwnerById(id);
+        if(owner){
+            const result = await OwnerServices.updateOwner(id, updatedOwner);
+            if(result){
+                res.status(HttpStatus.OK).json({"message": "Owner information updated"});
+            }else{
+                res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while updating owner information"});
+            }
+        }else{
+            res.status(HttpStatus.NOT_FOUND).json({"message": "Owner not found"});
+        }
+    }catch(error){
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while updating owner information"});
+    }
+}
+
+async function deleteOwnerProfile(req: TRequest, res: Response){
+    try{
+        let id = req.token?._id;
+        const result = await OwnerServices.deleteOwner(id);
+        if(result){
+            res.status(HttpStatus.OK).json({"message": "Owner deleted"});
+        }else{
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while deleting owner"});
+        }
+    }catch(error){
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while deleting owner"});
+    }
+}
+
 
 export default {
     login,
     register,
     getRestaurantsByOwner,
+    getOwnerProfile,
+    updateOwnerProfile,
+    deleteOwnerProfile
 };
