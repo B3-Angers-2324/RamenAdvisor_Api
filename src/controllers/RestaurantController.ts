@@ -59,8 +59,6 @@ const getRestaurantById = async (req: Request, res: Response) =>{
             obj: restaurant
         });
     }catch(e : CustomError|any){
-        console.log(e.code);
-        console.log(e);
         res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.message? e.message : "Internal server error"});
     }
 }
