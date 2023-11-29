@@ -203,10 +203,13 @@ async function computeNotePercentage(restaurantId : string , newNote : number, v
             newglobalnote += (((i+1)*10) * element.nbNote);
         });
         newglobalnote = Math.round(newglobalnote / nbNoteTotal);
+        if (Number.isNaN(newglobalnote)) newglobalnote = 0;
         //Update the global note
         //Compute the new percentage for each note
         restaurant.detailNote.forEach((element :{percentage: number; nbNote:number},i:number) => {
-            newPercentage.push({"percentage": Math.round((element.nbNote / nbNoteTotal)*100), "nbNote": element.nbNote});
+            let percentage = Math.round((element.nbNote / nbNoteTotal)*100);
+            if (Number.isNaN(percentage)) percentage = 0;
+            newPercentage.push({"percentage": percentage, "nbNote": element.nbNote});
         });
         //update the restaurant in the database
         await RestaurantService.updateRestaurantNote(restaurant._id,newglobalnote,newPercentage);
@@ -225,5 +228,6 @@ export default {
     reportMessage,
     getReportedMessages,
     deleteReport,
-    addMessage
+    addMessage,
+    deleteNotePercentage
 };
