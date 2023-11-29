@@ -1,4 +1,4 @@
-import { describe, expect, test, beforeEach, afterEach, jest } from '@jest/globals';
+import { describe, expect, test, beforeEach, afterEach, jest, it } from '@jest/globals';
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import HttpStatus from '../../src/constants/HttpStatus';
@@ -8,11 +8,13 @@ import CheckInput from '../../src/tools/CheckInput';
 import { TRequest } from '../../src/controllers/types/types';
 
 import dotenv from 'dotenv';
+import MessageService from '../../src/services/MessageService';
 dotenv.config();
 
 jest.mock('jsonwebtoken');
 jest.mock('../../src/services/UserService');
 jest.mock('../../src/tools/CheckInput');
+jest.mock('../../src/services/MessageService');
 
 describe('UserController - login', () => {
   let req: Request;
@@ -712,5 +714,164 @@ describe('UserController - deleteUserProfile', () => {
     expect(UserServices.deleteUser).toHaveBeenCalledWith(req.token?._id);
     expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
     expect(res.json).toHaveBeenCalledWith({ message: 'Error while deleting user' });
+  });
+});
+
+describe('UserController - getUserMessage', () => {
+  let messages = 
+  it('should return all messages for a user with no more message', async () => {
+    const req = {
+      token: {
+        _id: 'userId',
+      },
+      query: {
+        limit: 2,
+        offset: 0,
+      },
+    } as unknown as TRequest;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+    const messages = [
+      { _id: 'messageId1', message: 'Message 1' },
+      { _id: 'messageId2', message: 'Message 2' },
+    ];
+  
+    (MessageService.queryMessagesForUser as jest.Mock).mockReturnValue(messages as never);
+  
+    await UserController.getUserMessage(req, res);
+  
+    expect(MessageService.queryMessagesForUser).toHaveBeenCalledWith(req.token?._id, 3, 0);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.OK);
+    expect(res.json).toHaveBeenCalledWith({
+      length: messages.length,
+      messages: messages,
+      more: false,
+    });
+  });
+  it('should return all messages for a user with more message', async () => {
+    const req = {
+      token: {
+        _id: 'userId',
+      },
+      query: {
+        limit: 2,
+        offset: 0,
+      },
+    } as unknown as TRequest;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+    const messages = [
+      { _id: 'messageId1', message: 'Message 1' },
+      { _id: 'messageId2', message: 'Message 2' },
+      { _id: 'messageId3', message: 'Message 3' },
+    ];
+  
+    (MessageService.queryMessagesForUser as jest.Mock).mockReturnValue(messages as never);
+  
+    await UserController.getUserMessage(req, res);
+  
+    expect(MessageService.queryMessagesForUser).toHaveBeenCalledWith(req.token?._id, 3, 0);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.OK);
+    expect(res.json).toHaveBeenCalledWith({
+      length: messages.length,
+      messages: [messages[0], messages[1]],
+      more: true,
+    });
+  });
+  it("should return not found status if user doesn't exist", async () => {
+    const req = {
+      token: {
+        _id: 'userId',
+      },
+      query: {
+        limit: 2,
+        offset: 0,
+      },
+    } as unknown as TRequest;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+  
+    (MessageService.queryMessagesForUser as jest.Mock).mockReturnValue(null as never);
+  
+    await UserController.getUserMessage(req, res);
+  
+    expect(MessageService.queryMessagesForUser).toHaveBeenCalledWith(req.token?._id, 3, 0);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.NOT_FOUND);
+    expect(res.json).toHaveBeenCalledWith({ message: 'No message found' });
+  });
+  it("should return internal server error status if an error occurs", async () => {
+    const req = {
+      token: {
+        _id: 'userId',
+      },
+      query: {
+        limit: 2,
+        offset: 0,
+      },
+    } as unknown as TRequest;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+  
+    (MessageService.queryMessagesForUser as jest.Mock).mockRejectedValue(new Error('Some error') as never);
+  
+    await UserController.getUserMessage(req, res);
+  
+    expect(MessageService.queryMessagesForUser).toHaveBeenCalledWith(req.token?._id, 3, 0);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Some error' });
+  });
+
+
+  describe("should return bad request status if limit or offset are missing", () => {
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+
+    test("limit is missing", async () => {
+      const req = {
+        token: {
+          _id: 'userId',
+        },
+        query: {
+          offset: 0,
+        },
+      } as unknown as TRequest;
+      
+      await UserController.getUserMessage(req, res);
+    
+      expect(MessageService.queryMessagesForUser).not.toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+      expect(res.json).toHaveBeenCalledWith({ message: 'Missing parameters' });
+    });
+    test("offset is missing", async () => {
+      const req = {
+        token: {
+          _id: 'userId',
+        },
+        query: {
+          limit: 2,
+        },
+      } as unknown as TRequest;
+      
+      await UserController.getUserMessage(req, res);
+    
+      expect(MessageService.queryMessagesForUser).not.toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+      expect(res.json).toHaveBeenCalledWith({ message: 'Missing parameters' });
+    });
   });
 });

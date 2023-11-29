@@ -32,7 +32,7 @@ jest.mock('../../src/services/MessageService', () => ({
         return (uid=="test_full")?[{id: "test_message"}]:[];
     }),
     deleteMessage: jest.fn(async (uid: string) => {return true;}),
-    queryMessagesForRestaurant: jest.fn(async (uid: string, limit: number, offset: number) => (uid=="test_full")?[{_id: "test_message", user: {_id: "user_id", firstName: "test", lastName: "test", image: "test"}, message: "test", date: "2023-11-21T17:06:58.026Z", note: 5}]:[]),
+    queryMessagesForRestaurant: jest.fn(async (uid: string, limit: number, offset: number) => (uid=="test_full")?[{_id: "test_message", user: {_id: "user_id", firstName: "test", lastName: "test", image: "test"}, message: "test", date: "2023-11-21T17:06:58.026Z", note: 5, detailNote: "test"}]:[]),
     lasTimeUserSentMessage: jest.fn(async (userId: string) => {return (userId=="test_user_id")?{date: new Date()}:null;}),
     addMessage: jest.fn(async (message: any) => { return true;}),
 }));
@@ -80,8 +80,8 @@ describe('Get messages for a restaurant', () => {
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.json).toHaveBeenCalledWith({
             number: 1,
-            obj: [{ id: "test_message", user: { id: "user_id", firstName: "test", lastName: "test", img: "test" }, content: "test", date: "2023-11-21T17:06:58.026Z", note: 5 }],
-            pageleft: false
+            obj: [{ id: "test_message", user: { id: "user_id", firstName: "test", lastName: "test", img: "test" }, content: "test", date: "2023-11-21T17:06:58.026Z", note: 5, detailNote:"test"}],
+            more: false
         });
     });
     it("Should return a 200 when everything is correct with no limit nor offset", async () => {
@@ -103,8 +103,8 @@ describe('Get messages for a restaurant', () => {
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.json).toHaveBeenCalledWith({
             number: 1,
-            obj: [{ id: "test_message", user: { id: "user_id", firstName: "test", lastName: "test", img: "test" }, content: "test", date: "2023-11-21T17:06:58.026Z", note: 5 }],
-            pageleft: false
+            obj: [{ id: "test_message", user: { id: "user_id", firstName: "test", lastName: "test", img: "test" }, content: "test", date: "2023-11-21T17:06:58.026Z", note: 5, detailNote:"test"}],
+            more: false
         });
     });
     it ("Should return a empty list when there is no message for that restaurant", async () => {
@@ -131,7 +131,7 @@ describe('Get messages for a restaurant', () => {
         expect(res.json).toHaveBeenCalledWith({
             number: 0,
             obj: [],
-            pageleft: false
+            more: false
         });
     });
     it ("Should return a 400 list when there is no uid ", async () => {
