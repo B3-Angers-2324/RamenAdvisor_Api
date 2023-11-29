@@ -222,14 +222,13 @@ async function deleteMessage(req: TRequest, res: Response){
     UserMiddleware.userLoginMiddleware(req,res,async ()=>{
         try{
             let userId = req.token._id;
-            if (req.params.uid===undefined) throw new CustomError("No restaurant provided", HttpStatus.BAD_REQUEST);
+            if (req.params.uid===undefined) throw new CustomError("No messageID provided", HttpStatus.BAD_REQUEST);
             let messageId = req.params.uid;
 
             let message = await MessageService.queryOne(messageId);
             if (message===null || message===undefined) throw new CustomError("Message not found", HttpStatus.NOT_FOUND);
             if (message.userId.toString() !== userId) throw new CustomError("You can't delete this message", HttpStatus.FORBIDDEN);
-
-            await deleteNotePercentage(messageId, message.note);
+            await deleteNotePercentage(message.restaurantId, message.note);
             await MessageService.deleteMessage(messageId);
             
             res.status(HttpStatus.OK).json({"message": "Message deleted"});
