@@ -13,6 +13,8 @@ router.use(UserMiddleware.userLoginMiddleware);
 
 router.get("/profile", UserController.getUserProfile);
 
+router.get("/message", UserController.getUserMessage);
+
 router.patch("/profile", UserController.updateUserProfile);
 
 router.delete("/profile", UserController.deleteUserProfile);

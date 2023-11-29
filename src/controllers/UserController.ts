@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
-import { TRequest } from "../controllers/types/types";
+import { CustomError, TRequest } from "../controllers/types/types";
 import User from "../models/UserModel";
 import jwt from "jsonwebtoken";
 import UserServices from "../services/UserService";
+import MessageService from "../services/MessageService";
 import HttpStatus from "../constants/HttpStatus";
 import CheckInput from "../tools/CheckInput";
 import dotenv from 'dotenv';
@@ -184,11 +185,30 @@ async function deleteUserProfile(req: TRequest, res: Response){
     }
 }
 
+async function getUserMessage(req: TRequest, res: Response){
+    try{
+        let id = req.token?._id;
+        if (req.query.limit == undefined || req.query.offset == undefined) throw new CustomError("Missing parameters", HttpStatus.BAD_REQUEST);
+        let limit = parseInt(req.query.limit.toString());
+        let offset = parseInt(req.query.offset.toString());
+        let messages = await MessageService.queryMessagesForUser(id, limit, offset);
+        if(messages == undefined) throw new CustomError("No message found", HttpStatus.NOT_FOUND);
+        res.status(HttpStatus.OK).json({
+            length: messages.length,
+            messages: messages
+        });
+        //throw new CustomError("Not implemented", HttpStatus.NOT_IMPLEMENTED);
+    }catch(error : CustomError | any){
+        res.status(error.code? error.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": error.message? error.message : "Internal server error"});
+    }
+}
+
 export default {
     login,
     register,
     getAll,
     getUserProfile,
     updateUserProfile,
-    deleteUserProfile
+    deleteUserProfile,
+    getUserMessage
 };
