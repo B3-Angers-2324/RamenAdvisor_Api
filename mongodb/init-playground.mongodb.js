@@ -47,66 +47,8 @@ db.createCollection(
 );
 
 db.createCollection(
-    RestaurantCollection,
-    {
-        validator: { $jsonSchema: {
-            bsonType: "object",
-            required: ["ownerId", "name", "position", "address", "foodtype", "note"],
-            properties: {
-                ownerId: {
-                    bsonType: "objectId",
-                    description: "must be a int and is required"
-                },
-                name: {
-                    bsonType: "string",
-                    description: "must be a string and is required"
-                },
-                position: {
-                    bsonType: "array",
-                    description: "must be a array and is required"
-                },
-                address: {
-                    bsonType: "string",
-                    description: "must be a string and is required"
-                },
-                foodtype:{
-                    bsonType: "string",
-                    description: "must be a string and is required"
-                },
-                note: {
-                    bsonType: "int",
-                    minimum: 0,
-                    maximum: 50,
-                    description: "must be a int and is required",
-                },
-                detailNote: {
-                    bsonType: "array",
-                    items: {
-                        bsonType: "object",
-                        required: ["percentage", "nbNote"],
-                        properties: {
-                            percentage: {
-                                bsonType: "int",
-                                minimum: 0,
-                                maximum: 100,
-                                description: "must be an integer and is required"
-                            },
-                            nbNote: {
-                                bsonType: "int",
-                                description: "must be an integer and is required"
-                            }
-                        }
-                    }
-                },
-                //Need to be changed to Images type
-                images: {
-                    bsonType: "array",
-                    description: "must be a array of string"
-                },
-            }
-        }}
-    }
-);
+    RestaurantCollection
+    );
 
 db.createCollection(
     UserCollection,

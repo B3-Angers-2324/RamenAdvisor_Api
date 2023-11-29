@@ -60,6 +60,44 @@ const updateRestaurantNote = async (id: ObjectId, note : number, detailNote: Arr
     return result;
 }
 
+const queryRestaurantsWithParam = async (type: string|undefined, accessible: boolean, limit: number, search: string|undefined) => {
+    const param = {
+        ...(accessible && { accessible }),
+        ...(type && { foodtype: type }),
+        ...(search && { $text: { $search: search , $caseSensitive:false} })
+    };
+    const restaurants = await collections.restaurant?.find(param, {
+        sort: { note: -1 },
+        limit
+    })?.toArray();
+    if (!restaurants?.length) {
+        throw new Error("No restaurants found");
+    }
+    return restaurants;
+}
+
+
+/*const queryRestaurantsBySearch = async (type : string, accessible:boolean, limit: number, search: string) => {
+    let param :{
+        accessible?: boolean,
+        foodtype?: string
+    }={};
+    if (accessible)param.accessible = accessible;
+    if (type!="none") param.foodtype = type;
+    let restaurants = await collections.restaurant?.find({
+        ...param,
+        $text: { $search: search }
+    },{
+        sort: { note: -1 },
+        limit: limit 
+    }).toArray();
+    if (restaurants==undefined || restaurants.length==0){
+        throw new Error("No restaurants found");
+    }
+    return restaurants;
+}*/
+
+
 export default {
     queryBestRestaurants,
     queryRestaurantById,
@@ -67,5 +105,6 @@ export default {
     createRestaurant,
     updateRestaurant,
     restaurantExistsById,
-    updateRestaurantNote
+    updateRestaurantNote,
+    queryRestaurantsWithParam
 } as const;

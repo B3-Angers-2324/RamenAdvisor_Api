@@ -215,6 +215,10 @@ async function computeNotePercentage(restaurantId : string , newNote : number, v
     }
 }
 
+async function deleteMessage(req: Request, res: Response){
+    //TODO: implement this function
+}
+
 
 export default {
     getMessagesForRestaurant,

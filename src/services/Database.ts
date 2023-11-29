@@ -33,5 +33,8 @@ export async function connectToDatabase(){
     collections.admin = adminCollection;
     collections.report = reportCollection;
 
+    // Indexes for restaurants
+    collections.restaurant?.createIndex({name: "text"}, { collation: { locale: "simple" }})
+
     console.log(`[Server]: Successfully connected to database: ${db.databaseName}`);
 }

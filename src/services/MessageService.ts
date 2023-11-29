@@ -1,6 +1,7 @@
 import { ObjectId } from 'mongodb';
 import { collections } from './Database';
 import Message from '../models/MessageModel';
+import { off } from 'process';
 
 async function queryMessagesForRestaurant(restaurantId: string, limit: number, offset: number) {
     const result = await collections.message?.aggregate([
@@ -39,11 +40,32 @@ async function lasTimeUserSentMessage(userId: string, restaurantId: string) {
     return result;
 }
 
+async function queryMessagesForUser(userId: string, limit: number, offset: number) {
+    const result = await collections.message?.aggregate([
+        { $match: { userId: new ObjectId(userId) } },
+        { $lookup: { from: 'restaurants', localField: 'restaurantId', foreignField: '_id', as: 'restaurant' } },
+        { $unwind: '$restaurant'},
+        { $sort: { date: -1 } },
+        { $skip: offset },
+        { $limit: limit },
+        { $project: {
+            _id: 1,
+            "restaurant.name": 1,
+            "restaurant._id": 1,
+            message: 1,
+            date: 1,
+            note: 1
+        } }
+    ]).toArray();
+    return result;
+}
+
 export default {
     queryMessagesForRestaurant,
     queryOne,
     deleteMessage,
     addMessage,
     deleteAllMessagesForUser,
-    lasTimeUserSentMessage
+    lasTimeUserSentMessage,
+    queryMessagesForUser
 } as const;
