@@ -78,13 +78,30 @@ const createRestaurant = (req: TRequest, res: Response) => {
             if(req.body.tel != "" && !CheckInput.phone(req.body.tel)){
                 throw(new CustomError("Invalid phone number", HttpStatus.BAD_REQUEST));
             }
-            req.body.ownerId = new ObjectId((req as any).token._id);
-            req.body.note = 10;
-            req.body.images = [
-                "https://picsum.photos/1000/1000",
-                "https://picsum.photos/1000/1000"
-              ];
-            let restaurant = await Service.createRestaurant(req.body);
+            let restaurantData = {
+                name: req.body.name,
+                address: req.body.address,
+                city: req.body.city,
+                tel: req.body.tel,
+                foodtype: req.body.foodtype,
+                position: req.body.position,
+                handicap: req.body.handicap,
+                ownerId: new ObjectId(req.token._id),
+                note: 10,
+                images: [
+                    "https://picsum.photos/1000/1000",
+                    "https://picsum.photos/1000/1000"
+                ],
+                detailNote: [{"percentage": 0, "nbNote": 0},{"percentage": 0, "nbNote": 0},{"percentage": 0, "nbNote": 0},{"percentage": 0, "nbNote": 0},{"percentage": 0, "nbNote": 0}]
+            }
+            // req.body.ownerId = new ObjectId((req as any).token._id);
+            // req.body.note = 10;
+            // req.body.images = [
+            //     "https://picsum.photos/1000/1000",
+            //     "https://picsum.photos/1000/1000"
+            // ];
+            // req.body.detailNote = [{"percentage": 0, "nbNote": 0},{"percentage": 0, "nbNote": 0},{"percentage": 0, "nbNote": 0},{"percentage": 0, "nbNote": 0},{"percentage": 0, "nbNote": 0}];
+            let restaurant = await Service.createRestaurant(restaurantData);
             res.status(HttpStatus.OK).json({id: restaurant.insertedId?.toString()});
         }catch(e : CustomError|any){
             res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.message? e.message : "Internal server error"});

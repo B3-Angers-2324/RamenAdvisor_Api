@@ -6,6 +6,7 @@ import UserServices from "../services/UserService";
 import MessageService from "../services/MessageService";
 import HttpStatus from "../constants/HttpStatus";
 import CheckInput from "../tools/CheckInput";
+import MessageController from "./MessageController";
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -174,6 +175,27 @@ async function updateUserProfile(req: TRequest, res: Response){
 async function deleteUserProfile(req: TRequest, res: Response){
     try{
         let id = req.token?._id;
+        // get all messages from user
+        const messages = await MessageService.queryMessagesForUser(id, 99999999, 0);
+        if(messages == undefined){
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while deleting user"});
+            return;
+        }
+        // recalculate note for each restaurant
+        for(let message of messages){
+            // TODO : could be optimized
+            const note = await MessageController.deleteNotePercentage(message.restaurant._id.toString(), message.note);
+            console.log(note);
+        }
+
+
+        // delete all messages from user
+        const messagesDeleted = await MessageService.deleteAllMessagesForUser(id);
+        if(!messagesDeleted){
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while deleting user"});
+            return;
+        }
+        // delete user
         const result = await UserServices.deleteUser(id);
         if(result){
             res.status(HttpStatus.OK).json({"message": "User deleted"});

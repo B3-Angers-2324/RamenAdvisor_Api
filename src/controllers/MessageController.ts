@@ -166,7 +166,7 @@ const addMessage = async (req: TRequest, res: Response) => {
             //Add the message to the database
             await MessageService.addMessage(message);
             //Compute the new note percentage
-            computeNotePercentage(req.params.uid,parseInt(req.body.note));
+            addNotePercentage(req.params.uid,parseInt(req.body.note));
             //Send the response
             res.status(HttpStatus.OK).json({"message": "Message added"});
         }catch(e: CustomError|any){
@@ -175,12 +175,21 @@ const addMessage = async (req: TRequest, res: Response) => {
     });
 }
 
-async function computeNotePercentage(restaurantId : string , newNote : number){
+// refactor this function to juste update the note percentage and not add a new note
+async function addNotePercentage(restaurantId : string , newNote : number){
+    computeNotePercentage(restaurantId,newNote);
+}
+
+async function deleteNotePercentage(restaurantId : string , newNote : number){
+    computeNotePercentage(restaurantId,newNote, -1);
+}
+
+async function computeNotePercentage(restaurantId : string , newNote : number, value : number = 1){
     try{        
         let restaurant = await RestaurantService.queryRestaurantById(restaurantId);
         if (restaurant===null || restaurant== undefined) throw new CustomError("Restaurant not found", HttpStatus.NOT_FOUND);
         //Add the new note to the total note
-        restaurant.detailNote[newNote-1].nbNote++;
+        restaurant.detailNote[newNote-1].nbNote += value;
         //Define variable to store the total note and the total percentage
         let nbNoteTotal = 0;
         let newPercentage : Array<{percentage: number; nbNote:number}> = [];
@@ -194,10 +203,13 @@ async function computeNotePercentage(restaurantId : string , newNote : number){
             newglobalnote += (((i+1)*10) * element.nbNote);
         });
         newglobalnote = Math.round(newglobalnote / nbNoteTotal);
+        if (Number.isNaN(newglobalnote)) newglobalnote = 0;
         //Update the global note
         //Compute the new percentage for each note
         restaurant.detailNote.forEach((element :{percentage: number; nbNote:number},i:number) => {
-            newPercentage.push({"percentage": Math.round((element.nbNote / nbNoteTotal)*100), "nbNote": element.nbNote});
+            let percentage = Math.round((element.nbNote / nbNoteTotal)*100);
+            if (Number.isNaN(percentage)) percentage = 0;
+            newPercentage.push({"percentage": percentage, "nbNote": element.nbNote});
         });
         //update the restaurant in the database
         await RestaurantService.updateRestaurantNote(restaurant._id,newglobalnote,newPercentage);
@@ -206,8 +218,25 @@ async function computeNotePercentage(restaurantId : string , newNote : number){
     }
 }
 
-async function deleteMessage(req: Request, res: Response){
-    //TODO: implement this function
+async function deleteMessage(req: TRequest, res: Response){
+    UserMiddleware.userLoginMiddleware(req,res,async ()=>{
+        try{
+            let userId = req.token._id;
+            if (req.params.uid===undefined) throw new CustomError("No restaurant provided", HttpStatus.BAD_REQUEST);
+            let messageId = req.params.uid;
+
+            let message = await MessageService.queryOne(messageId);
+            if (message===null || message===undefined) throw new CustomError("Message not found", HttpStatus.NOT_FOUND);
+            if (message.userId.toString() !== userId) throw new CustomError("You can't delete this message", HttpStatus.FORBIDDEN);
+
+            await deleteNotePercentage(messageId, message.note);
+            await MessageService.deleteMessage(messageId);
+            
+            res.status(HttpStatus.OK).json({"message": "Message deleted"});
+        }catch(e: CustomError|any){
+            res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.message? e.message : "Internal server error"});
+        }
+    });
 }
 
 
@@ -217,4 +246,6 @@ export default {
     getReportedMessages,
     deleteReport,
     addMessage,
+    deleteNotePercentage,
+    deleteMessage
 };
