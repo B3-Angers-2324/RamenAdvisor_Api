@@ -166,7 +166,7 @@ const addMessage = async (req: TRequest, res: Response) => {
             //Add the message to the database
             await MessageService.addMessage(message);
             //Compute the new note percentage
-            computeNotePercentage(req.params.uid,parseInt(req.body.note));
+            addNotePercentage(req.params.uid,parseInt(req.body.note));
             //Send the response
             res.status(HttpStatus.OK).json({"message": "Message added"});
         }catch(e: CustomError|any){
@@ -175,12 +175,21 @@ const addMessage = async (req: TRequest, res: Response) => {
     });
 }
 
-async function computeNotePercentage(restaurantId : string , newNote : number){
+// refactor this function to juste update the note percentage and not add a new note
+async function addNotePercentage(restaurantId : string , newNote : number){
+    computeNotePercentage(restaurantId,newNote);
+}
+
+async function deleteNotePercentage(restaurantId : string , newNote : number){
+    computeNotePercentage(restaurantId,newNote, -1);
+}
+
+async function computeNotePercentage(restaurantId : string , newNote : number, value : number = 1){
     try{        
         let restaurant = await RestaurantService.queryRestaurantById(restaurantId);
         if (restaurant===null || restaurant== undefined) throw new CustomError("Restaurant not found", HttpStatus.NOT_FOUND);
         //Add the new note to the total note
-        restaurant.detailNote[newNote-1].nbNote++;
+        restaurant.detailNote[newNote-1].nbNote += value;
         //Define variable to store the total note and the total percentage
         let nbNoteTotal = 0;
         let newPercentage : Array<{percentage: number; nbNote:number}> = [];
@@ -212,5 +221,5 @@ export default {
     reportMessage,
     getReportedMessages,
     deleteReport,
-    addMessage,
+    addMessage
 };

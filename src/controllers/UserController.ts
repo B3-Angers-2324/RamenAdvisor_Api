@@ -6,6 +6,7 @@ import UserServices from "../services/UserService";
 import HttpStatus from "../constants/HttpStatus";
 import CheckInput from "../tools/CheckInput";
 import dotenv from 'dotenv';
+import MessageService from "../services/MessageService";
 dotenv.config();
 
 async function login(req: Request, res: Response){
@@ -173,6 +174,15 @@ async function updateUserProfile(req: TRequest, res: Response){
 async function deleteUserProfile(req: TRequest, res: Response){
     try{
         let id = req.token?._id;
+        // get all messages from user
+        // const messages = await MessageService.getAllMessagesForUser(id);
+        // delete all messages from user
+        const messagesDeleted = await MessageService.deleteAllMessagesForUser(id);
+        if(!messagesDeleted){
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while deleting user"});
+            return;
+        }
+        // delete user
         const result = await UserServices.deleteUser(id);
         if(result){
             res.status(HttpStatus.OK).json({"message": "User deleted"});
