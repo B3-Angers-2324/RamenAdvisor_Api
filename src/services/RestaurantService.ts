@@ -1,7 +1,6 @@
 import { ObjectId } from 'mongodb';
 import { collections } from './Database';
 import Restaurant from '../models/RestaurantModel';
-import { cp } from 'fs';
 
 const queryBestRestaurants = async (limit : number) => {
     let restaurants = await collections.restaurant?.find({},{
@@ -76,6 +75,14 @@ const queryRestaurantsWithParam = async (type: string|undefined, accessible: boo
     return restaurants;
 }
 
+const deleteAllRestaurantsByOwner = async (id: string) => {
+    let result = await collections.restaurant?.deleteMany({ownerId: new ObjectId(id)});
+    if (result==undefined){
+        throw new Error("Error while deleting restaurants");
+    }
+    return result;
+}
+
 
 /*const queryRestaurantsBySearch = async (type : string, accessible:boolean, limit: number, search: string) => {
     let param :{
@@ -106,5 +113,6 @@ export default {
     updateRestaurant,
     restaurantExistsById,
     updateRestaurantNote,
-    queryRestaurantsWithParam
+    queryRestaurantsWithParam,
+    deleteAllRestaurantsByOwner
 } as const;

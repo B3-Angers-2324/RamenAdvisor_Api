@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import RestaurantService from "../services/RestaurantService";
 import { TRequest } from "./types/types";
 import CheckInput from "../tools/CheckInput";
+import MessageService from "../services/MessageService";
 dotenv.config();
 
 async function login(req: Request, res: Response){
@@ -141,6 +142,18 @@ async function updateOwnerProfile(req: TRequest, res: Response){
 async function deleteOwnerProfile(req: TRequest, res: Response){
     try{
         let id = req.token?._id;
+        //get all restaurants of the owner
+        const restaurants = await RestaurantService.queryRestaurantsByOwner(id);
+
+        // delete all messages of the restaurants
+        restaurants.forEach(async (element) => {
+            await MessageService.deleteAllMessagesForRestaurant(element._id?.toString() || "");
+        });
+
+        // delete all restaurants of the owner
+        await RestaurantService.deleteAllRestaurantsByOwner(id);
+
+        // delete the owner
         const result = await OwnerServices.deleteOwner(id);
         if(result){
             res.status(HttpStatus.OK).json({"message": "Owner deleted"});
