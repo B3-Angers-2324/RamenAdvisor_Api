@@ -49,16 +49,16 @@ const getMessagesForRestaurant = async (req: Request, res: Response) => {
             });
         });
         //Check if there is more messages to load
-        let pageleft = false;
+        let more = false;
         if (messages.length > limit){
             messages.pop();
-            pageleft = true;
+            more = true;
         }
         //Send the response
         res.status(HttpStatus.OK).json({
             number: messages.length,
             obj: messages,
-            pageleft: pageleft
+            more: more
         });
     }catch(e: CustomError|any){
         res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.message});

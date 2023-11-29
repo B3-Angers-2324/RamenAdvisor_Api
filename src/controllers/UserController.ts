@@ -191,11 +191,18 @@ async function getUserMessage(req: TRequest, res: Response){
         if (req.query.limit == undefined || req.query.offset == undefined) throw new CustomError("Missing parameters", HttpStatus.BAD_REQUEST);
         let limit = parseInt(req.query.limit.toString());
         let offset = parseInt(req.query.offset.toString());
-        let messages = await MessageService.queryMessagesForUser(id, limit, offset);
+        let messages = await MessageService.queryMessagesForUser(id, limit+1, offset);
         if(messages == undefined) throw new CustomError("No message found", HttpStatus.NOT_FOUND);
+        // check if there is more messages
+        let more = false;
+        if (messages.length > limit) {
+            messages.pop();
+            more = true;
+        }
         res.status(HttpStatus.OK).json({
             length: messages.length,
-            messages: messages
+            messages: messages,
+            more: more
         });
         //throw new CustomError("Not implemented", HttpStatus.NOT_IMPLEMENTED);
     }catch(error : CustomError | any){
