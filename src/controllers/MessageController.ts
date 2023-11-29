@@ -218,8 +218,25 @@ async function computeNotePercentage(restaurantId : string , newNote : number, v
     }
 }
 
-async function deleteMessage(req: Request, res: Response){
-    //TODO: implement this function
+async function deleteMessage(req: TRequest, res: Response){
+    UserMiddleware.userLoginMiddleware(req,res,async ()=>{
+        try{
+            let userId = req.token._id;
+            if (req.params.uid===undefined) throw new CustomError("No restaurant provided", HttpStatus.BAD_REQUEST);
+            let messageId = req.params.uid;
+
+            let message = await MessageService.queryOne(messageId);
+            if (message===null || message===undefined) throw new CustomError("Message not found", HttpStatus.NOT_FOUND);
+            if (message.userId.toString() !== userId) throw new CustomError("You can't delete this message", HttpStatus.FORBIDDEN);
+
+            await deleteNotePercentage(messageId, message.note);
+            await MessageService.deleteMessage(messageId);
+            
+            res.status(HttpStatus.OK).json({"message": "Message deleted"});
+        }catch(e: CustomError|any){
+            res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.message? e.message : "Internal server error"});
+        }
+    });
 }
 
 
@@ -229,5 +246,6 @@ export default {
     getReportedMessages,
     deleteReport,
     addMessage,
-    deleteNotePercentage
+    deleteNotePercentage,
+    deleteMessage
 };
