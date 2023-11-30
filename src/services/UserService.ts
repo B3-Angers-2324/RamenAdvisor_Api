@@ -99,6 +99,35 @@ async function deleteUser(id: string): Promise<any> {
     }
 }
 
+async function getUsersByFirstName(firstName: string): Promise<any> {
+    try{
+        const user = await collections.user?.find({firstName: firstName},{}).toArray();
+        return user;
+    }catch(error){
+        throw error;
+    }
+}
+
+async function getUsersByLastName(lastName: string): Promise<any> {
+    try{
+        const user = await collections.user?.find({lastName: lastName},{}).toArray();
+        return user;
+    }catch(error){
+        throw error;
+    }
+}
+
+async function getUsersByFirstNameAndLastName(firstName: string, lastName: string): Promise<any> {
+    try{
+        const user = await collections.user?.find({lastName: lastName, firstName: firstName},{}).toArray();
+        return user;
+    }catch(error){
+        throw error;
+    }
+}
+
+
+
 export default {
     getOneUser,
     addUser,
@@ -106,5 +135,8 @@ export default {
     getOne,
     getUserById,
     updateUser,
-    deleteUser
+    deleteUser,
+    getUsersByFirstName,
+    getUsersByLastName,
+    getUsersByFirstNameAndLastName
 } as const;
