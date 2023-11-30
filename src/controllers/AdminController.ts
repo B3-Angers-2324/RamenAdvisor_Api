@@ -2,6 +2,9 @@ import { Request, Response } from "express";
 import HttpStatus from "../constants/HttpStatus";
 import AdminService from "../services/AdminService";
 import jwt from "jsonwebtoken";
+import OwnerServices from "../services/OwnerService";
+import Owner from "../models/OwnerModel";
+import { TRequest } from "./types/types";
 
 async function login(req: Request, res: Response){
     try{
@@ -22,7 +25,63 @@ async function login(req: Request, res: Response){
     }
 }
 
+async function getOwnerNoValidate (req: TRequest, res: Response) {
+    try{
+        let owners = await OwnerServices.queryOwnerNoValidate();
+        if(owners){
+            res.status(HttpStatus.OK).json({"owners": owners});
+        }else{
+            res.status(HttpStatus.NOT_FOUND).json({"message": "No unvalidate owners found"});
+        }
+    }catch(error){
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while getting owners"});
+    }
+}
+
+async function getAllOwner (req: TRequest, res: Response) {
+    try{
+        let ownerlist = await OwnerServices.getAll();
+        console.log(ownerlist);
+        res.status(HttpStatus.OK).json({"data": ownerlist});
+    }catch(error){
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"error": error});
+    }
+}
+
+async function validateOwner (req: TRequest, res: Response) {
+    try{
+        let id = req.token?._id;
+
+        let updatedOwner : Owner = {
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            email: req.body.email,
+            companyName: req.body.companyName,
+            password: req.body.password,
+            socialAdresse: req.body.socialAdresse,
+            validate: !(req.body.validate)
+        };
+
+        const owner = await OwnerServices.getOwnerById(id);
+        if(owner){
+            const result = await OwnerServices.updateOwner(id, updatedOwner);
+            if(result){
+                res.status(HttpStatus.OK).json({"message": "Owner information updated"});
+            }else{
+                res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while updating owner information"});
+            }
+        }else{
+            res.status(HttpStatus.NOT_FOUND).json({"message": "Owner not found"});
+        }
+    }catch(error){
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while updating owner information"});
+    }
+}
+
 
 export default {
-    login
+    login,
+    getOwnerNoValidate,
+    getAllOwner,
+    validateOwner
 };

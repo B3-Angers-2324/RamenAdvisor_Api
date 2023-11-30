@@ -38,7 +38,7 @@ async function register(req: Request, res: Response){
             password: req.body.password,
             siret: req.body.siret,
             socialAdresse: req.body.socialAdresse,
-            validate: req.body.validate
+            validate: false
         };
 
         if(!newOwner.email.match(/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/)){
