@@ -818,11 +818,12 @@ describe('UserController - getUserMessage', () => {
 
     await UserController.getUserMessage(req, res);
 
-    expect(MessageService.queryMessagesForUser).toHaveBeenCalledWith('userId', 10, 0);
+    expect(MessageService.queryMessagesForUser).toHaveBeenCalledWith('userId', 11, 0);
     expect(res.status).toHaveBeenCalledWith(HttpStatus.OK);
     expect(res.json).toHaveBeenCalledWith({
       length: messages.length,
       messages: messages,
+      more: false,
     });
   });
 
@@ -831,7 +832,7 @@ describe('UserController - getUserMessage', () => {
 
     await UserController.getUserMessage(req, res);
 
-    expect(MessageService.queryMessagesForUser).toHaveBeenCalledWith('userId', 10, 0);
+    expect(MessageService.queryMessagesForUser).toHaveBeenCalledWith('userId', 11, 0);
     expect(res.status).toHaveBeenCalledWith(HttpStatus.NOT_FOUND);
     expect(res.json).toHaveBeenCalledWith({ message: 'No message found' });
   });
@@ -852,7 +853,7 @@ describe('UserController - getUserMessage', () => {
 
     await UserController.getUserMessage(req, res);
 
-    expect(MessageService.queryMessagesForUser).toHaveBeenCalledWith('userId', 10, 0);
+    expect(MessageService.queryMessagesForUser).toHaveBeenCalledWith('userId', 11, 0);
     expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
     expect(res.json).toHaveBeenCalledWith({ message: 'Internal server error' });
   });
