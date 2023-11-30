@@ -64,4 +64,11 @@ describe('Test the /user paths', () => {
         // Assert that UserController.deleteUserProfile was called
         expect(UserController.deleteUserProfile).toHaveBeenCalled();
     });
+
+    test('The /messages route should call the getUserMessages function on the controller', async () => {
+        // Make a GET request to the /user/messages endpoint
+        const response = await request.get(`${base_url}/user/message`);
+        // Assert that UserController.getUserMessage was called
+        expect(UserController.getUserMessage).toHaveBeenCalled();
+    });
 });
