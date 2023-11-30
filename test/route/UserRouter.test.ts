@@ -23,7 +23,8 @@ jest.mock('../../src/controllers/UserController', () => ({
     getAll: jest.fn((req, res : Response) => res.json()),
     getUserProfile: jest.fn((req, res : Response) => res.json()),
     updateUserProfile: jest.fn((req, res : Response) => res.json()),
-    deleteUserProfile: jest.fn((req, res : Response) => res.json())
+    deleteUserProfile: jest.fn((req, res : Response) => res.json()),
+    getUserMessage: jest.fn((req, res : Response) => res.json()),
 }));
 
 describe('Test the /user paths', () => {
@@ -62,5 +63,12 @@ describe('Test the /user paths', () => {
         const response = await request.delete(`${base_url}/user/profile`);
         // Assert that UserController.deleteUserProfile was called
         expect(UserController.deleteUserProfile).toHaveBeenCalled();
+    });
+
+    test('The /messages route should call the getUserMessages function on the controller', async () => {
+        // Make a GET request to the /user/messages endpoint
+        const response = await request.get(`${base_url}/user/message`);
+        // Assert that UserController.getUserMessage was called
+        expect(UserController.getUserMessage).toHaveBeenCalled();
     });
 });

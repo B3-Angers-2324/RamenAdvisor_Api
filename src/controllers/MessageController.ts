@@ -214,7 +214,7 @@ async function computeNotePercentage(restaurantId : string , newNote : number, v
         //update the restaurant in the database
         await RestaurantService.updateRestaurantNote(restaurant._id,newglobalnote,newPercentage);
     }catch(e){
-        console.log("Error While computing the note : ",e);
+        // console.log("Error While computing the note : ",e);
     }
 }
 
@@ -231,7 +231,6 @@ async function deleteMessage(req: TRequest, res: Response){
 
             await deleteNotePercentage(messageId, message.note);
             await MessageService.deleteMessage(messageId);
-            
             res.status(HttpStatus.OK).json({"message": "Message deleted"});
         }catch(e: CustomError|any){
             res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.message? e.message : "Internal server error"});

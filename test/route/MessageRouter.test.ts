@@ -14,6 +14,7 @@ jest.mock('../../src/controllers/MessageController', () => ({
     getReportedMessages: jest.fn((req, res : Response) => res.json()),
     deleteReport: jest.fn((req, res : Response) => res.json()),
     addMessage: jest.fn((req, res : Response) => res.json()),
+    deleteMessage: jest.fn((req, res : Response) => res.json()),
 }));
 
 describe('Test the /restaurant paths', () => {
@@ -47,5 +48,11 @@ describe('Test the /restaurant paths', () => {
         await request.post(`${base_url}/message/new/restaurant/:uid`);
         // Assert that UserController.login was called
         expect(MessageController.addMessage).toHaveBeenCalled();
+    });
+    test('The /message/delete/:uid route with a delete should call the function on the controller', async () => {
+        // Make a POST request to the /user/login endpoint
+        await request.delete(`${base_url}/message/delete/:uid`);
+        // Assert that UserController.login was called
+        expect(MessageController.deleteMessage).toHaveBeenCalled();
     });
 });

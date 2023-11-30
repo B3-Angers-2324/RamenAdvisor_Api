@@ -3,6 +3,8 @@ import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import HttpStatus from '../../src/constants/HttpStatus';
 import UserServices from '../../src/services/UserService';
+import MessageService from '../../src/services/MessageService';
+import MessageController from '../../src/controllers/MessageController';
 import UserController from '../../src/controllers/UserController';
 import CheckInput from '../../src/tools/CheckInput';
 import { TRequest } from '../../src/controllers/types/types';
@@ -13,6 +15,8 @@ dotenv.config();
 jest.mock('jsonwebtoken');
 jest.mock('../../src/services/UserService');
 jest.mock('../../src/tools/CheckInput');
+jest.mock('../../src/services/MessageService');
+jest.mock('../../src/controllers/MessageController');
 
 describe('UserController - login', () => {
   let req: Request;
@@ -670,47 +674,186 @@ describe('UserController - updateUserProfile', () => {
 });
 
 
-
 // ---------------------------------------------------------------
 
 describe('UserController - deleteUserProfile', () => {
-  test('should delete user profile and return success message', async () => {
-    const req = {
+  let req: TRequest;
+  let res: Response;
+
+  beforeEach(() => {
+    req = {
       token: {
         _id: 'userId',
       },
     } as TRequest;
-    const res = {
+    res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
     } as unknown as Response;
-  
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('should delete user profile and return success message', async () => {
+    const messages = [
+      {
+        restaurant: {
+          _id: 'restaurantId1',
+        },
+        note: 4,
+      },
+      {
+        restaurant: {
+          _id: 'restaurantId2',
+        },
+        note: 3,
+      },
+    ];
+
+    (MessageService.queryMessagesForUser as jest.Mock).mockResolvedValue(messages as never);
+    (MessageController.deleteNotePercentage as jest.Mock).mockResolvedValue(3.5 as never);
+    (MessageService.deleteAllMessagesForUser as jest.Mock).mockResolvedValue(true as never);
     (UserServices.deleteUser as jest.Mock).mockResolvedValue(true as never);
-  
+
     await UserController.deleteUserProfile(req, res);
-  
-    expect(UserServices.deleteUser).toHaveBeenCalledWith(req.token?._id);
+
+    expect(MessageService.queryMessagesForUser).toHaveBeenCalledWith('userId', 99999999, 0);
+    expect(MessageController.deleteNotePercentage).toHaveBeenCalledWith('restaurantId1', 4);
+    expect(MessageController.deleteNotePercentage).toHaveBeenCalledWith('restaurantId2', 3);
+    expect(MessageService.deleteAllMessagesForUser).toHaveBeenCalledWith('userId');
+    expect(UserServices.deleteUser).toHaveBeenCalledWith('userId');
     expect(res.status).toHaveBeenCalledWith(HttpStatus.OK);
     expect(res.json).toHaveBeenCalledWith({ message: 'User deleted' });
   });
-  
-  test('should return internal server error if an error occurs while deleting user profile', async () => {
-    const req = {
+
+  test('should return internal server error if error occurs while deleting user messages', async () => {
+    (MessageService.queryMessagesForUser as jest.Mock).mockResolvedValue(undefined as never);
+
+    await UserController.deleteUserProfile(req, res);
+
+    expect(MessageService.queryMessagesForUser).toHaveBeenCalledWith('userId', 99999999, 0);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Error while deleting user' });
+  });
+
+  test('should return internal server error if error occurs while deleting user', async () => {
+    const messages = [
+      {
+        restaurant: {
+          _id: 'restaurantId1',
+        },
+        note: 4,
+      },
+      {
+        restaurant: {
+          _id: 'restaurantId2',
+        },
+        note: 3,
+      },
+    ];
+
+    (MessageService.queryMessagesForUser as jest.Mock).mockResolvedValue(messages as never);
+    (MessageController.deleteNotePercentage as jest.Mock).mockResolvedValue(3.5 as never);
+    (MessageService.deleteAllMessagesForUser as jest.Mock).mockResolvedValue(true as never);
+    (UserServices.deleteUser as jest.Mock).mockResolvedValue(false as never);
+
+    await UserController.deleteUserProfile(req, res);
+
+    expect(MessageService.queryMessagesForUser).toHaveBeenCalledWith('userId', 99999999, 0);
+    expect(MessageController.deleteNotePercentage).toHaveBeenCalledWith('restaurantId1', 4);
+    expect(MessageController.deleteNotePercentage).toHaveBeenCalledWith('restaurantId2', 3);
+    expect(MessageService.deleteAllMessagesForUser).toHaveBeenCalledWith('userId');
+    expect(UserServices.deleteUser).toHaveBeenCalledWith('userId');
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Error while deleting user' });
+  });
+
+  test('should return internal server error if an error occurs', async () => {
+    (MessageService.queryMessagesForUser as jest.Mock).mockRejectedValue(new Error('Some error') as never);
+
+    await UserController.deleteUserProfile(req, res);
+
+    expect(MessageService.queryMessagesForUser).toHaveBeenCalledWith('userId', 99999999, 0);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Error while deleting user' });
+  });
+});
+
+
+// ---------------------------------------------------------------
+
+describe('UserController - getUserMessage', () => {
+  let req: Request;
+  let res: Response;
+
+  beforeEach(() => {
+    req = {
       token: {
         _id: 'userId',
       },
-    } as TRequest;
-    const res = {
+      query: {
+        limit: '10',
+        offset: '0',
+      },
+    } as unknown as Request;
+    res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
     } as unknown as Response;
-  
-    (UserServices.deleteUser as jest.Mock).mockRejectedValue(new Error('Some error') as never);
-  
-    await UserController.deleteUserProfile(req, res);
-  
-    expect(UserServices.deleteUser).toHaveBeenCalledWith(req.token?._id);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('should return messages for the user', async () => {
+    const messages = [
+      { id: 'messageId1', content: 'Message 1' },
+      { id: 'messageId2', content: 'Message 2' },
+    ];
+
+    (MessageService.queryMessagesForUser as jest.Mock).mockResolvedValue(messages as never);
+
+    await UserController.getUserMessage(req, res);
+
+    expect(MessageService.queryMessagesForUser).toHaveBeenCalledWith('userId', 10, 0);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.OK);
+    expect(res.json).toHaveBeenCalledWith({
+      length: messages.length,
+      messages: messages,
+    });
+  });
+
+  test('should return a not found status if no messages are found', async () => {
+    (MessageService.queryMessagesForUser as jest.Mock).mockResolvedValue(undefined as never);
+
+    await UserController.getUserMessage(req, res);
+
+    expect(MessageService.queryMessagesForUser).toHaveBeenCalledWith('userId', 10, 0);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.NOT_FOUND);
+    expect(res.json).toHaveBeenCalledWith({ message: 'No message found' });
+  });
+
+  test('should return a bad request status if limit or offset are missing', async () => {
+    req.query.limit = undefined;
+    req.query.offset = undefined;
+
+    await UserController.getUserMessage(req, res);
+
+    expect(MessageService.queryMessagesForUser).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Missing parameters' });
+  });
+
+  test('should return an internal server error status if an error occurs', async () => {
+    (MessageService.queryMessagesForUser as jest.Mock).mockRejectedValue(new Error('Internal server error') as never);
+
+    await UserController.getUserMessage(req, res);
+
+    expect(MessageService.queryMessagesForUser).toHaveBeenCalledWith('userId', 10, 0);
     expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
-    expect(res.json).toHaveBeenCalledWith({ message: 'Error while deleting user' });
+    expect(res.json).toHaveBeenCalledWith({ message: 'Internal server error' });
   });
 });
