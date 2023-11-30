@@ -1,6 +1,7 @@
 import express, { Router } from 'express';
 import UserMiddleware from '../middleware/UserMiddleware';
 import UserController from "../controllers/UserController"
+import User from '../models/UserModel';
 
 const router: Router = express.Router();
 
@@ -12,6 +13,8 @@ router.post("/register", UserController.register);
 router.use(UserMiddleware.userLoginMiddleware);
 
 router.get("/profile", UserController.getUserProfile);
+
+router.get("/test", UserController.getAll);
 
 router.patch("/profile", UserController.updateUserProfile);
 

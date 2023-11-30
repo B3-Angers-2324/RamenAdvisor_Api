@@ -17,9 +17,19 @@ async function getOwnerNoValidate (req: TRequest, res: Response) {
     }catch(error){
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while getting owners"});
     }
-} 
+}
+
+async function getAllOwner (req: TRequest, res: Response) {
+    try{
+        const ownerlist = await OwnerService.getAll();
+        res.status(HttpStatus.OK).json({"data": ownerlist});
+    }catch(error){
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"error": error});
+    }
+}
 
 export default {
     nothing,
-    getOwnerNoValidate
+    getOwnerNoValidate,
+    getAllOwner
 };
