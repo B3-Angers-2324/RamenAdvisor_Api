@@ -99,6 +99,35 @@ async function deleteUser(id: string): Promise<any> {
     }
 }
 
+async function isRightToken(id: string, token: string): Promise<any> {
+    try{
+        // find one user with id and token
+        const exist = await collections.user?.findOne({_id: new ObjectId(id), token: token});
+        return exist;
+    }catch(error){
+        throw error;
+    }
+
+}
+
+async function updateToken(email: string, token: string): Promise<any> {
+    try{
+        const result = await collections.user?.updateOne({email: email}, {$set: {token: token}});
+        return result;
+    }catch(error){
+        throw error;
+    }
+}
+
+async function isBan(id: string): Promise<any> {
+    try{
+        const result = await collections.user?.findOne({_id: new ObjectId(id), ban: true});
+        return result;
+    }catch(error){
+        throw error;
+    }
+}
+
 export default {
     getOneUser,
     addUser,
@@ -106,5 +135,8 @@ export default {
     getOne,
     getUserById,
     updateUser,
-    deleteUser
+    deleteUser,
+    isRightToken,
+    updateToken,
+    isBan
 } as const;

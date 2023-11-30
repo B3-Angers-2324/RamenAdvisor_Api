@@ -9,5 +9,9 @@ router.post("/login", Admin.login);
 // load middleware for all routes to test admin login
 router.use(adminMiddleware.adminLoginMiddleware);
 
+router.get("/users", (req, res)=> {
+    console.log("HERE");
+    res.send("users");
+});
 
 export default router;

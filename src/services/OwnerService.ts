@@ -48,11 +48,53 @@ async function deleteOwner(id: string): Promise<any> {
     }
 }
 
+async function isRightToken(id: string, token: string): Promise<any> {
+    try{
+        // find one user with id and token
+        const exist = await collections.owner?.findOne({_id: new ObjectId(id), token: token});
+        return exist;
+    }catch(error){
+        throw error;
+    }
+
+}
+
+async function updateToken(email: string, token: string): Promise<any> {
+    try{
+        const result = await collections.owner?.updateOne({email: email}, {$set: {token: token}});
+        return result;
+    }catch(error){
+        throw error;
+    }
+}
+
+async function isBan(id: string): Promise<any> {
+    try{
+        const result = await collections.owner?.findOne({_id: new ObjectId(id), ban: true});
+        return result;
+    }catch(error){
+        throw error;
+    }
+}
+
+async function isValidate(email: string): Promise<any> {
+    try{
+        const result = await collections.owner?.findOne({email: email, validate: true});
+        return result;
+    }catch(error){
+        throw error;
+    }
+}
+
 
 export default {
     getOneOwner,
     addOwner,
     getOwnerById,
     updateOwner,
-    deleteOwner
+    deleteOwner,
+    isRightToken,
+    updateToken,
+    isBan,
+    isValidate
 } as const;

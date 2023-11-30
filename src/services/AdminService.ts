@@ -11,6 +11,28 @@ async function getOneUser(email: string): Promise<any> {
     }
 }
 
+async function isRightToken(id: string, token: string): Promise<any> {
+    try{
+        // find one user with id and token
+        const exist = await collections.admin?.findOne({_id: new ObjectId(id), token: token});
+        return exist;
+    }catch(error){
+        throw error;
+    }
+
+}
+
+async function updateToken(email: string, token: string): Promise<any> {
+    try{
+        const result = await collections.admin?.updateOne({email: email}, {$set: {token: token}});
+        return result;
+    }catch(error){
+        throw error;
+    }
+}
+
 export default {
     getOneUser,
+    isRightToken,
+    updateToken
 } as const;
