@@ -8,6 +8,7 @@ export default class Owner{
         public password: string,
         public companyName: string,
         public socialAdresse: string,
+        public validate: boolean,
         public id?: ObjectId,
         public siret?: string,
     ){}

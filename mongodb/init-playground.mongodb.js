@@ -173,6 +173,10 @@ db.createCollection(
                 socialAdresse: {
                     bsonType: "string",
                     description: "must be a string and is required"
+                },
+                validate: {
+                    bsonType: "bool",
+                    description: "must be a bool and is required"
                 }
             }
         }}

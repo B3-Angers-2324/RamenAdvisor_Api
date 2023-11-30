@@ -11,6 +11,14 @@ async function getOneOwner(email: string): Promise<any> {
     }
 }
 
+const queryOwnerNoValidate = async () => {
+    let owners = await collections.owner?.find({validate: false}).toArray();
+    if (owners==undefined){
+        throw new Error("No unvalid owner found");
+    }
+    return owners;
+}
+
 async function addOwner(owner: Owner): Promise<any> {
     try{
         const result = await collections.owner?.insertOne(owner);
@@ -54,5 +62,6 @@ export default {
     addOwner,
     getOwnerById,
     updateOwner,
-    deleteOwner
+    deleteOwner,
+    queryOwnerNoValidate
 } as const;

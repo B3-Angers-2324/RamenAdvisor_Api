@@ -37,7 +37,8 @@ async function register(req: Request, res: Response){
             companyName: req.body.companyName,
             password: req.body.password,
             siret: req.body.siret,
-            socialAdresse: req.body.socialAdresse
+            socialAdresse: req.body.socialAdresse,
+            validate: req.body.validate
         };
 
         if(!newOwner.email.match(/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/)){
@@ -119,7 +120,8 @@ async function updateOwnerProfile(req: TRequest, res: Response){
             email: req.body.email,
             companyName: req.body.companyName,
             password: req.body.password,
-            socialAdresse: req.body.socialAdresse
+            socialAdresse: req.body.socialAdresse,
+            validate: req.body.validate
         };
 
         const owner = await OwnerServices.getOwnerById(id);
