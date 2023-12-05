@@ -14,6 +14,7 @@ jest.mock('../../src/controllers/MessageController', () => ({
     getReportedMessages: jest.fn((req, res : Response) => res.json()),
     deleteReport: jest.fn((req, res : Response) => res.json()),
     addMessage: jest.fn((req, res : Response) => res.json()),
+    deleteMessage: jest.fn((req, res : Response) => res.json()),
 }));
 
 describe('Test the /restaurant paths', () => {

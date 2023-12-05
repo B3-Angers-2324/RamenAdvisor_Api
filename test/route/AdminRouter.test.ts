@@ -11,7 +11,10 @@ const base_url = '/api/v1';
 // Mock the UserController module
 jest.mock('../../src/controllers/AdminController', () => ({
     login: jest.fn((req, res : Response) => res.json()),
-    defaultFunction: jest.fn((req, res : Response) => res.json())
+    getUsers: jest.fn((req, res : Response) => res.json()),
+    getUserProfile: jest.fn((req, res : Response) => res.json()),
+    getUserMessage: jest.fn((req, res : Response) => res.json()),
+    banUser: jest.fn((req, res : Response) => res.json()),
 }));
 
 describe('Test the /Admin paths', () => {

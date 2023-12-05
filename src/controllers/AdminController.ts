@@ -56,9 +56,9 @@ async function getUsers(req: TRequest, res: Response){
 async function getUserProfile(req: TRequest, res: Response){
     //Just forwards the request to the user controller with the right id
     try{
-        const userId = await UserService.getUserById(req.params.uid);
+        const userId = req.params.uid;
         if (userId == "" || userId == undefined) throw new CustomError("No user id provided", HttpStatus.BAD_REQUEST);
-        let user = await UserService.getUserById(req.params.uid);
+        let user = await UserService.getUserById(userId);
         if (user == null) throw new CustomError("No user found", HttpStatus.NOT_FOUND);
         res.status(HttpStatus.OK).json(user);
     }catch(error : CustomError | any){
@@ -71,6 +71,7 @@ async function getUserMessage(req: TRequest, res: Response){
         const userId = req.params.uid;
         if (userId == "" || userId == undefined) throw new CustomError("No user id provided", HttpStatus.BAD_REQUEST);
         const user = await UserService.getUserById(req.params.uid);
+        if (user == null) throw new CustomError("No user found", HttpStatus.NOT_FOUND);
         if (req.query.limit == undefined || req.query.offset == undefined) throw new CustomError("Missing parameters", HttpStatus.BAD_REQUEST);
         let limit = parseInt(req.query.limit.toString());
         let offset = parseInt(req.query.offset.toString());
@@ -104,7 +105,7 @@ async function banUser(req: TRequest, res: Response){
         if (result == null) throw new CustomError("Error while banning user", HttpStatus.INTERNAL_SERVER_ERROR);
         res.status(HttpStatus.OK).json({"message": "User banned"});
     }catch(e: CustomError | any){
-        res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.code? e.message : "Error while getting users"});
+        res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.code? e.message : "Error while banning user"});
     }
 }
 
