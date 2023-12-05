@@ -2,6 +2,7 @@ import { Response, NextFunction } from 'express';
 import HttpStatus from "../constants/HttpStatus"
 import { TRequest } from '../controllers/types/types';
 import AdminService from '../services/AdminService';
+import ModeratorService from '../services/ModeratorService';
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
@@ -14,14 +15,38 @@ const adminLoginMiddleware = async (req: TRequest, res: Response, next: NextFunc
             throw new Error("No token provided");
         }
 
-        const secret = process.env.JWT_SECRET_ADMIN || "ASecretPhrase";
-        const decode = jwt.verify(token, secret);
+        try{
+            // check if moderator is logged in
+            const secret_moderator = process.env.JWT_SECRET_MODO || "ASecretPhrase";
+            const decode = jwt.verify(token, secret_moderator);
 
-        (req as any).token = decode;
+            console.log("Moderator decode: ", decode);
+
+            (req as any).token = decode;
+            (req as any).admin = false;
         
-        const exist = await AdminService.isRightToken(req.token?._id, token)
-        if(!exist){
-            throw new Error("Wrong token");
+            const exist = await ModeratorService.isRightToken(req.token?._id, token)
+            if(!exist){
+                throw new Error("Wrong moderator token");
+            }
+        }catch(e){
+            // check if admin is logged in
+            try{
+                const secret_admin = process.env.JWT_SECRET_ADMIN || "ASecretPhrase";
+                const decode = jwt.verify(token, secret_admin);
+
+                console.log("Admin decode: ", decode);
+
+                (req as any).token = decode;
+                (req as any).admin = true;
+        
+                const exist = await AdminService.isRightToken(req.token?._id, token)
+                if(!exist){
+                    throw new Error("Wrong admin token");
+                }
+            }catch(e){
+                throw new Error("Wrong token");
+            }
         }
 
         next();
