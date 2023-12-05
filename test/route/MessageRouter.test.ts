@@ -49,4 +49,10 @@ describe('Test the /restaurant paths', () => {
         // Assert that UserController.login was called
         expect(MessageController.addMessage).toHaveBeenCalled();
     });
+    test('The /message/delete/:uid route with a delete should call the function on the controller', async () => {
+        // Make a POST request to the /user/login endpoint
+        await request.delete(`${base_url}/message/delete/:uid`);
+        // Assert that UserController.login was called
+        expect(MessageController.deleteMessage).toHaveBeenCalled();
+    });
 });

@@ -185,7 +185,6 @@ async function deleteUserProfile(req: TRequest, res: Response){
         for(let message of messages){
             // TODO : could be optimized
             const note = await MessageController.deleteNotePercentage(message.restaurant._id.toString(), message.note);
-            console.log(note);
         }
 
 

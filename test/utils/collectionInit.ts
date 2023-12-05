@@ -75,6 +75,7 @@ export const createRestaurantCollection = async () : Promise<Collection> => {
                 }
             }}
         });
+    database.collection('restaurants').createIndex({name: "text"}, { collation: { locale: "simple" }})
     return database.collection('restaurants');
 }
 

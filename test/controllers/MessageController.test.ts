@@ -35,6 +35,7 @@ jest.mock('../../src/services/MessageService', () => ({
     queryMessagesForRestaurant: jest.fn(async (uid: string, limit: number, offset: number) => (uid=="test_full")?[{_id: "test_message", user: {_id: "user_id", firstName: "test", lastName: "test", image: "test"}, message: "test", date: "2023-11-21T17:06:58.026Z", note: 5, detailNote: "test"}]:[]),
     lasTimeUserSentMessage: jest.fn(async (userId: string) => {return (userId=="test_user_id")?{date: new Date()}:null;}),
     addMessage: jest.fn(async (message: any) => { return true;}),
+    queryOne: jest.fn(async (uid: string) => { return (uid=="test_full")?{id: "test_message", userId: "test_user_id", note: 5}:null;}),
 }));
 
 jest.mock('../../src/services/RestaurantService', () => ({
@@ -646,6 +647,159 @@ describe('Add a message', () => {
 
         // Act
         await MessageController.addMessage(req, res);
+
+        // Assert
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.json).toHaveBeenCalledWith({"message": "Internal server error"});
+    });
+});
+
+
+// ---------------------------------
+describe('Delete a message', () => {
+    it("Should return a 200 when the message is deleted successfully", async () => {
+        // Arrange
+        const req = {
+            params: {
+                uid: "64a685757acccfac3d045af3"
+            },
+            token: {
+                _id: "64a685757acccfac3d045af3"
+            }
+        } as unknown as TRequest;
+        let resolveStatusPromise: (value: unknown) => void;
+        const statusPromise = new Promise(resolve => {
+            resolveStatusPromise = resolve;
+        });
+
+        const resMock = {
+            status: jest.fn().mockImplementation(() => {
+                resolveStatusPromise(null);
+                return resMock;
+            }),
+            json: jest.fn(),
+        } as unknown as Response;
+
+        // Mock the queryOne function
+        jest.spyOn(MessageService, 'queryOne').mockResolvedValueOnce({
+            _id: new ObjectId("64a685757acccfac3d045af3"),
+            userId: "64a685757acccfac3d045af3",
+            note: 5
+        });
+
+        // Mock the deleteNotePercentage function
+        jest.spyOn(MessageController, 'deleteNotePercentage').mockResolvedValueOnce();
+
+        // Mock the deleteMessage function
+        jest.spyOn(MessageService, 'deleteMessage').mockResolvedValueOnce(null as never);
+
+        // Act
+        await MessageController.deleteMessage(req, resMock);
+
+        await statusPromise;
+
+        // Assert
+        expect(resMock.status).toHaveBeenCalledWith(200);
+        expect(resMock.json).toHaveBeenCalledWith({"message": "Message deleted"});
+    });
+
+    it("Should return a 400 when no restaurant is provided", async () => {
+        // Arrange
+        const req = {
+            params: {},
+            token: {
+                _id: "64a685757acccfac3d045af3"
+            }
+        } as unknown as TRequest;
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+        } as unknown as Response;
+
+        // Act
+        await MessageController.deleteMessage(req, res);
+
+        // Assert
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({"message": "No messageID provided"});
+    });
+
+    it("Should return a 404 when the message is not found", async () => {
+        // Arrange
+        const req = {
+            params: {
+                uid: "64a685757acccfac3d045af3"
+            },
+            token: {
+                _id: "64a685757acccfac3d045af3"
+            }
+        } as unknown as TRequest;
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+        } as unknown as Response;
+
+        // Mock the queryOne function
+        jest.spyOn(MessageService, 'queryOne').mockResolvedValueOnce(null);
+
+        // Act
+        await MessageController.deleteMessage(req, res);
+
+        // Assert
+        expect(res.status).toHaveBeenCalledWith(404);
+        expect(res.json).toHaveBeenCalledWith({"message": "Message not found"});
+    });
+
+    it("Should return a 403 when the user is not authorized to delete the message", async () => {
+        // Arrange
+        const req = {
+            params: {
+                uid: "64a685757acccfac3d045af3"
+            },
+            token: {
+                _id: "64a685757acccfac3d045af3"
+            }
+        } as unknown as TRequest;
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+        } as unknown as Response;
+
+        // Mock the queryOne function
+        jest.spyOn(MessageService, 'queryOne').mockResolvedValueOnce({
+            _id: new ObjectId("64a685757acccfac3d045af3"),
+            userId: "64a685757acccfac3d045ad8",
+            note: 5
+        });
+
+        // Act
+        await MessageController.deleteMessage(req, res);
+
+        // Assert
+        expect(res.status).toHaveBeenCalledWith(403);
+        expect(res.json).toHaveBeenCalledWith({"message": "You can't delete this message"});
+    });
+
+    it("Should return a 500 when an error occurs", async () => {
+        // Arrange
+        const req = {
+            params: {
+                uid: "64a685757acccfac3d045af3"
+            },
+            token: {
+                _id: "64a685757acccfac3d045af3"
+            }
+        } as unknown as TRequest;
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+        } as unknown as Response;
+
+        // Mock the queryOne function to throw an error
+        jest.spyOn(MessageService, 'queryOne').mockRejectedValueOnce(new Error("Internal server error"));
+
+        // Act
+        await MessageController.deleteMessage(req, res);
 
         // Assert
         expect(res.status).toHaveBeenCalledWith(500);

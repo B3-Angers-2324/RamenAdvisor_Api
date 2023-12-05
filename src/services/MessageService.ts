@@ -30,6 +30,11 @@ async function deleteAllMessagesForUser(userId: string) {
     return result;
 }
 
+async function deleteAllMessagesForRestaurant(restaurantId: string) {
+    const result = await collections.message?.deleteMany({restaurantId: new ObjectId(restaurantId)});
+    return result;
+}
+
 async function addMessage(message: Message) {
     const result = await collections.message?.insertOne(message);
     return result;
@@ -66,6 +71,7 @@ export default {
     deleteMessage,
     addMessage,
     deleteAllMessagesForUser,
+    deleteAllMessagesForRestaurant,
     lasTimeUserSentMessage,
     queryMessagesForUser
 } as const;
