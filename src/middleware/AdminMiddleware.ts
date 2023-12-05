@@ -20,8 +20,6 @@ const adminLoginMiddleware = async (req: TRequest, res: Response, next: NextFunc
             const secret_moderator = process.env.JWT_SECRET_MODO || "ASecretPhrase";
             const decode = jwt.verify(token, secret_moderator);
 
-            console.log("Moderator decode: ", decode);
-
             (req as any).token = decode;
             (req as any).admin = false;
         
@@ -34,8 +32,6 @@ const adminLoginMiddleware = async (req: TRequest, res: Response, next: NextFunc
             try{
                 const secret_admin = process.env.JWT_SECRET_ADMIN || "ASecretPhrase";
                 const decode = jwt.verify(token, secret_admin);
-
-                console.log("Admin decode: ", decode);
 
                 (req as any).token = decode;
                 (req as any).admin = true;

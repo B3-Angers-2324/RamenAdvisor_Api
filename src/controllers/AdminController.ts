@@ -47,7 +47,6 @@ async function login(req: Request, res: Response){
 }
 
 async function nav(req: TRequest, res: Response){
-    console.log("user route called", req.token, req.admin);
 
     // TODO: add the content of the navbar
 
