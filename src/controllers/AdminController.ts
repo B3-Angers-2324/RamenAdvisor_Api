@@ -5,6 +5,8 @@ import jwt from "jsonwebtoken";
 import OwnerServices from "../services/OwnerService";
 import Owner from "../models/OwnerModel";
 import { TRequest } from "./types/types";
+import RestaurantService from "../services/RestaurantService";
+
 
 async function login(req: Request, res: Response){
     try{
@@ -40,31 +42,38 @@ async function getOwnerNoValidate (req: TRequest, res: Response) {
 
 async function getAllOwner (req: TRequest, res: Response) {
     try{
-        let ownerlist = await OwnerServices.getAll();
-        console.log(ownerlist);
+        let ownerlist = await OwnerServices.queryAllOwner();
         res.status(HttpStatus.OK).json({"data": ownerlist});
     }catch(error){
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"error": error});
     }
 }
 
-async function validateOwner (req: TRequest, res: Response) {
+async function getOwnerProfile(req: TRequest, res: Response) {
     try{
-        let id = req.token?._id;
-
-        let updatedOwner : Owner = {
-            firstName: req.body.firstName,
-            lastName: req.body.lastName,
-            email: req.body.email,
-            companyName: req.body.companyName,
-            password: req.body.password,
-            socialAdresse: req.body.socialAdresse,
-            validate: !(req.body.validate)
-        };
-
+        //let id = req.token?._id;
+        let id = "65685b83f28ecabc60b84c57";
+        console.log("Id Owner: ", id);
         const owner = await OwnerServices.getOwnerById(id);
         if(owner){
-            const result = await OwnerServices.updateOwner(id, updatedOwner);
+            res.status(HttpStatus.OK).json({"owner": owner});
+        }else{
+            res.status(HttpStatus.NOT_FOUND).json({"message": "Owner not found"});
+        }
+    }catch(error){
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while getting owner information"});
+    }
+}
+
+async function validateOwner (req: TRequest, res: Response) {
+    try{
+        let id = "65685b83f28ecabc60b84c57";
+        // let id = req.token?._id;
+        const owner = await OwnerServices.getOwnerById(id);
+        owner.validate = true;
+
+        if(owner){
+            const result = await OwnerServices.updateOwner(id, owner);
             if(result){
                 res.status(HttpStatus.OK).json({"message": "Owner information updated"});
             }else{
@@ -78,10 +87,27 @@ async function validateOwner (req: TRequest, res: Response) {
     }
 }
 
+async function getRestaurantsByOwner(req: TRequest, res: Response){
+    try{
+        //let id = req.token?._id;
+        let id = "64a685757acccfac3d045af3";
+        const restaurants = await RestaurantService.queryRestaurantsByOwner(id);
+        if(restaurants){
+            res.status(HttpStatus.OK).json({"restaurants": restaurants});
+        }else{
+            res.status(HttpStatus.NOT_FOUND).json({"message": "No restaurant found"});
+        }
+    }catch(error){
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while getting restaurants"});
+    }
+}
+
 
 export default {
     login,
     getOwnerNoValidate,
     getAllOwner,
-    validateOwner
+    getOwnerProfile,
+    validateOwner,
+    getRestaurantsByOwner
 };

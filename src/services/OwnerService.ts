@@ -56,29 +56,13 @@ async function deleteOwner(id: string): Promise<any> {
     }
 }
 
-async function getAll(): Promise<Owner[]> {
-    try {
-        const owners = await collections.owner?.find({}).toArray();
-        if (owners) {
-            return owners.map(element => new Owner(
-                element.firstName,
-                element.lastName,
-                element.email,
-                element.password,
-                element.companyName,
-                element.socialAdresse,
-                element.validate,
-                element.id,
-                element.siret 
-            ));
-        } else {
-            return [];
-        }
-    } catch (err) {
-        throw err;
+const queryAllOwner = async () => {
+    let owners = await collections.owner?.find({}).toArray();
+    if (owners==undefined){
+        throw new Error("No unvalid owner found");
     }
+    return owners;
 }
-
 
 export default {
     getOneOwner,
@@ -87,5 +71,5 @@ export default {
     updateOwner,
     deleteOwner,
     queryOwnerNoValidate,
-    getAll
+    queryAllOwner
 } as const;

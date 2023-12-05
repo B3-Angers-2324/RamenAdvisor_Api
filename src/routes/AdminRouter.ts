@@ -13,7 +13,11 @@ router.get("/getValidate", Admin.getOwnerNoValidate);
 
 router.get("/getAll", Admin.getAllOwner);
 
-router.get("/validate", Admin.validateOwner);
+router.get("/getOne", Admin.getOwnerProfile);
+
+router.patch("/validate", Admin.validateOwner);
+
+router.get("/restaurants", Admin.getRestaurantsByOwner);
 
 
 export default router;
