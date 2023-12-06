@@ -279,7 +279,7 @@ describe("Get reported messages", () => {
             obj: []
         });
     });
-    it("Should return a 200 whi no limit nor offset provided", async () => {
+    it("Should return a 400 whit no limit or offset provided", async () => {
         // Arrange
         const req = {
             query: {}
@@ -293,10 +293,9 @@ describe("Get reported messages", () => {
         await MessageController.getReportedMessages(req, res);
 
         // Assert
-        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.status).toHaveBeenCalledWith(400);
         expect(res.json).toHaveBeenCalledWith({
-            number: 0,
-            obj: []
+            message: "No limit or offset provided"
         });
     });
 });

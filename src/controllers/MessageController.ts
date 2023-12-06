@@ -97,18 +97,21 @@ const reportMessage = async (req: Request, res: Response) => {
 const getReportedMessages = async (req: Request, res: Response) => {
     AdminMiddleware.adminLoginMiddleware(req,res,async ()=>{
         try{
+            if(req.query.limit===undefined || req.query.offset === undefined) throw new CustomError("No limit or offset provided", HttpStatus.BAD_REQUEST);
             //Retrieve the limit and offset from the query
-            let limit = req.query.limit ? parseInt(req.query.limit.toString()) : 10;
-            let offset = req.query.offset ? parseInt(req.query.offset.toString()) : 0;
+            let limit = parseInt(req.query.limit.toString());
+            let offset = parseInt(req.query.offset.toString());
+            let restaurantName = "";
+            if (req.query.restaurantName !== undefined && req.query.restaurantName !== null && req.query.restaurantName !== "") restaurantName = req.query.restaurantName.toString();
             //Retrieve the messages from the database
-            let messages = await ReportService.queryReportedMessages(limit,offset);
+            let messages = await ReportService.queryReportedMessages(limit,offset,restaurantName);
             //Send the response
             res.status(HttpStatus.OK).json({
                 number: messages?.length,
                 obj: messages
             });
-        }catch(e : Error|any){
-            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
+        }catch(e : CustomError|any){
+            res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.message});
         }
     })
 }

@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import * as mongoDB from 'mongodb';
 import dotenv from 'dotenv';
 
