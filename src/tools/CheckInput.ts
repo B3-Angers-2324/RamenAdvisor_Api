@@ -8,13 +8,20 @@ const phone = (input: string) => {
 const email = (input: string) => {
     let regex = new RegExp('^[a-z0-9._-]+@[a-z0-9._-]{2,}\.[a-z]{2,4}$');
     return regex.test(input);
-    // return input.match(/^[a-z0-9._-]+@[a-z0-9._-]{2,}\.[a-z]{2,4}$/);
 }
 
 const password = (input: string) => {
     let regex = new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])');
     return regex.test(input);
     // return input.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])/);
+}
+
+const dateInferiorToToday = (input: Date) => {
+    // input inferior to today - 13 years
+    let today = new Date();
+    let dateLimit = new Date();
+    dateLimit.setFullYear(today.getFullYear() - 13);
+    return input < dateLimit;
 }
 
 const isNotEmpty = (input: string) => {
@@ -36,5 +43,6 @@ export default {
     email,
     password,
     isNotEmpty,
-    areNotEmpty
+    areNotEmpty,
+    dateInferiorToToday
 };

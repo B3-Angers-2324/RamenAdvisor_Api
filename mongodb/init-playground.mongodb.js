@@ -7,6 +7,7 @@ const OwnerCollection = "owners";
 const ModeratorCollection = "moderators";
 const AdminCollection = "admins";
 const FoodtypeCollection = "foodtypes";
+const ReportCollection = "reports";
 
 use(database);
 
@@ -57,6 +58,8 @@ db.createCollection(
                 },
                 note: {
                     bsonType: "int",
+                    minimum: 1,
+                    maximum: 5,
                     description: "must be a int and is required"
                 },
                 date: {
@@ -69,54 +72,15 @@ db.createCollection(
 );
 
 db.createCollection(
-    RestaurantCollection,
-    {
-        validator: { $jsonSchema: {
-            bsonType: "object",
-            required: ["ownerId", "name", "position", "address", "foodtype", "note"],
-            properties: {
-                ownerId: {
-                    bsonType: "objectId",
-                    description: "must be a int and is required"
-                },
-                name: {
-                    bsonType: "string",
-                    description: "must be a string and is required"
-                },
-                position: {
-                    bsonType: "array",
-                    description: "must be a array and is required"
-                },
-                address: {
-                    bsonType: "string",
-                    description: "must be a string and is required"
-                },
-                foodtype:{
-                    bsonType: "string",
-                    description: "must be a string and is required"
-                },
-                note: {
-                    bsonType: "int",
-                    minimum: 0,
-                    maximum: 50,
-                    description: "must be a int and is required"
-                },
-                //Need to be changed to Images type
-                images: {
-                    bsonType: "array",
-                    description: "must be a array of string"
-                },
-            }
-        }}
-    }
-);
+    RestaurantCollection
+    );
 
 db.createCollection(
     UserCollection,
     {
         validator: { $jsonSchema: {
             bsonType: "object",
-            required: ["firstName", "lastName", "birthDay", "email", "phone", "sexe", "password", "ville", "ban"],
+            required: ["firstName", "lastName", "birthDay", "email", "phone", "sexe", "password", "ville", "ban", "image"],
             properties: {
                 firstName: {
                     bsonType: "string",
@@ -127,7 +91,7 @@ db.createCollection(
                     description: "must be a string and is required"
                 },
                 birthDay: {
-                    bsonType: "string",
+                    bsonType: "date",
                     description: "must be a string and is required"
                 },
                 email: {
@@ -153,6 +117,10 @@ db.createCollection(
                 ban: {
                     bsonType: "bool",
                     description: "must be a bool and is required"
+                },
+                image: {
+                    bsonType: "string",
+                    description: "must be a string and is required"
                 }
             }
         }}
@@ -204,16 +172,8 @@ db.createCollection(
     {
         validator: { $jsonSchema: {
             bsonType: "object",
-            required: ["firstName", "lastName", "email", "password"],
+            required: ["email", "password"],
             properties: {
-                firstName: {
-                    bsonType: "string",
-                    description: "must be a string and is required"
-                },
-                lastName: {
-                    bsonType: "string",
-                    description: "must be a string and is required"
-                },
                 email: {
                     bsonType: "string",
                     description: "must be a string and is required"
@@ -232,16 +192,8 @@ db.createCollection(
     {
         validator: { $jsonSchema: {
             bsonType: "object",
-            required: ["firstName", "lastName", "email", "password"],
+            required: ["email", "password"],
             properties: {
-                firstName: {
-                    bsonType: "string",
-                    description: "must be a string and is required"
-                },
-                lastName: {
-                    bsonType: "string",
-                    description: "must be a string and is required"
-                },
                 email: {
                     bsonType: "string",
                     description: "must be a string and is required"
@@ -249,6 +201,38 @@ db.createCollection(
                 password: {
                     bsonType: "string",
                     description: "must be a string and is required"
+                }
+            }
+        }}
+    }
+);
+
+db.createCollection(
+    ReportCollection,
+    {
+        validator: { $jsonSchema: {
+            bsonType: "object",
+            required: ["userId", "restaurantId", "messageId", "date_first", "nbReport"],
+            properties: {
+                userId: {
+                    bsonType: "objectId",
+                    description: "The Id of the user who wrote the message, must be a int and is required"
+                },
+                restaurantId: {
+                    bsonType: "objectId",
+                    description: "The id of the restaurant where the message is written ,must be a int and is required"
+                },
+                messageId: {
+                    bsonType: "objectId",
+                    description: "The id of the message ,must be a int and is required"
+                },
+                date_first: {
+                    bsonType: "date",
+                    description: "The date of the first report, must be a date and is required"
+                },
+                nbReport: {
+                    bsonType: "int",
+                    description: "The number of report, must be a int and is required"
                 }
             }
         }}

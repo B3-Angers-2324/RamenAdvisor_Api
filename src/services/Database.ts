@@ -9,6 +9,7 @@ export const collections: {
     moderator?: mongoDB.Collection,
     admin?: mongoDB.Collection,
     foodtype?: mongoDB.Collection,
+    report?: mongoDB.Collection
 } = {};
 
 export async function connectToDatabase(){
@@ -24,6 +25,7 @@ export async function connectToDatabase(){
     const moderatorCollection: mongoDB.Collection = db.collection("moderators");
     const adminCollection: mongoDB.Collection = db.collection("admins");
     const foodtypeCollection: mongoDB.Collection = db.collection("foodtypes");
+    const reportCollection: mongoDB.Collection = db.collection("reports");
 
     collections.restaurant = restaurantCollection;
     collections.owner = ownerCollection;
@@ -32,6 +34,10 @@ export async function connectToDatabase(){
     collections.moderator = moderatorCollection;
     collections.admin = adminCollection;
     collections.foodtype = foodtypeCollection;
+    collections.report = reportCollection;
+
+    // Indexes for restaurants
+    collections.restaurant?.createIndex({name: "text"}, { collation: { locale: "simple" }})
 
     console.log(`[Server]: Successfully connected to database: ${db.databaseName}`);
 }
