@@ -54,13 +54,13 @@ db.getCollection(UserCollection).insertMany([
 ]);
 
 db.getCollection(ModeratorCollection).insertMany([
-  { "_id": ObjectId("64a685757acccfac3d045af8"), "firstName": "Jean", "lastName": "Eude", "email": "jean.eude@gmail.com", "password": "grospassword" },
-  { "_id": ObjectId("64a685757acccfac3d045af9"), "firstName": "Marie", "lastName": "Lacroix", "email": "marie.lacroix@gmail.com", "password": "secret123" },
-  { "_id": ObjectId("64a685757acccfac3d045afa"), "firstName": "Pierre", "lastName": "Dumas", "email": "pierre.dumas@gmail.com", "password": "securepass" },
-  { "_id": ObjectId("64a685757acccfac3d045afb"), "firstName": "Sophie", "lastName": "Gagnon", "email": "sophie.gagnon@gmail.com", "password": "myp@ssword" },
-  { "_id": ObjectId("64a685757acccfac3d045afc"), "firstName": "Luc", "lastName": "Martel", "email": "luc.martel@gmail.com", "password": "letmein" },
-  { "_id": ObjectId("64a685757acccfac3d045afd"), "firstName": "Isabelle", "lastName": "Leblanc", "email": "isabelle.leblanc@gmail.com", "password": "changeme" },
-  { "_id": ObjectId("64a685757acccfac3d045afe"), "firstName": "Antoine", "lastName": "Rousseau", "email": "antoine.rousseau@gmail.com", "password": "easytohack" }
+  { "_id": ObjectId("64a685757acccfac3d045af8"), "email": "jean.eude@gmail.com", "password": "9adfb0a6d03beb7141d8ec2708d6d9fef9259d12cd230d50f70fb221ae6cabd5" },
+  { "_id": ObjectId("64a685757acccfac3d045af9"), "email": "marie.lacroix@gmail.com", "password": "9adfb0a6d03beb7141d8ec2708d6d9fef9259d12cd230d50f70fb221ae6cabd5" },
+  { "_id": ObjectId("64a685757acccfac3d045afa"), "email": "pierre.dumas@gmail.com", "password": "9adfb0a6d03beb7141d8ec2708d6d9fef9259d12cd230d50f70fb221ae6cabd5" },
+  { "_id": ObjectId("64a685757acccfac3d045afb"), "email": "sophie.gagnon@gmail.com", "password": "myp@9adfb0a6d03beb7141d8ec2708d6d9fef9259d12cd230d50f70fb221ae6cabd5" },
+  { "_id": ObjectId("64a685757acccfac3d045afc"), "email": "luc.martel@gmail.com", "password": "9adfb0a6d03beb7141d8ec2708d6d9fef9259d12cd230d50f70fb221ae6cabd5" },
+  { "_id": ObjectId("64a685757acccfac3d045afd"), "email": "isabelle.leblanc@gmail.com", "password": "9adfb0a6d03beb7141d8ec2708d6d9fef9259d12cd230d50f70fb221ae6cabd5" },
+  { "_id": ObjectId("64a685757acccfac3d045afe"), "email": "antoine.rousseau@gmail.com", "password": "9adfb0a6d03beb7141d8ec2708d6d9fef9259d12cd230d50f70fb221ae6cabd5" }
 ]);
 
 db.getCollection(AdminCollection).insertMany([

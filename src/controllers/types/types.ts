@@ -2,6 +2,7 @@ import { Request } from "express";
 
 export interface TRequest extends Request {
     token?: any;
+    admin?: boolean;
 }
 
 export class CustomError extends Error {

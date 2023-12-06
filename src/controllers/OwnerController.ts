@@ -15,8 +15,22 @@ async function login(req: Request, res: Response){
         const owner = await OwnerServices.getOneOwner(req.body.email);
         if(owner){
             if(owner.password == req.body.password){
+
+                const isBan = await OwnerServices.isBan(owner._id?.toString());
+                if(isBan){
+                    res.status(HttpStatus.UNAUTHORIZED).json({"message": "You are banned"});
+                    return;
+                }
+
+                // const isValidate = await OwnerServices.isValidate(owner._id?.toString());
+                // if(!isValidate){
+                //     res.status(HttpStatus.UNAUTHORIZED).json({"message": "Your account is being validated"});
+                //     return;
+                // }
+
                 const secret = process.env.JWT_SECRET_OWNER || "ASecretPhrase";
                 const token = jwt.sign({_id: owner._id?.toString()}, secret, {expiresIn: process.env.JWT_EXPIRES_IN});
+                await OwnerServices.updateToken(req.body.email, token);
                 res.status(HttpStatus.OK).json({"token": token});
             }else{
                 res.status(HttpStatus.UNAUTHORIZED).json({"message": "Wrong password"});
@@ -58,6 +72,7 @@ async function register(req: Request, res: Response){
         if(addedOwner){
             const secret = process.env.JWT_SECRET_OWNER || "ASecretPhrase";
             const token = jwt.sign({_id: addedOwner.insertedId?.toString()}, secret, {expiresIn: process.env.JWT_EXPIRES_IN});
+            await OwnerServices.updateToken(newOwner.email, token);
             res.status(HttpStatus.CREATED).json({"token": token});
         }else{
             res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while adding owner"});

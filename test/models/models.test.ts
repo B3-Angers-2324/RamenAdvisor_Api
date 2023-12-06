@@ -12,10 +12,8 @@ import { ObjectId } from 'mongodb';
 // test admin model
 describe('Test Admin model', () => {
     test('Create new Admin', () => {
-        const admin = new Admin('first', 'last', 'password');
-        expect(admin.firstName).toBe('first');
-        expect(admin.lastName).toBe('last');
-        expect(admin.password).toBe('password');
+        const admin = new Admin('email');
+        expect(admin.email).toBe('email');
     });
 });
 
@@ -33,10 +31,8 @@ describe('Test Message model', () => {
 // test moderator model
 describe('Test Moderator model', () => {
     test('Create new Moderator', () => {
-        const moderator = new Moderator('first', 'last', 'password');
-        expect(moderator.firstName).toBe('first');
-        expect(moderator.lastName).toBe('last');
-        expect(moderator.password).toBe('password');
+        const moderator = new Moderator('email');
+        expect(moderator.email).toBe('email');
     });
 });
 

@@ -18,8 +18,15 @@ async function login(req: Request, res: Response){
         const user = await UserServices.getOneUser(req.body.email);
         if(user){
             if(user.password === req.body.password){
+
+                const isBan = await UserServices.isBan(user._id?.toString());
+                if(isBan){
+                    throw new Error("You are banned");
+                }
+
                 const secret = process.env.JWT_SECRET_USER || "ASecretPhrase";
                 const token = jwt.sign({_id: user._id?.toString()}, secret, {expiresIn: process.env.JWT_EXPIRES_IN});
+                await UserServices.updateToken(req.body.email, token);
                 res.status(HttpStatus.OK).json({"token": token});
             }else{
                 throw new Error("Wrong password");
@@ -37,6 +44,9 @@ async function login(req: Request, res: Response){
                 break;
             case "User not found":
                 res.status(HttpStatus.NOT_FOUND).json({"message": error.message});
+                break;
+            case "You are banned":
+                res.status(HttpStatus.UNAUTHORIZED).json({"message": error.message});
                 break;
             default:
                 res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while logging in"});
@@ -82,6 +92,7 @@ async function register(req: Request, res: Response){
         if(addedUser){
             const secret = process.env.JWT_SECRET_USER || "ASecretPhrase";
             const token = jwt.sign({_id: addedUser.insertedId?.toString()}, secret, {expiresIn: process.env.JWT_EXPIRES_IN});
+            await UserServices.updateToken(req.body.email, token);
             res.status(HttpStatus.CREATED).json({"token": token});
         }else{
             throw new Error("Error while adding user");

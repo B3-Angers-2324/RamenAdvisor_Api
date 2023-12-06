@@ -33,10 +33,11 @@ describe('Test all UserService function', () => {
             phone: '0123456789',
             sexe: 'homme',
             password: 'test1',
-            ban: false,
+            ban: true,
             ville: 'Angers',
             address: 'test1',
             image: 'urlImage1',
+            token: 'token1',
         },
         {
             firstName: 'test3',
@@ -267,6 +268,257 @@ describe('Test all UserService function', () => {
             // Check if the delete was not successful
             expect(result).toBeDefined();
             expect(result.deletedCount).toBe(0);
+        });
+    });
+
+
+    describe('Test if isRightToken work correctely', () => {
+        test('isRightToken of user with id and token', async () => {
+            const usersData = [
+                {
+                    _id: new ObjectId('64a685757acccfac3d045aa1'),
+                    firstName: 'test1',
+                    lastName: 'test1',
+                    birthDay: new Date('1999-01-01'),
+                    email: 'user1@gmail.com',
+                    phone: '0123456789',
+                    sexe: 'homme',
+                    password: 'test1',
+                    ban: false,
+                    ville: 'Angers',
+                    address: 'test1',
+                    image: 'urlImage1',
+                    token: 'token1'
+                }
+            ];
+            await db.addDatasToCollection(userCollection, usersData);
+
+            // there is a user with id and token
+            const res = await UserService.isRightToken('64a685757acccfac3d045aa1', 'token1');
+            expect(res).not.toBeNull();
+
+            // there is no user with id and token
+            const res2 = await UserService.isRightToken('64a685757acccfac3d045aa1', 'token2');
+            expect(res2).toBeNull();
+
+            // there is no user with id
+            const res3 = await UserService.isRightToken('64a685757acccfac3d045aa2', 'token1');
+            expect(res3).toBeNull();
+
+            // there is no user with token
+            const res4 = await UserService.isRightToken('64a685757acccfac3d045aa2', 'token3');
+            expect(res4).toBeNull();
+        })
+    })
+
+    describe('Test if updateToken work correctely', () => {
+        test('updateToken of user with email and token', async () => {
+            const usersData = [
+                {
+                    _id: new ObjectId('64a685757acccfac3d045aa1'),
+                    firstName: 'test1',
+                    lastName: 'test1',
+                    birthDay: new Date('1999-01-01'),
+                    email: 'test1@gmail.com',
+                    phone: '0123456789',
+                    sexe: 'homme',
+                    password: 'test1',
+                    ban: false,
+                    ville: 'Angers',
+                    address: 'test1',
+                    image: 'urlImage1',
+                }
+            ];
+            await db.addDatasToCollection(userCollection, usersData);
+
+            // add token
+            const res = await UserService.updateToken('test1@gmail.com', 'token1');
+
+            // check if token is added
+            const user = await userCollection.findOne({email: 'test1@gmail.com'});
+            expect(user?.token).toBe('token1');
+
+            // update token
+            const res2 = await UserService.updateToken('test1@gmail.com', 'token2');
+
+            // check if token is updated
+            const user2 = await userCollection.findOne({email: 'test1@gmail.com'});
+            expect(user2?.token).toBe('token2');
+        });
+    });
+
+    describe('Test if isBan works correctly', () => {
+        test('isBan with valid id', async () => {
+          const usersData = [
+            {
+              _id: new ObjectId('64a685757acccfac3d045aa1'),
+              firstName: 'test1',
+              lastName: 'test1',
+              birthDay: new Date('1999-01-01'),
+              email: 'test1@gmail.com',
+              phone: '0123456789',
+              sexe: 'homme',
+              password: 'test1',
+              ban: true,
+              ville: 'Angers',
+              address: 'test1',
+              image: 'urlImage1',
+            },
+            {
+              _id: new ObjectId('64a685757acccfac3d045aa2'),
+              firstName: 'test1',
+              lastName: 'test1',
+              birthDay: new Date('1999-01-01'),
+              email: 'test1@gmail.com',
+              phone: '0123456789',
+              sexe: 'homme',
+              password: 'test1',
+              ban: false,
+              ville: 'Angers',
+              address: 'test1',
+              image: 'urlImage1',
+            }
+          ];
+          await db.addDatasToCollection(userCollection, usersData);
+    
+          // Call isBan
+          const result = await UserService.isBan('64a685757acccfac3d045aa1');
+          const result2 = await UserService.isBan('64a685757acccfac3d045aa2');
+    
+          // Check if the result contains somting in {...}
+          expect(result).toBeDefined();
+          //check if the result2 equals to be null
+          expect(result2).toBeNull();
+        })
+    })
+
+    describe('Test if getUsersByFirstName works correctly', () => {
+        test('getUsersByFirstName with valid firstName', async () => {
+            const userData = [
+                {
+                  _id: new ObjectId('64a685757acccfac3d045aa1'),
+                  firstName: 'jean',
+                  lastName: 'bernard',
+                  birthDay: new Date('1999-01-01'),
+                  email: 'test1@gmail.com',
+                  phone: '0123456789',
+                  sexe: 'homme',
+                  password: 'test1',
+                  ban: true,
+                  ville: 'Angers',
+                  address: 'test1',
+                  image: 'urlImage1',
+                },
+                {
+                  _id: new ObjectId('64a685757acccfac3d045aa2'),
+                  firstName: 'jean',
+                  lastName: 'michel',
+                  birthDay: new Date('1999-01-01'),
+                  email: 'test1@gmail.com',
+                  phone: '0123456789',
+                  sexe: 'homme',
+                  password: 'test1',
+                  ban: true,
+                  ville: 'Angers',
+                  address: 'test1',
+                  image: 'urlImage1',
+                }
+            ];
+            await db.addDatasToCollection(userCollection, userData);
+
+            // Call getUsersByFirstName
+            const result = await UserService.getUsersByFirstName('jean');
+            // Check if the result contains somting in {...}
+            expect(result).toBeDefined();
+            // Check if the result contains 2 users
+            expect(result.length).toBe(2);
+        });
+    });
+
+
+    describe('Test if getUsersByLastName works correctly', () => {
+        test('getUsersByLastName with valid firstName', async () => {
+            const userData = [
+                {
+                  _id: new ObjectId('64a685757acccfac3d045aa1'),
+                  firstName: 'cedrique',
+                  lastName: 'michel',
+                  birthDay: new Date('1999-01-01'),
+                  email: 'test1@gmail.com',
+                  phone: '0123456789',
+                  sexe: 'homme',
+                  password: 'test1',
+                  ban: true,
+                  ville: 'Angers',
+                  address: 'test1',
+                  image: 'urlImage1',
+                },
+                {
+                  _id: new ObjectId('64a685757acccfac3d045aa2'),
+                  firstName: 'jean',
+                  lastName: 'michel',
+                  birthDay: new Date('1999-01-01'),
+                  email: 'test1@gmail.com',
+                  phone: '0123456789',
+                  sexe: 'homme',
+                  password: 'test1',
+                  ban: true,
+                  ville: 'Angers',
+                  address: 'test1',
+                  image: 'urlImage1',
+                }
+            ];
+            await db.addDatasToCollection(userCollection, userData);
+
+            // Call getUsersByFirstName
+            const result = await UserService.getUsersByLastName('michel');
+            // Check if the result contains somting in {...}
+            expect(result).toBeDefined();
+            // Check if the result contains 2 users
+            expect(result.length).toBe(2);
+        });
+    });
+
+    describe('Test if getUsersByFirstNameAndLastName works correctly', () => {
+        test('getUsersByFirstNameAndLastName with valid firstName', async () => {
+            const userData = [
+                {
+                  _id: new ObjectId('64a685757acccfac3d045aa1'),
+                  firstName: 'michel',
+                  lastName: 'rodriguez',
+                  birthDay: new Date('1999-01-01'),
+                  email: 'test1@gmail.com',
+                  phone: '0123456789',
+                  sexe: 'homme',
+                  password: 'test1',
+                  ban: true,
+                  ville: 'Angers',
+                  address: 'test1',
+                  image: 'urlImage1',
+                },
+                {
+                  _id: new ObjectId('64a685757acccfac3d045aa2'),
+                  firstName: 'jean',
+                  lastName: 'michel',
+                  birthDay: new Date('1999-01-01'),
+                  email: 'test1@gmail.com',
+                  phone: '0123456789',
+                  sexe: 'homme',
+                  password: 'test1',
+                  ban: true,
+                  ville: 'Angers',
+                  address: 'test1',
+                  image: 'urlImage1',
+                }
+            ];
+            await db.addDatasToCollection(userCollection, userData);
+
+            // Call getUsersByFirstName
+            const result = await UserService.getUsersByFirstNameAndLastName('michel', "rodriguez");
+            // Check if the result contains somting in {...}
+            expect(result).toBeDefined();
+            // Check if the result contains 2 users
+            expect(result.length).toBe(1);
         });
     });
 })
