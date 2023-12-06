@@ -22,4 +22,13 @@ router.get("/user/message/:uid", Admin.getUserMessage);
 router.patch("/user/ban/:uid", Admin.banUser);
 
 
+// Route for admin only
+
+router.get("/moderator", Admin.getModerators);
+
+router.post("/moderator", Admin.addModerator);
+
+router.delete("/moderator/:mid", Admin.deleteModerator);
+
+
 export default router;

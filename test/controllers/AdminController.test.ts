@@ -9,6 +9,8 @@ import UserService from '../../src/services/UserService';
 import MessageService from '../../src/services/MessageService';
 import dotenv from 'dotenv';
 import { TRequest } from '../../src/controllers/types/types';
+import CheckInput from '../../src/tools/CheckInput';
+import { CustomError } from '../../src/controllers/types/types';
 import User from '../../src/models/UserModel';
 import { uptime } from 'process';
 dotenv.config();
@@ -44,13 +46,13 @@ describe('AdminController - login', () => {
       password: 'moderatorPassword',
     };
 
-    jest.spyOn(ModeratorService, 'getOneUser').mockResolvedValueOnce(moderator);
+    jest.spyOn(ModeratorService, 'getOneModo').mockResolvedValueOnce(moderator);
     jest.spyOn(jwt, 'sign').mockReturnValueOnce(token as any);
     jest.spyOn(ModeratorService, 'updateToken').mockResolvedValueOnce(true);
 
     await AdminControler.login(req, res);
 
-    expect(ModeratorService.getOneUser).toHaveBeenCalledWith('moderator@example.com');
+    expect(ModeratorService.getOneModo).toHaveBeenCalledWith('moderator@example.com');
     expect(jwt.sign).toHaveBeenCalledWith(
       { _id: undefined, moderator: true },
       secret_moderator,
@@ -69,11 +71,11 @@ describe('AdminController - login', () => {
       password: 'wrongPassword',
     };
 
-    jest.spyOn(ModeratorService, 'getOneUser').mockResolvedValueOnce(moderator);
+    jest.spyOn(ModeratorService, 'getOneModo').mockResolvedValueOnce(moderator);
 
     await AdminControler.login(req, res);
 
-    expect(ModeratorService.getOneUser).toHaveBeenCalledWith('moderator@example.com');
+    expect(ModeratorService.getOneModo).toHaveBeenCalledWith('moderator@example.com');
     expect(res.status).toHaveBeenCalledWith(HttpStatus.UNAUTHORIZED);
     expect(res.json).toHaveBeenCalledWith({ message: 'Wrong password' });
   });
@@ -88,14 +90,14 @@ describe('AdminController - login', () => {
       password: 'adminPassword',
     };
 
-    jest.spyOn(ModeratorService, 'getOneUser').mockResolvedValueOnce(null);
+    jest.spyOn(ModeratorService, 'getOneModo').mockResolvedValueOnce(null);
     jest.spyOn(AdminService, 'getOneUser').mockResolvedValueOnce(admin);
     jest.spyOn(jwt, 'sign').mockReturnValueOnce(token as any);
     jest.spyOn(AdminService, 'updateToken').mockResolvedValueOnce(true);
 
     await AdminControler.login(req, res);
 
-    expect(ModeratorService.getOneUser).toHaveBeenCalledWith('admin@example.com');
+    expect(ModeratorService.getOneModo).toHaveBeenCalledWith('admin@example.com');
     expect(AdminService.getOneUser).toHaveBeenCalledWith('admin@example.com');
     expect(jwt.sign).toHaveBeenCalledWith(
       { _id: undefined, moderator: true },
@@ -115,12 +117,12 @@ describe('AdminController - login', () => {
       password: 'wrongPassword',
     };
 
-    jest.spyOn(ModeratorService, 'getOneUser').mockResolvedValueOnce(null);
+    jest.spyOn(ModeratorService, 'getOneModo').mockResolvedValueOnce(null);
     jest.spyOn(AdminService, 'getOneUser').mockResolvedValueOnce(admin);
 
     await AdminControler.login(req, res);
 
-    expect(ModeratorService.getOneUser).toHaveBeenCalledWith('admin@example.com');
+    expect(ModeratorService.getOneModo).toHaveBeenCalledWith('admin@example.com');
     expect(AdminService.getOneUser).toHaveBeenCalledWith('admin@example.com');
     expect(res.status).toHaveBeenCalledWith(HttpStatus.UNAUTHORIZED);
     expect(res.json).toHaveBeenCalledWith({ message: 'Wrong password' });
@@ -132,12 +134,12 @@ describe('AdminController - login', () => {
       password: 'password',
     };
 
-    jest.spyOn(ModeratorService, 'getOneUser').mockResolvedValueOnce(null);
+    jest.spyOn(ModeratorService, 'getOneModo').mockResolvedValueOnce(null);
     jest.spyOn(AdminService, 'getOneUser').mockResolvedValueOnce(null);
 
     await AdminControler.login(req, res);
 
-    expect(ModeratorService.getOneUser).toHaveBeenCalledWith('unknown@example.com');
+    expect(ModeratorService.getOneModo).toHaveBeenCalledWith('unknown@example.com');
     expect(AdminService.getOneUser).toHaveBeenCalledWith('unknown@example.com');
     expect(res.status).toHaveBeenCalledWith(HttpStatus.NOT_FOUND);
     expect(res.json).toHaveBeenCalledWith({ message: 'User not found' });
@@ -149,11 +151,11 @@ describe('AdminController - login', () => {
       password: 'adminPassword',
     };
 
-    jest.spyOn(ModeratorService, 'getOneUser').mockRejectedValueOnce(new Error('Database error'));
+    jest.spyOn(ModeratorService, 'getOneModo').mockRejectedValueOnce(new Error('Database error'));
 
     await AdminControler.login(req, res);
 
-    expect(ModeratorService.getOneUser).toHaveBeenCalledWith('admin@example.com');
+    expect(ModeratorService.getOneModo).toHaveBeenCalledWith('admin@example.com');
     expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
     expect(res.json).toHaveBeenCalledWith({ message: 'Error while logging in' });
   });
@@ -607,5 +609,290 @@ describe("AdminController - banUser", () => {
     expect(UserService.updateUser).toHaveBeenCalledWith(user._id, user);
     expect(res.status).toHaveBeenCalledWith(HttpStatus.OK);
     expect(res.json).toHaveBeenCalledWith({ message: 'User banned' });
+  });
+});
+
+// ------------------------------------------------------------- //
+
+describe('AdminController - addModerator', () => {
+  let req: TRequest;
+  let res: Response;
+
+  beforeEach(() => {
+    req = {
+      admin: true,
+      body: {
+        email: 'moderator@example.com',
+        password: 'moderatorPassword',
+      },
+    } as never as TRequest;
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('should add a new moderator', async () => {
+    const newModerator = {
+      email: 'moderator@example.com',
+      password: 'moderatorPassword',
+    };
+
+    jest.spyOn(CheckInput, 'email').mockReturnValueOnce(true);
+    jest.spyOn(AdminService, 'getOneUser').mockResolvedValueOnce(null);
+    jest.spyOn(ModeratorService, 'getOneModo').mockResolvedValueOnce(null);
+    jest.spyOn(ModeratorService, 'addModerator').mockResolvedValueOnce(true);
+
+    await AdminControler.addModerator(req, res);
+
+    expect(CheckInput.email).toHaveBeenCalledWith(newModerator.email);
+    expect(AdminService.getOneUser).toHaveBeenCalledWith(newModerator.email);
+    expect(ModeratorService.getOneModo).toHaveBeenCalledWith(newModerator.email);
+    expect(ModeratorService.addModerator).toHaveBeenCalledWith(newModerator);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.OK);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Moderator added' });
+  });
+
+  test('should return unauthorized if not an admin', async () => {
+    req.admin = false;
+
+    await AdminControler.addModerator(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.UNAUTHORIZED);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Unauthorized' });
+  });
+
+  test('should return bad request if email or password is missing', async () => {
+    req.body.email = undefined;
+
+    await AdminControler.addModerator(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Missing parameters' });
+  });
+
+  test('should return bad request if email is invalid', async () => {
+    jest.spyOn(CheckInput, 'email').mockReturnValueOnce(false);
+
+    await AdminControler.addModerator(req, res);
+
+    expect(CheckInput.email).toHaveBeenCalledWith(req.body.email);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Invalid email' });
+  });
+
+  // test('should return bad request if password is invalid', async () => {
+  //   jest.spyOn(CheckInput, 'password').mockReturnValueOnce(false);
+
+  //   await AdminControler.addModerator(req, res);
+
+  //   expect(CheckInput.password).toHaveBeenCalledWith(req.body.password);
+  //   expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+  //   expect(res.json).toHaveBeenCalledWith({ message: 'Invalid password' });
+  // });
+
+  test('should return bad request if admin already exists with the same email', async () => {
+    jest.spyOn(AdminService, 'getOneUser').mockResolvedValueOnce({});
+
+    await AdminControler.addModerator(req, res);
+
+    expect(AdminService.getOneUser).toHaveBeenCalledWith(req.body.email);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Admin already exists with this mail' });
+  });
+
+  test('should return bad request if moderator already exists with the same email', async () => {
+    jest.spyOn(ModeratorService, 'getOneModo').mockResolvedValueOnce({});
+
+    await AdminControler.addModerator(req, res);
+
+    expect(ModeratorService.getOneModo).toHaveBeenCalledWith(req.body.email);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Moderator already exists with this mail' });
+  });
+
+  test('should return internal server error if error occurs while adding moderator', async () => {
+    jest.spyOn(ModeratorService, 'addModerator').mockResolvedValueOnce(null);
+
+    await AdminControler.addModerator(req, res);
+
+    expect(ModeratorService.addModerator).toHaveBeenCalledWith(req.body);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Error while adding moderator' });
+  });
+
+  test('should handle custom error', async () => {
+    const customError = new CustomError('Custom error', HttpStatus.BAD_REQUEST);
+
+    jest.spyOn(CheckInput, 'email').mockImplementation(() => {
+      throw customError;
+    });
+
+    await AdminControler.addModerator(req, res);
+
+    expect(CheckInput.email).toHaveBeenCalledWith(req.body.email);
+    expect(res.status).toHaveBeenCalledWith(customError.code);
+    expect(res.json).toHaveBeenCalledWith({ message: customError.message });
+  });
+});
+
+// ------------------------------------------------------------- //
+
+describe('AdminController - deleteModerator', () => {
+  let req: TRequest;
+  let res: Response;
+
+  beforeEach(() => {
+    req = {
+      admin: true,
+      params: {
+        mid: 'moderatorId',
+      },
+    } as never as TRequest;
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('should delete the moderator', async () => {
+    const moderator = { _id: 'moderatorId' };
+
+    jest.spyOn(ModeratorService, 'getOneModoById').mockResolvedValueOnce(moderator);
+    jest.spyOn(ModeratorService, 'deleteModerator').mockResolvedValueOnce(true);
+
+    await AdminControler.deleteModerator(req, res);
+
+    expect(ModeratorService.getOneModoById).toHaveBeenCalledWith(req.params.mid);
+    expect(ModeratorService.deleteModerator).toHaveBeenCalledWith(req.params.mid);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.OK);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Moderator deleted' });
+  });
+
+  test('should return unauthorized if not an admin', async () => {
+    req.admin = false;
+
+    await AdminControler.deleteModerator(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.UNAUTHORIZED);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Unauthorized' });
+  });
+
+  test('should return bad request if missing parameters', async () => {
+    let custReq = {
+      admin: true,
+      params: {},
+    } as never as TRequest;
+
+    await AdminControler.deleteModerator(custReq, res);
+
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Missing parameters' });
+  });
+
+  test('should return not found if moderator not found', async () => {
+    jest.spyOn(ModeratorService, 'getOneModoById').mockResolvedValueOnce(null);
+
+    await AdminControler.deleteModerator(req, res);
+
+    expect(ModeratorService.getOneModoById).toHaveBeenCalledWith(req.params.mid);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.NOT_FOUND);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Moderator not found' });
+  });
+
+  test('should return internal server error if error occurs while deleting moderator', async () => {
+    jest.spyOn(ModeratorService, 'getOneModoById').mockResolvedValueOnce({ _id: 'moderatorId' });
+    jest.spyOn(ModeratorService, 'deleteModerator').mockResolvedValueOnce(null);
+
+    await AdminControler.deleteModerator(req, res);
+
+    expect(ModeratorService.getOneModoById).toHaveBeenCalledWith(req.params.mid);
+    expect(ModeratorService.deleteModerator).toHaveBeenCalledWith(req.params.mid);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Error while deleting moderator' });
+  });
+
+  test('should handle custom error', async () => {
+    const customError = new CustomError('Custom Error', HttpStatus.BAD_REQUEST);
+
+    jest.spyOn(ModeratorService, 'getOneModoById').mockRejectedValueOnce(customError);
+
+    await AdminControler.deleteModerator(req, res);
+
+    expect(ModeratorService.getOneModoById).toHaveBeenCalledWith(req.params.mid);
+    expect(res.status).toHaveBeenCalledWith(customError.code);
+    expect(res.json).toHaveBeenCalledWith({ message: customError.message });
+  });
+
+  test('should handle generic error', async () => {
+    const genericError = new Error('Generic Error');
+
+    jest.spyOn(ModeratorService, 'getOneModoById').mockRejectedValueOnce(genericError);
+
+    await AdminControler.deleteModerator(req, res);
+
+    expect(ModeratorService.getOneModoById).toHaveBeenCalledWith(req.params.mid);
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Error while deleting moderator' });
+  });
+});
+
+// ------------------------------------------------------------- //
+
+describe('AdminController - getModerators', () => {
+  let req: TRequest;
+  let res: Response;
+
+  beforeEach(() => {
+    req = {
+      admin: true,
+    } as never as TRequest;
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('should return the list of moderators', async () => {
+    const moderators = [{ name: 'Moderator 1' }, { name: 'Moderator 2' }];
+
+    jest.spyOn(ModeratorService, 'getModerators').mockResolvedValueOnce(moderators);
+
+    await AdminControler.getModerators(req, res);
+
+    expect(ModeratorService.getModerators).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.OK);
+    expect(res.json).toHaveBeenCalledWith(moderators);
+  });
+
+  test('should return an internal server error if an error occurs while getting moderators', async () => {
+    jest.spyOn(ModeratorService, 'getModerators').mockRejectedValueOnce(new Error('Database error'));
+
+    await AdminControler.getModerators(req, res);
+
+    expect(ModeratorService.getModerators).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Error while getting moderators' });
+  });
+
+  test('should return unauthorized if the request is not from an admin', async () => {
+    req.admin = false;
+
+    await AdminControler.getModerators(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.UNAUTHORIZED);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Unauthorized' });
   });
 });

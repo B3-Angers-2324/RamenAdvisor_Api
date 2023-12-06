@@ -118,4 +118,27 @@ describe('Test areNotEmpty function', () => {
     const result = CheckInput.areNotEmpty(emptyStrings);
     expect(result).toBe(false);
   });
+})
+
+describe('Test dateInferiorToToday function', () => {
+  test('should return true for a date inferior to today - 13 years', () => {
+    const input = new Date();
+    input.setFullYear(input.getFullYear() - 14);
+    const result = CheckInput.dateInferiorToToday(input);
+    expect(result).toBe(true);
+  });
+
+  test('should return false for a date equal to today - 13 years', () => {
+    const input = new Date();
+    input.setFullYear(input.getFullYear() - 13);
+    const result = CheckInput.dateInferiorToToday(input);
+    expect(result).toBe(false);
+  });
+
+  test('should return false for a date superior to today - 13 years', () => {
+    const input = new Date();
+    input.setFullYear(input.getFullYear() - 12);
+    const result = CheckInput.dateInferiorToToday(input);
+    expect(result).toBe(false);
+  });
 });

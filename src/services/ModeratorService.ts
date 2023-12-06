@@ -2,8 +2,13 @@ import { ObjectId } from 'mongodb';
 import { collections } from './Database';
 import Moderator from '../models/ModeratorModel';
 
-async function getOneUser(email: string): Promise<any> {
+async function getOneModo(email: string): Promise<any> {
     const moderator = await collections.moderator?.findOne({email: email});
+    return moderator;
+}
+
+async function getOneModoById(id: string): Promise<any> {
+    const moderator = await collections.moderator?.findOne({_id: new ObjectId(id)});
     return moderator;
 }
 
@@ -18,8 +23,29 @@ async function updateToken(email: string, token: string): Promise<any> {
     return result;
 }
 
+async function addModerator(moderator: Moderator): Promise<any> {
+    const result = await collections.moderator?.insertOne(moderator);
+    return result;
+}
+
+async function deleteModerator(id: string): Promise<any> {
+    const result = await collections.moderator?.deleteOne({_id: new ObjectId(id)});
+    return result;
+}
+
+async function getModerators(): Promise<any> {
+    const moderators = await collections.moderator?.find({}, {projection: {_id: 1, email: 1}}).toArray();
+    return moderators;
+}
+
+
+
 export default {
-    getOneUser,
+    getOneModo,
+    getOneModoById,
     isRightToken,
-    updateToken
+    updateToken,
+    addModerator,
+    deleteModerator,
+    getModerators
 } as const;

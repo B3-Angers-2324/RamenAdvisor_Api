@@ -7,12 +7,14 @@ import ModeratorService from "../services/ModeratorService";
 import { CustomError, TRequest } from "./types/types";
 import UserService from "../services/UserService";
 import MessageService from "../services/MessageService";
+import Moderator from "../models/ModeratorModel";
+import CheckInput from "../tools/CheckInput";
 dotenv.config();
 
 async function login(req: Request, res: Response){
     try{
         //check if its a moderator
-        const moderator = await ModeratorService.getOneUser(req.body.email);
+        const moderator = await ModeratorService.getOneModo(req.body.email);
         if(moderator){
 
             if(moderator.password === req.body.password){
@@ -147,6 +149,69 @@ async function banUser(req: TRequest, res: Response){
     }
 }
 
+async function addModerator(req: TRequest, res: Response){
+    try{
+        if(!req.admin) throw new CustomError("Unauthorized", HttpStatus.UNAUTHORIZED);
+
+        if (req.body.email == undefined || req.body.password == undefined) throw new CustomError("Missing parameters", HttpStatus.BAD_REQUEST);
+        const newModerator: Moderator = {
+            email: req.body.email,
+            password: req.body.password
+        }
+
+        // check if the email is valid
+        if (!CheckInput.email(newModerator.email)) throw new CustomError("Invalid email", HttpStatus.BAD_REQUEST);
+
+        // check if the password is valid
+        // console.log(newModerator.password, CheckInput.password(newModerator.password || ""));
+        // if (!newModerator.password || !CheckInput.password(newModerator.password)) throw new CustomError("Invalid password", HttpStatus.BAD_REQUEST);
+
+        const admin = await AdminService.getOneUser(newModerator.email);
+        if (admin != null) throw new CustomError("Admin already exists with this mail", HttpStatus.BAD_REQUEST);
+
+        const moderator = await ModeratorService.getOneModo(newModerator.email);
+        if (moderator != null) throw new CustomError("Moderator already exists with this mail", HttpStatus.BAD_REQUEST);
+
+        const result = await ModeratorService.addModerator(newModerator);
+        if (result == null) throw new CustomError("Error while adding moderator", HttpStatus.INTERNAL_SERVER_ERROR);
+
+        res.status(HttpStatus.OK).json({"message": "Moderator added"});
+    }catch(e: CustomError | any){
+        res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.code? e.message : "Error while adding moderator"});
+    }
+}
+
+async function deleteModerator(req: TRequest, res: Response){
+    try{
+        if(!req.admin) throw new CustomError("Unauthorized", HttpStatus.UNAUTHORIZED);
+
+        if (req.params.mid == undefined) throw new CustomError("Missing parameters", HttpStatus.BAD_REQUEST);
+
+        const moderator = await ModeratorService.getOneModoById(req.params.mid);
+        if (moderator == null) throw new CustomError("Moderator not found", HttpStatus.NOT_FOUND);
+
+        const result = await ModeratorService.deleteModerator(req.params.mid);
+        if (result == null) throw new CustomError("Error while deleting moderator", HttpStatus.INTERNAL_SERVER_ERROR);
+
+        res.status(HttpStatus.OK).json({"message": "Moderator deleted"});
+    }catch(e: CustomError | any){
+        res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.code? e.message : "Error while deleting moderator"});
+    }
+}
+
+async function getModerators(req: TRequest, res: Response){
+    try{
+        if(!req.admin) throw new CustomError("Unauthorized", HttpStatus.UNAUTHORIZED);
+
+        const moderators = await ModeratorService.getModerators();
+        if (moderators == null) throw new CustomError("Error while getting moderators", HttpStatus.INTERNAL_SERVER_ERROR);
+
+        res.status(HttpStatus.OK).json(moderators);
+    }catch(e: CustomError | any){
+        res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.code? e.message : "Error while getting moderators"});
+    }
+}
+
 
 export default {
     login,
@@ -154,5 +219,8 @@ export default {
     getUsers,
     getUserProfile,
     getUserMessage,
-    banUser
+    banUser,
+    addModerator,
+    deleteModerator,
+    getModerators
 };
