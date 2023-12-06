@@ -9,6 +9,7 @@ export const collections: {
     moderator?: mongoDB.Collection,
     admin?: mongoDB.Collection,
     foodtype?: mongoDB.Collection,
+    image?: mongoDB.Collection,
     report?: mongoDB.Collection
 } = {};
 
@@ -25,6 +26,7 @@ export async function connectToDatabase(){
     const moderatorCollection: mongoDB.Collection = db.collection("moderators");
     const adminCollection: mongoDB.Collection = db.collection("admins");
     const foodtypeCollection: mongoDB.Collection = db.collection("foodtypes");
+    const imageCollection: mongoDB.Collection = db.collection("images");
     const reportCollection: mongoDB.Collection = db.collection("reports");
 
     collections.restaurant = restaurantCollection;
@@ -34,6 +36,7 @@ export async function connectToDatabase(){
     collections.moderator = moderatorCollection;
     collections.admin = adminCollection;
     collections.foodtype = foodtypeCollection;
+    collections.image = imageCollection;
     collections.report = reportCollection;
 
     // Indexes for restaurants

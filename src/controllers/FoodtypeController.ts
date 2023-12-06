@@ -1,86 +1,81 @@
 import { Request, Response, query } from "express";
 import HttpStatus from "../constants/HttpStatus";
-import Foodtype from "../services/FoodtypeService";
+import FoodtypeService from "../services/FoodtypeService";
+import ImageService from "../services/ImageService";
 import { TRequest } from "./types/types";
-import AdminbMiddleware from "../middleware/AdminMiddleware";
+import AdminMiddleware from "../middleware/AdminMiddleware";
 import FoodtypeModel from "../models/FoodtypeModel";
+import ImageModel from "../models/ImageModel";
 import { ObjectId } from "mongodb";
+import ImageContoller from "./ImageContoller";
 
 const fs = require('fs');
 
-// async function getAll(req: Request, res: Response){
-//     try{
-//         const result = await Foodtype.queryAllFoodtype();
-//         // convert buffer to base64
-//         let data: { _id: ObjectId; name: string; url: string; }[] = [];
-//         result.forEach((foodtype) => {
-//             foodtype.svg = foodtype.svg.toString('base64');
-//             // print size of svg
-//             console.log(foodtype.svg.length);
-//             data.push({
-//                 _id: foodtype._id,
-//                 name: foodtype.name,
-//                 url: `data:${foodtype.mimetype};base64,${foodtype.svg}`
-//             });
-//         });
-
-//         res.status(HttpStatus.OK).json(data);
-//     }catch(error){
-//         res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
-//     } 
-// }
-
-async function getAllName(req: Request, res: Response){
+async function getAll(req: Request, res: Response){
     try{
-        const result = await Foodtype.queryAllFoodtypeByName();
-        
+        const result = await FoodtypeService.queryAll();
         res.status(HttpStatus.OK).json(result);
     }catch(error){
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
     } 
 }
 
-async function getFoodtype(req: Request, res: Response){
-    try{
-        const result = await Foodtype.queryFoodtype(req.params.name);
-        // convert result.svg type object to a buffer
-        result.svg = result.svg.buffer;
-        res.writeHead(200, {
-            'Content-Type': result.mimetype,
-            'Content-Length': result.svg.length,
-            'X-Name': result.name,
-            'Access-Control-Expose-Headers': 'X-Name'
-        });
-        res.end(result.svg, "binary");
+// async function getFoodtype(req: Request, res: Response){
+//     try{
+//         const result = await FoodtypeService.queryFoodtype(req.params.name);
+//         // convert result.svg type object to a buffer
+//         result.svg = result.svg.buffer;
+//         res.writeHead(200, {
+//             'Content-Type': result.mimetype,
+//             'Content-Length': result.svg.length,
+//             'X-Name': result.name,
+//             'Access-Control-Expose-Headers': 'X-Name'
+//         });
+//         res.end(result.svg, "binary");
 
-    }catch(error){
-        console.log(error);
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal servers error"});
-    }
-}
+//     }catch(error){
+//         console.log(error);
+//         res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal servers error"});
+//     }
+// }
 
 
 async function addFoodtype(req: TRequest, res: Response){
-    AdminbMiddleware.adminLoginMiddleware(req, res, async () => { 
+    AdminMiddleware.adminLoginMiddleware(req, res, async () => { 
         if(req.file){
-            let data = {
-                name: req.body.name,
-                svg: req.file.buffer,
-                mimetype: req.file.mimetype
-            }
-            
             try{
-                const result = await Foodtype.addFoodtype(data as unknown as FoodtypeModel);
-                res.status(HttpStatus.OK).json(result);
+                // add image to database
+                ImageContoller.addImage(req.file.buffer, req.file.mimetype).then((imageId) => {
+                    // add foodtype to database
+                    let foodtype = {
+                        name: req.body.name,
+                        imgId: new ObjectId(imageId)
+                    }
+                
+                    const result = FoodtypeService.addFoodtype(foodtype as unknown as FoodtypeModel);
+                    res.status(HttpStatus.OK).json(result);
+                }).catch((error) => {
+                    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
+                });
+                
+                // // add foodtype to database
+                // let foodtype = {
+                //     name: req.body.name,
+                //     imgId: imageResult.insertedId
+                // }
+            
+                // const result = await FoodtypeService.addFoodtype(foodtype as unknown as FoodtypeModel);
+                // res.status(HttpStatus.OK).json(result);
             }catch(error){
                 res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
             }
+            res.status(HttpStatus.OK);
         }
     });
 }
 
 export default{
-    getAllName,
+    getAll,
     addFoodtype,
-    getFoodtype
+    // getFoodtype
 }

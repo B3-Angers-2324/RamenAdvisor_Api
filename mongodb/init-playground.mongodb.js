@@ -7,6 +7,7 @@ const OwnerCollection = "owners";
 const ModeratorCollection = "moderators";
 const AdminCollection = "admins";
 const FoodtypeCollection = "foodtypes";
+const ImageCollection = "images";
 const ReportCollection = "reports";
 
 use(database);
@@ -18,24 +19,40 @@ db.createCollection(
     {
         validator: { $jsonSchema: {
             bsonType: "object",
-            required: ["name", "svg", "mimetype"],
+            required: ["name", "imgId"],
             properties: {
                 name: {
                     bsonType: "string",
                     description: "must be a string and is required"
                 },
-                svg: {
+                imgId: {
+                    bsonType: "objectId",
+                    description: "must be a objectId and is required"
+                }
+            }
+        }}
+    }
+);
+
+db.createCollection(
+    ImageCollection,
+    {
+        validator: { $jsonSchema: {
+            bsonType: "object",
+            required: ["binary", "mimetype"],
+            properties: {
+                binary: {
                     bsonType: "binData",
-                    description: "must be a string and is required"
+                    description: "must be a binData and is required"
                 },
                 mimetype: {
                     bsonType: "string",
                     description: "must be a string and is required"
                 }
             }
-        }}
+        }
     }
-);
+});
 
 db.createCollection(
     MessageCollection,

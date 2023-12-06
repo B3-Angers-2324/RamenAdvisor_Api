@@ -2,19 +2,10 @@ import { ObjectId } from 'mongodb';
 import { collections } from './Database';
 import Foodtype from '../models/FoodtypeModel';
 
-// const queryAllFoodtype = async () => {    
-//     const result = await collections.foodtype?.find({}).toArray();
 
-//     if (result==undefined){
-//         throw new Error("No restaurants found");
-//     }
-
-//     return result;
-// }
-
-const queryAllFoodtypeByName = async () => {
+const queryAll = async () => {
     // query all foodtype names and return them in an array with juste the name
-    const result = await collections.foodtype?.find({}).project({name: 1, _id: 0}).toArray();
+    const result = await collections.foodtype?.find({}).project({name: 1, imgId : 1, _id: 0}).toArray();
 
     if (result==undefined){
         throw new Error("No restaurants found");
@@ -44,7 +35,7 @@ const addFoodtype = async (foodtype: Foodtype) => {
 }
 
 export default {
-    queryAllFoodtypeByName,
+    queryAll,
     addFoodtype,
     queryFoodtype
 } as const;

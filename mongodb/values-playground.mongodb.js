@@ -7,9 +7,17 @@ const OwnerCollection = "owners";
 const ModeratorCollection = "moderators";
 const AdminCollection = "admins";
 const FoodtypeCollection = "foodtypes";
+const ImageCollection = "images";
 
 use(database);
 
+db.getCollection(FoodtypeCollection).insertMany([
+  { "_id": ObjectId("64a685757acccfac3d045b02"), "name": "feux", "imgId": ObjectId("64a685757acccfac3d045b03") },
+]);
+
+db.getCollection(ImageCollection).insertMany([
+  { "_id": ObjectId("64a685757acccfac3d045b03"), "mimetype": "image/svg+xml", "binary": BinData(0, 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48IS0tIFVwbG9hZGVkIHRvOiBTVkcgUmVwbywgd3d3LnN2Z3JlcG8uY29tLCBHZW5lcmF0b3I6IFNWRyBSZXBvIE1peGVyIFRvb2xzIC0tPgo8c3ZnIHdpZHRoPSI4MDBweCIgaGVpZ2h0PSI4MDBweCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPg0KPHBhdGggZD0iTTE0LjUgMTAuMDAwM0MxNC41IDkuMjA4NzUgMTUuNTUyOCA4Ljk5ODk1IDE1LjgzMjEgOS43Mzk1N0MxNi41MDc3IDExLjUzMTEgMTcgMTMuMTMzNyAxNyAxNC4wMDAyQzE3IDE2Ljc2MTYgMTQuNzYxNCAxOS4wMDAyIDEyIDE5LjAwMDJDOS4yMzg1OCAxOS4wMDAyIDcgMTYuNzYxNiA3IDE0LjAwMDJDNyAxMy4wNjkzIDcuNTY4MjIgMTEuMjg4NyA4LjMyMTU2IDkuMzM2OThDOS4yOTc0MyA2LjgwODc5IDkuNzg1MzYgNS41NDQ2OSAxMC4zODc3IDUuNDc2NkMxMC41ODA0IDUuNDU0ODIgMTAuNzkwNyA1LjQ5Mzk5IDEwLjk2MjYgNS41ODM3MUMxMS41IDUuODY0MTMgMTEuNSA3LjI0Mjg1IDExLjUgMTAuMDAwM0MxMS41IDEwLjgyODcgMTIuMTcxNiAxMS41MDAzIDEzIDExLjUwMDNDMTMuODI4NCAxMS41MDAzIDE0LjUgMTAuODI4NyAxNC41IDEwLjAwMDNaIiBzdHJva2U9IiMzMzM2M0YiIHN0cm9rZS13aWR0aD0iMiIvPg0KPHBhdGggZD0iTTExIDE5TDEwLjczNzIgMTguMzQzQzEwLjI4MTYgMTcuMjA0IDEwLjQ3MzcgMTUuOTA3OSAxMS4yNCAxNC45NVYxNC45NUMxMS42Mjk2IDE0LjQ2MyAxMi4zNzA0IDE0LjQ2MyAxMi43NiAxNC45NVYxNC45NUMxMy41MjYzIDE1LjkwNzkgMTMuNzE4NCAxNy4yMDQgMTMuMjYyOCAxOC4zNDNMMTMgMTkiIHN0cm9rZT0iIzMzMzYzRiIgc3Ryb2tlLXdpZHRoPSIyIi8+DQo8L3N2Zz4=')},
+]);
 
 db.getCollection(RestaurantCollection).insertMany([
   { "_id": ObjectId("64a685757acccfac3d045ad9"), "ownerId": ObjectId("64a685757acccfac3d045af3"), "name": "Loin du Pot", "position": [47.472270716783584, -0.556831383954351], "address": "9, Rue Baudriere, Angers", foodtype:"local_pizza", "note": 10, "images": ["https://picsum.photos/1000/1000","https://picsum.photos/1000/1000"], "detailNote": [{"percentage": 100, "nbNote": 1}, {"percentage": 0, "nbNote": 0}, {"percentage": 0, "nbNote": 0}, {"percentage": 0, "nbNote": 0}, {"percentage": 0, "nbNote": 0}]},
