@@ -28,7 +28,6 @@ describe('Test all ModeratorService function', () => {
 
     describe("Test 1+1=2 juste for waiting real function", () => {
         test("1+1=2", () => {
-            ModeratorService.nothing();
             expect(1+1).toBe(2);
         })
     })

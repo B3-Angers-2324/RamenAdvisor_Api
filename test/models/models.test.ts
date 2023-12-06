@@ -12,9 +12,7 @@ import { ObjectId } from 'mongodb';
 // test admin model
 describe('Test Admin model', () => {
     test('Create new Admin', () => {
-        const admin = new Admin('first', 'last', 'password');
-        expect(admin.firstName).toBe('first');
-        expect(admin.lastName).toBe('last');
+        const admin = new Admin('password');
         expect(admin.password).toBe('password');
     });
 });
@@ -33,9 +31,7 @@ describe('Test Message model', () => {
 // test moderator model
 describe('Test Moderator model', () => {
     test('Create new Moderator', () => {
-        const moderator = new Moderator('first', 'last', 'password');
-        expect(moderator.firstName).toBe('first');
-        expect(moderator.lastName).toBe('last');
+        const moderator = new Moderator('password');
         expect(moderator.password).toBe('password');
     });
 });
