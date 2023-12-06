@@ -114,6 +114,16 @@ async function updateToken(email: string, token: string): Promise<any> {
     try{
         const result = await collections.user?.updateOne({email: email}, {$set: {token: token}});
         return result;
+    }
+    catch(error){
+        throw error;
+    }
+}
+
+async function getUsersByFirstName(firstName: string): Promise<any> {
+    try{
+        const user = await collections.user?.find({firstName: firstName},{}).toArray();
+        return user;
     }catch(error){
         throw error;
     }
@@ -123,10 +133,31 @@ async function isBan(id: string): Promise<any> {
     try{
         const result = await collections.user?.findOne({_id: new ObjectId(id), ban: true});
         return result;
+    }
+    catch(error){
+        throw error;
+    }
+}
+
+async function getUsersByLastName(lastName: string): Promise<any> {
+    try{
+        const user = await collections.user?.find({lastName: lastName},{}).toArray();
+        return user;
     }catch(error){
         throw error;
     }
 }
+
+async function getUsersByFirstNameAndLastName(firstName: string, lastName: string): Promise<any> {
+    try{
+        const user = await collections.user?.find({lastName: lastName, firstName: firstName},{}).toArray();
+        return user;
+    }catch(error){
+        throw error;
+    }
+}
+
+
 
 export default {
     getOneUser,
@@ -138,5 +169,8 @@ export default {
     deleteUser,
     isRightToken,
     updateToken,
-    isBan
+    isBan,
+    getUsersByFirstName,
+    getUsersByLastName,
+    getUsersByFirstNameAndLastName
 } as const;

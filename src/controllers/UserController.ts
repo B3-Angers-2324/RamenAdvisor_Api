@@ -236,7 +236,6 @@ async function getUserMessage(req: TRequest, res: Response){
             messages: messages,
             more: more
         });
-        //throw new CustomError("Not implemented", HttpStatus.NOT_IMPLEMENTED);
     }catch(error : CustomError | any){
         res.status(error.code? error.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": error.message? error.message : "Internal server error"});
     }

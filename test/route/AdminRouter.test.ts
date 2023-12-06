@@ -18,6 +18,10 @@ jest.mock('../../src/middleware/AdminMiddleware', () => ({
 jest.mock('../../src/controllers/AdminController', () => ({
     login: jest.fn((req, res : Response) => res.json()),
     nav: jest.fn((req, res : Response) => res.json()),
+    getUsers: jest.fn((req, res : Response) => res.json()),
+    getUserProfile: jest.fn((req, res : Response) => res.json()),
+    getUserMessage: jest.fn((req, res : Response) => res.json()),
+    banUser: jest.fn((req, res : Response) => res.json()),
 }));
 
 describe('Test the /Admin paths', () => {
