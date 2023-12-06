@@ -3,21 +3,13 @@ import { collections } from './Database';
 import User from '../models/UserModel';
 
 async function getOneUser(email: string): Promise<any> {
-    try{
-        const user = await collections.user?.findOne({email: email});
-        return user;
-    }catch(error){
-        throw error;
-    }
+    const user = await collections.user?.findOne({email: email});
+    return user;
 }
 
 async function addUser(user: User): Promise<any> {
-    try{
-        const result = await collections.user?.insertOne(user);
-        return result
-    }catch(error){
-        throw error;
-    }
+    const result = await collections.user?.insertOne(user);
+    return result;
 }
 
 async function getAll(): Promise<User[]> {
@@ -72,89 +64,49 @@ async function getOne(id: string): Promise<User | null> {
 }
 
 async function getUserById(id: string): Promise<any> {
-    try{
-        const user = await collections.user?.findOne({_id: new ObjectId(id)});
-        return user;
-    }catch(error){
-        throw error;
-    }
-
+    const user = await collections.user?.findOne({_id: new ObjectId(id)});
+    return user;
 }
 
 async function updateUser(id: string, user: User): Promise<any> {
-    try{
-        const result = await collections.user?.updateOne({_id: new ObjectId(id)}, {$set: user});
-        return result;
-    }catch(error){
-        throw error;
-    }
+    const result = await collections.user?.updateOne({_id: new ObjectId(id)}, {$set: user});
+    return result;
 }
 
 async function deleteUser(id: string): Promise<any> {
-    try{
-        const result = await collections.user?.deleteOne({_id: new ObjectId(id)});
-        return result;
-    }catch(error){
-        throw error;
-    }
+    const result = await collections.user?.deleteOne({_id: new ObjectId(id)});
+    return result;
 }
 
 async function isRightToken(id: string, token: string): Promise<any> {
-    try{
-        // find one user with id and token
-        const exist = await collections.user?.findOne({_id: new ObjectId(id), token: token});
-        return exist;
-    }catch(error){
-        throw error;
-    }
-
+    // find one user with id and token
+    const exist = await collections.user?.findOne({_id: new ObjectId(id), token: token});
+    return exist;
 }
 
 async function updateToken(email: string, token: string): Promise<any> {
-    try{
-        const result = await collections.user?.updateOne({email: email}, {$set: {token: token}});
-        return result;
-    }
-    catch(error){
-        throw error;
-    }
+    const result = await collections.user?.updateOne({email: email}, {$set: {token: token}});
+    return result;
 }
 
 async function getUsersByFirstName(firstName: string): Promise<any> {
-    try{
-        const user = await collections.user?.find({firstName: firstName},{}).toArray();
-        return user;
-    }catch(error){
-        throw error;
-    }
+    const user = await collections.user?.find({firstName: firstName},{}).toArray();
+    return user;
 }
 
 async function isBan(id: string): Promise<any> {
-    try{
-        const result = await collections.user?.findOne({_id: new ObjectId(id), ban: true});
-        return result;
-    }
-    catch(error){
-        throw error;
-    }
+    const result = await collections.user?.findOne({_id: new ObjectId(id), ban: true});
+    return result;
 }
 
 async function getUsersByLastName(lastName: string): Promise<any> {
-    try{
-        const user = await collections.user?.find({lastName: lastName},{}).toArray();
-        return user;
-    }catch(error){
-        throw error;
-    }
+    const user = await collections.user?.find({lastName: lastName},{}).toArray();
+    return user;
 }
 
 async function getUsersByFirstNameAndLastName(firstName: string, lastName: string): Promise<any> {
-    try{
-        const user = await collections.user?.find({lastName: lastName, firstName: firstName},{}).toArray();
-        return user;
-    }catch(error){
-        throw error;
-    }
+    const user = await collections.user?.find({lastName: lastName, firstName: firstName},{}).toArray();
+    return user;
 }
 
 

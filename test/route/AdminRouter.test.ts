@@ -40,4 +40,36 @@ describe('Test the /Admin paths', () => {
         // Assert that UserController.login was called
         expect(AdminController.nav).toHaveBeenCalled();
     });
+
+    //GetUsers test
+    test('The /search/user route should call the getUsers function on the controller', async () => {
+        // Make a POST request to the /user/login endpoint
+        const response = await request.get(`${base_url}/admin/search/user`);
+        // Assert that UserController.login was called
+        expect(AdminController.getUsers).toHaveBeenCalled();
+    });
+
+    //GetUserProfile test
+    test('The /user/profile/:uid route should call the getUserProfile function on the controller', async () => {
+        // Make a POST request to the /user/login endpoint
+        const response = await request.get(`${base_url}/admin/user/profile/1`);
+        // Assert that UserController.login was called
+        expect(AdminController.getUserProfile).toHaveBeenCalled();
+    });
+
+    //GetUserMessage test
+    test('The /user/message/:uid route should call the getUserMessage function on the controller', async () => {
+        // Make a POST request to the /user/login endpoint
+        const response = await request.get(`${base_url}/admin/user/message/1`);
+        // Assert that UserController.login was called
+        expect(AdminController.getUserMessage).toHaveBeenCalled();
+    });
+
+    //BanUser test
+    test('The /user/ban/:uid route should call the banUser function on the controller', async () => {
+        // Make a POST request to the /user/login endpoint
+        const response = await request.patch(`${base_url}/admin/user/ban/1`);
+        // Assert that UserController.login was called
+        expect(AdminController.banUser).toHaveBeenCalled();
+    });
 });

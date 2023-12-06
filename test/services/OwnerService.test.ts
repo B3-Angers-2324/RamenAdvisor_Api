@@ -213,4 +213,150 @@ describe('Test all OwnerService function', () => {
     });
   });
 
+  describe('Test if isRightToken work correctely', () => {
+    test('isRightToken of owner with id and token', async () => {
+      const ownersData = [
+          {
+              _id: new ObjectId('64a685757acccfac3d045aa1'),
+              firstName: 'test1',
+              lastName: 'test1',
+              email: 'owner1@gmail.com',
+              password: 'test1',
+              siret: 'test1',
+              companyName: 'test1',
+              socialAdresse: 'test1',
+              token: 'token1'
+          }
+      ];
+      await db.addDatasToCollection(ownerCollection, ownersData);
+
+      // there is a user with id and token
+      const res = await OwnerService.isRightToken('64a685757acccfac3d045aa1', 'token1');
+      expect(res).not.toBeNull();
+
+      // there is no user with id and token
+      const res2 = await OwnerService.isRightToken('64a685757acccfac3d045aa1', 'token2');
+      expect(res2).toBeNull();
+
+      // there is no user with id
+      const res3 = await OwnerService.isRightToken('64a685757acccfac3d045aa2', 'token1');
+      expect(res3).toBeNull();
+
+      // there is no user with token
+      const res4 = await OwnerService.isRightToken('64a685757acccfac3d045aa2', 'token3');
+      expect(res4).toBeNull();
+    })
+  })
+
+  describe('Test if updateToken work correctely', () => {
+    test('updateToken of owner with email and token', async () => {
+      const ownersData = [
+          {
+              _id: new ObjectId('64a685757acccfac3d045aa1'),
+              firstName: 'test1',
+              lastName: 'test1',
+              email: 'test1@gmail.com',
+              password: 'test1',
+              siret: 'test1',
+              companyName: 'test1',
+              socialAdresse: 'test1',
+          }
+      ];
+      await db.addDatasToCollection(ownerCollection, ownersData);
+
+      // add token
+      const res = await OwnerService.updateToken('test1@gmail.com', 'token1');
+
+      // check if token is added
+      const owner = await ownerCollection.findOne({email: 'test1@gmail.com'});
+      expect(owner?.token).toBe('token1');
+
+      // update token
+      const res2 = await OwnerService.updateToken('test1@gmail.com', 'token2');
+
+      // check if token is updated
+      const owner2 = await ownerCollection.findOne({email: 'test1@gmail.com'});
+      expect(owner2?.token).toBe('token2');
+
+    })
+  })
+
+  describe('Test if isBan works correctly', () => {
+    test('isBan with valid id', async () => {
+      const ownersData = [
+        {
+          _id: new ObjectId('64a685757acccfac3d045aa1'),
+          firstName: 'test1',
+          lastName: 'test1',
+          email: 'owner1@gmail.com',
+          password: 'test1',
+          siret: 'test1',
+          companyName: 'test1',
+          socialAdresse: 'test1',
+          ban: true,
+        },
+        {
+          _id: new ObjectId('64a685757acccfac3d045aa2'),
+          firstName: 'test1',
+          lastName: 'test1',
+          email: 'owner1@gmail.com',
+          password: 'test1',
+          siret: 'test1',
+          companyName: 'test1',
+          socialAdresse: 'test1',
+        }
+      ];
+      await db.addDatasToCollection(ownerCollection, ownersData);
+
+      // Call isBan
+      const result = await OwnerService.isBan('64a685757acccfac3d045aa1');
+      const result2 = await OwnerService.isBan('64a685757acccfac3d045aa2');
+
+      // Check if the result contains somting in {...}
+      expect(result).toBeDefined();
+      //check if the result2 equals to be null
+      expect(result2).toBeNull();
+    })
+  })
+
+  describe('Test if isValidate works correctly', () => {
+    test('isValidate with valid id', async () => {
+      const ownersData = [
+        {
+          _id: new ObjectId('64a685757acccfac3d045aa1'),
+          firstName: 'test1',
+          lastName: 'test1',
+          email: 'owner1@gmail.com',
+          password: 'test1',
+          siret: 'test1',
+          companyName: 'test1',
+          socialAdresse: 'test1',
+          validate: true,
+        },
+        {
+          _id: new ObjectId('64a685757acccfac3d045aa2'),
+          firstName: 'test1',
+          lastName: 'test1',
+          email: 'owner1@gmail.com',
+          password: 'test1',
+          siret: 'test1',
+          companyName: 'test1',
+          socialAdresse: 'test1',
+          validate: false,
+        }
+      ];
+      await db.addDatasToCollection(ownerCollection, ownersData);
+
+      // Call isValidate
+      const result = await OwnerService.isValidate('64a685757acccfac3d045aa1');
+      const result2 = await OwnerService.isValidate('64a685757acccfac3d045aa2');
+
+      // Check if the result contains somting in {...}
+      expect(result).toBeDefined();
+      //check if the result2 equals to be null
+      expect(result2).toBeNull();
+
+    })
+  })
+
 })
