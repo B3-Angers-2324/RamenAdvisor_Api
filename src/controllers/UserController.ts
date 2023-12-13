@@ -83,6 +83,8 @@ async function register(req: Request, res: Response){
 
         if(!CheckInput.dateInferiorToToday(newUser.birthDay)) throw new Error("Invalid birth day");
 
+        if(!CheckInput.validDateFormat(req.body.birthDay)) throw new Error("Invalid birth day format");
+
         const user = await UserServices.getOneUser(newUser.email);
         if(user){
             throw new Error("User already exists");
@@ -152,6 +154,11 @@ async function updateUserProfile(req: TRequest, res: Response){
 
         if(!CheckInput.dateInferiorToToday(new Date(req.body.birthDay))){
             res.status(HttpStatus.BAD_REQUEST).json({"message": "Invalid birth day"});
+            return;
+        }
+
+        if(!CheckInput.validDateFormat(req.body.birthDay)){
+            res.status(HttpStatus.BAD_REQUEST).json({"message": "Invalid birth day format"});
             return;
         }
 

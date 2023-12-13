@@ -24,6 +24,11 @@ const dateInferiorToToday = (input: Date) => {
     return input < dateLimit;
 }
 
+const validDateFormat = (input: string) => {
+    let regex = new RegExp('^[0-9]{4}-[0-9]{2}-[0-9]{2}$');
+    return regex.test(input);
+}
+
 const isNotEmpty = (input: string) => {
     return input.length > 0;
 }
@@ -44,5 +49,6 @@ export default {
     password,
     isNotEmpty,
     areNotEmpty,
-    dateInferiorToToday
+    dateInferiorToToday,
+    validDateFormat
 };
