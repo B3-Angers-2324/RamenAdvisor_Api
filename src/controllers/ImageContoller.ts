@@ -49,7 +49,16 @@ async function addImage(binary: Buffer, mimetype: string) : Promise<string> {
     return imageResult.insertedId.toString();
 }
 
+async function deleteImage(imageId: string) : Promise<boolean> {
+    const result = await ImageService.deleteImage(imageId);
+    if(result==undefined){
+        throw new Error("Internal server error");
+    }
+    return true;
+}
+
 export default {
     getImage,
-    addImage
+    addImage,
+    deleteImage
 } as const;

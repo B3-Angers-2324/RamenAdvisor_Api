@@ -7,6 +7,8 @@ import MessageService from "../services/MessageService";
 import HttpStatus from "../constants/HttpStatus";
 import CheckInput from "../tools/CheckInput";
 import MessageController from "./MessageController";
+import ImageContoller from "./ImageContoller";
+import { ObjectId } from "mongodb";
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -71,7 +73,7 @@ async function register(req: Request, res: Response){
             ville: req.body.ville,
             address: req.body.address,
             password: req.body.password,
-            image: "http://thispersondoesnotexist.com/",
+            image: new ObjectId("000000000000000000000000"),
             ban: false
         };
         
@@ -171,7 +173,7 @@ async function updateUserProfile(req: TRequest, res: Response){
             sexe: req.body.sexe,
             ville: req.body.ville,
             address: req.body.address,
-            image: "http://thispersondoesnotexist.com/"
+            image: new ObjectId(req.body.image),
         };
 
         const user = await UserServices.getUserById(id);
@@ -248,12 +250,44 @@ async function getUserMessage(req: TRequest, res: Response){
     }
 }
 
+async function updateUserPP(req: TRequest, res: Response){
+    if(req.file){
+        try{
+            // test if user already has a profile picture (image = 000000000000000000000000)
+            const user = await UserServices.getUserById(req.token?._id);
+            if(user){
+                if(user.image.toString() != "000000000000000000000000"){
+                    // delete old profile picture
+                    const result = await ImageContoller.deleteImage(user.image.toString());
+                    if(!result){
+                        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
+                        return;
+                    }
+                }
+            }
+
+            // add image to database
+            ImageContoller.addImage(req.file.buffer, req.file.mimetype).then((imageId) => {
+            
+                const result = UserServices.updateUserPP(req.token?._id, imageId);
+                res.status(HttpStatus.OK).json(result);
+            }).catch((error) => {
+                res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
+            });
+        }catch(error){
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
+        }
+        res.status(HttpStatus.OK);
+    }
+}
+
 export default {
-    login,
+    login, 
     register,
     getAll,
     getUserProfile,
     updateUserProfile,
     deleteUserProfile,
-    getUserMessage
+    getUserMessage,
+    updateUserPP
 };

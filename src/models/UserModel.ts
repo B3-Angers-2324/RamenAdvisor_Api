@@ -8,7 +8,7 @@ export default class User{
         public email: string,
         public phone: string,
         public sexe: string,
-        public image: string,
+        public image: ObjectId,
         public ban?: boolean,
         public ville?: string,
         public address?: string,

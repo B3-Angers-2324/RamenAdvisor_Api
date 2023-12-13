@@ -136,9 +136,9 @@ db.createCollection(
                     description: "must be a bool and is required"
                 },
                 image: {
-                    bsonType: "string",
-                    description: "must be a string and is required"
-                }
+                    bsonType: "objectId",
+                    description: "must be a int and is required"
+                },
             }
         }}
     }

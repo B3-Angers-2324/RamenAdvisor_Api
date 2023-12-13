@@ -1,6 +1,10 @@
 import express, { Router } from 'express';
 import UserMiddleware from '../middleware/UserMiddleware';
 import UserController from "../controllers/UserController"
+const multer = require('multer');
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 const router: Router = express.Router();
 
@@ -18,6 +22,8 @@ router.get("/message", UserController.getUserMessage);
 router.patch("/profile", UserController.updateUserProfile);
 
 router.delete("/profile", UserController.deleteUserProfile);
+
+router.patch("/pp", upload.single('image'), UserController.updateUserPP);
 
 
 

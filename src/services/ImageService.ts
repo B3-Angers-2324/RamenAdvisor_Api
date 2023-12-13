@@ -17,7 +17,17 @@ async function addImage(image: Image){
     return result;
 }
 
+async function deleteImage(imageId: string){
+    const result = await collections.image?.deleteOne({_id: new ObjectId(imageId)});
+    if (result==undefined){
+        throw new Error("No restaurants found");
+    }
+
+    return result;
+}
+
 export default {
     queryImage,
-    addImage
+    addImage,
+    deleteImage
 } as const;
