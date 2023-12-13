@@ -133,7 +133,7 @@ const updateRestaurant = (req: Request, res: Response) => {
 }
 const getRestaurantSearch = async (req: Request, res: Response) => {
     try{
-        let restaurant: { 
+        let terst: { 
             id: ObjectId;
             name: string;
             foodtype:string,
@@ -147,30 +147,15 @@ const getRestaurantSearch = async (req: Request, res: Response) => {
         let limit = parseInt(req.query.limit as string); 
         let search = (req.query.search)?req.query.search as string : undefined;
         //Check if the mandatory parameters are valid
-        if (limit==undefined || accessible==undefined){
-            throw new Error("Invalid parameters");
-        }
-        (await Service.queryRestaurantsWithParam(type, accessible, limit, search)).forEach((element) => {
-            restaurant.push({
-                id: element._id,
-                name: element.name,
-                foodtype: element.foodtype,
-                note: element.note,
-                position: element.position,
-                images: element.images
-            });
-        });
+        if (limit==undefined || accessible==undefined)throw new CustomError("Invalid parameters", HttpStatus.BAD_REQUEST);
+        let restaurant = await Service.queryRestaurantsWithParam(type, accessible, limit, search)
+        if (restaurant === undefined || restaurant.length <= 0) throw new CustomError("No restaurant Found", HttpStatus.NOT_FOUND);
         res.status(HttpStatus.OK).json({
             number: restaurant.length,
             obj: restaurant
         });
-    }catch(e ){
-        console.log(e);
-        if ((e as Error).message=="No restaurants found"){
-            res.status(HttpStatus.NOT_FOUND).json({"message": "No restaurants found"});
-        }else{
-            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
-        }
+    }catch(e : CustomError|any ){
+        res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.message? e.message : "Internal server error"});
     }
 }
 

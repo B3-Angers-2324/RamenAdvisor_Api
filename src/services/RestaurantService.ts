@@ -59,19 +59,26 @@ const updateRestaurantNote = async (id: ObjectId, note : number, detailNote: Arr
     return result;
 }
 
-const queryRestaurantsWithParam = async (type: string|undefined, accessible: boolean, limit: number, search: string|undefined) => {
-    const param = {
-        ...(accessible && { accessible }),
-        ...(type && { foodtype: type }),
-        ...(search && { $text: { $search: search , $caseSensitive:false} })
-    };
-    const restaurants = await collections.restaurant?.find(param, {
-        sort: { note: -1 },
-        limit
-    })?.toArray();
-    if (!restaurants?.length) {
-        throw new Error("No restaurants found");
-    }
+const queryRestaurantsWithParam = async (type: string | undefined, accessible: boolean, limit: number, search: string | undefined) => {
+    const pipeline = [
+        { $match: {
+            ...(accessible && { accessible }),
+            ...(type && { foodtype: type }),
+            /*...(search && { $text: { $search: search, $caseSensitive: false } })*/
+            ...(search && { "name": { $regex: search, $options: "i" } })
+        }},
+        { $sort: { note: -1 }},
+        { $limit: limit},
+        { $project:{
+            _id: 1,
+            name: 1,
+            foodtype: 1,
+            note: 1,
+            position: 1,
+            images: 1
+        }}
+    ];
+    const restaurants = await collections.restaurant?.aggregate(pipeline)?.toArray();
     return restaurants;
 }
 
