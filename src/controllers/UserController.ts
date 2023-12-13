@@ -173,7 +173,6 @@ async function updateUserProfile(req: TRequest, res: Response){
             sexe: req.body.sexe,
             ville: req.body.ville,
             address: req.body.address,
-            image: new ObjectId(req.body.image),
         };
 
         const user = await UserServices.getUserById(id);
