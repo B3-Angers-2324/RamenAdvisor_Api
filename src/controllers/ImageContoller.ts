@@ -38,7 +38,6 @@ async function addImage(binary: Buffer, mimetype: string) : Promise<string> {
     if(mimetype!="image/webp" && mimetype!="image/svg+xml"){
         // convert image to webp
         webpBuffer = await convertToWebp(binary);
-        console.log("converted to webp");
     }
 
     // add image to database

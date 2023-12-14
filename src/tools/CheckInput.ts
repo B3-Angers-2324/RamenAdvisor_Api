@@ -43,6 +43,22 @@ const areNotEmpty = (inputs: string[]) => {
     return result;
 }
 
+const isImage = (mimetype: string) => {
+    // test if mimetype is an image (jpg, jpeg, png, gif)
+    return mimetype.match(/image\/(jpg|jpeg|png|gif)/);
+}
+
+const isSvg = (mimetype: string) => {
+    // test if mimetype is an svg
+    return mimetype.match(/image\/svg/);
+}
+
+const isUnder15Mo = (size: number) => {
+    // test if size is under 15Mo
+    return size < 15000000;
+}
+
+
 export default {
     phone,
     email,
@@ -50,5 +66,8 @@ export default {
     isNotEmpty,
     areNotEmpty,
     dateInferiorToToday,
-    validDateFormat
+    validDateFormat,
+    isImage,
+    isSvg,
+    isUnder15Mo
 };

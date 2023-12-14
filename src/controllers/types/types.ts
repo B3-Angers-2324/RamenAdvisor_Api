@@ -4,6 +4,7 @@ export interface TRequest extends Request {
     file?: {
         buffer: Buffer
         mimetype: string
+        size: number
     };
     token?: any;
     admin?: boolean;

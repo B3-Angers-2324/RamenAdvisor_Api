@@ -206,6 +206,19 @@ async function deleteUserProfile(req: TRequest, res: Response){
             const note = await MessageController.deleteNotePercentage(message.restaurant._id.toString(), message.note);
         }
 
+        // delete profile picture
+        const user = await UserServices.getUserById(id);
+        if(user){
+            if(user.image.toString() != "000000000000000000000000"){
+                // delete old profile picture
+                const result = await ImageContoller.deleteImage(user.image.toString());
+                if(!result){
+                    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
+                    return;
+                }
+            }
+        }
+
 
         // delete all messages from user
         const messagesDeleted = await MessageService.deleteAllMessagesForUser(id);
@@ -252,6 +265,19 @@ async function getUserMessage(req: TRequest, res: Response){
 async function updateUserPP(req: TRequest, res: Response){
     if(req.file){
         try{
+            // test if the image is a jpeg or png or jpg
+            if(!CheckInput.isImage(req.file.mimetype)){
+                res.status(HttpStatus.BAD_REQUEST).json({"message": "Invalid image format (jpg, jpeg, png, gif)"});
+                return;
+            }
+
+            // test if the image is under 15Mo
+            if(!CheckInput.isUnder15Mo(req.file.size)){
+                res.status(HttpStatus.BAD_REQUEST).json({"message": "Image is too big (max 15Mo)"});
+                return;
+            }
+
+
             // test if user already has a profile picture (image = 000000000000000000000000)
             const user = await UserServices.getUserById(req.token?._id);
             if(user){
