@@ -34,8 +34,12 @@ async function convertToWebp(buffer: Buffer) : Promise<Buffer> {
 }
 
 async function addImage(binary: Buffer, mimetype: string) : Promise<string> {
-    // convert image to webp
-    const webpBuffer = await convertToWebp(binary);
+    let webpBuffer = binary;
+    if(mimetype!="image/webp" && mimetype!="image/svg+xml"){
+        // convert image to webp
+        webpBuffer = await convertToWebp(binary);
+        console.log("converted to webp");
+    }
 
     // add image to database
     const image = {
