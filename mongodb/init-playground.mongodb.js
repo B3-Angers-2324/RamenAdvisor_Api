@@ -6,11 +6,53 @@ const UserCollection = "users";
 const OwnerCollection = "owners";
 const ModeratorCollection = "moderators";
 const AdminCollection = "admins";
+const FoodtypeCollection = "foodtypes";
+const ImageCollection = "images";
 const ReportCollection = "reports";
 
 use(database);
 
 db.dropDatabase();
+
+db.createCollection(
+    FoodtypeCollection,
+    {
+        validator: { $jsonSchema: {
+            bsonType: "object",
+            required: ["name", "imgId"],
+            properties: {
+                name: {
+                    bsonType: "string",
+                    description: "must be a string and is required"
+                },
+                imgId: {
+                    bsonType: "objectId",
+                    description: "must be a objectId and is required"
+                }
+            }
+        }}
+    }
+);
+
+db.createCollection(
+    ImageCollection,
+    {
+        validator: { $jsonSchema: {
+            bsonType: "object",
+            required: ["binary", "mimetype"],
+            properties: {
+                binary: {
+                    bsonType: "binData",
+                    description: "must be a binData and is required"
+                },
+                mimetype: {
+                    bsonType: "string",
+                    description: "must be a string and is required"
+                }
+            }
+        }
+    }
+});
 
 db.createCollection(
     MessageCollection,
@@ -94,9 +136,9 @@ db.createCollection(
                     description: "must be a bool and is required"
                 },
                 image: {
-                    bsonType: "string",
-                    description: "must be a string and is required"
-                }
+                    bsonType: "objectId",
+                    description: "must be a int and is required"
+                },
             }
         }}
     }

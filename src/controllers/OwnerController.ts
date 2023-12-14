@@ -8,6 +8,7 @@ import RestaurantService from "../services/RestaurantService";
 import { TRequest } from "./types/types";
 import CheckInput from "../tools/CheckInput";
 import MessageService from "../services/MessageService";
+import ImageContoller from "./ImageContoller";
 dotenv.config();
 
 async function login(req: Request, res: Response){
@@ -160,9 +161,22 @@ async function deleteOwnerProfile(req: TRequest, res: Response){
         //get all restaurants of the owner
         const restaurants = await RestaurantService.queryRestaurantsByOwner(id);
 
-        // delete all messages of the restaurants
+        // delete all messages and images of the restaurants
         restaurants.forEach(async (element) => {
+            // delete all messages of the restaurant
             await MessageService.deleteAllMessagesForRestaurant(element._id?.toString() || "");
+
+            // delete all images of the restaurant
+            if(element.images.length > 0){
+                // delete all images
+                for(let i = 0; i < element.images.length; i++){
+                    if(element.images[i] != "" && element.images[i] != undefined){
+                        console.log(element.images[i])
+                        await ImageContoller.deleteImage(element.images[i]);
+                        console.log("images to delete")
+                    }
+                }
+            }
         });
 
         // delete all restaurants of the owner

@@ -5,6 +5,8 @@ import { ObjectId } from "mongodb";
 import { CustomError, TRequest } from "./types/types";
 import OwnerMiddleware from "../middleware/OwnerMiddleware";
 import CheckInput from "../tools/CheckInput";
+import ImageContoller from "./ImageContoller";
+import MessageService from "../services/MessageService";
 
 /**
  * Function to get the best restaurants in the database
@@ -88,19 +90,10 @@ const createRestaurant = (req: TRequest, res: Response) => {
                 handicap: req.body.handicap,
                 ownerId: new ObjectId(req.token._id),
                 note: 10,
-                images: [
-                    "https://picsum.photos/1000/1000",
-                    "https://picsum.photos/1000/1000"
-                ],
+                images: [],
                 detailNote: [{"percentage": 0, "nbNote": 0},{"percentage": 0, "nbNote": 0},{"percentage": 0, "nbNote": 0},{"percentage": 0, "nbNote": 0},{"percentage": 0, "nbNote": 0}]
             }
-            // req.body.ownerId = new ObjectId((req as any).token._id);
-            // req.body.note = 10;
-            // req.body.images = [
-            //     "https://picsum.photos/1000/1000",
-            //     "https://picsum.photos/1000/1000"
-            // ];
-            // req.body.detailNote = [{"percentage": 0, "nbNote": 0},{"percentage": 0, "nbNote": 0},{"percentage": 0, "nbNote": 0},{"percentage": 0, "nbNote": 0},{"percentage": 0, "nbNote": 0}];
+            
             let restaurant = await Service.createRestaurant(restaurantData);
             res.status(HttpStatus.OK).json({id: restaurant.insertedId?.toString()});
         }catch(e : CustomError|any){
@@ -159,10 +152,84 @@ const getRestaurantSearch = async (req: Request, res: Response) => {
     }
 }
 
+const updateRestaurantImage = async (req: TRequest, res: Response) => {
+    OwnerMiddleware.ownerLoginMiddleware(req, res, async () => {
+        try{
+            if(req.file){
+                // check if its image
+                if(!CheckInput.isImage(req.file.mimetype)){
+                    throw new CustomError("Image must be a jpg, png, jpeg or gif", HttpStatus.BAD_REQUEST);
+                }
+
+                // check if image is under 15Mo
+                if(!CheckInput.isUnder15Mo(req.file.size)){
+                    throw new CustomError("Image must be under 15Mo", HttpStatus.BAD_REQUEST);
+                }
+
+                // check if the restaurant already has images as this place
+                const restaurant = await Service.queryRestaurantById(req.params.uid);
+                if(!restaurant) throw new CustomError("Restaurant not found", HttpStatus.NOT_FOUND);
+                
+                let alreadyHasImage = false;
+                // check if the image already exists
+                if(restaurant.images[req.params.imageNb] != "" && restaurant.images[req.params.imageNb] != undefined){
+                    // delete the old image
+                    await ImageContoller.deleteImage(restaurant.images[req.params.imageNb]);
+                    alreadyHasImage = true;
+                }
+
+                // add the new image
+                const imageId = await ImageContoller.addImage(req.file.buffer, req.file.mimetype);
+
+                // update the restaurant
+                await Service.updateRestaurantImage(req.params.uid, req.params.imageNb, imageId, alreadyHasImage);
+                res.status(HttpStatus.OK).json({"message": "Image updated"});
+            }else{
+                throw new CustomError("Missing parameters", HttpStatus.BAD_REQUEST);
+            }
+        }catch(e : CustomError|any){
+            res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.message? e.message : "Internal server error"});
+        }
+    });
+}
+
+const deleteRestaurant = async (req: TRequest, res: Response) => {
+    OwnerMiddleware.ownerLoginMiddleware(req, res, async () => {
+        try{
+            //check if restaurant exists
+            const restaurant = await Service.queryRestaurantById(req.params.uid);
+            if(!restaurant) throw new CustomError("Restaurant not found", HttpStatus.NOT_FOUND);
+            // if there is more than zero images
+            if(restaurant.images.length > 0){
+                // delete all images
+                for(let i = 0; i < restaurant.images.length; i++){
+                    if(restaurant.images[i] != "" && restaurant.images[i] != undefined){
+                        console.log(restaurant.images[i])
+                        await ImageContoller.deleteImage(restaurant.images[i]);
+                        console.log("images to delete")
+                    }
+                }
+            }
+            console.log("images all deleted")
+
+            //delete all messages
+            await MessageService.deleteAllMessagesForRestaurant(req.params.uid);
+            console.log("messages deleted")
+            await Service.deleteRestaurant(req.params.uid);
+            res.status(HttpStatus.OK).json({"message": "Restaurant deleted"});
+        }catch(e : CustomError|any){
+            res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.message? e.message : "Internal server error"});
+        }
+    });
+
+}
+
 export default {
     getBestRestaurants,
     getRestaurantById,
     createRestaurant,
     updateRestaurant,
-    getRestaurantSearch
+    getRestaurantSearch,
+    updateRestaurantImage,
+    deleteRestaurant
 };

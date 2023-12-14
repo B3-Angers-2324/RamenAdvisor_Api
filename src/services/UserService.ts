@@ -73,6 +73,11 @@ async function updateUser(id: string, user: User): Promise<any> {
     return result;
 }
 
+async function updateUserPP(id: string, image: string): Promise<any> {
+    const result = await collections.user?.updateOne({_id: new ObjectId(id)}, {$set: {image: new ObjectId(image)}});
+    return result;
+}
+
 async function deleteUser(id: string): Promise<any> {
     const result = await collections.user?.deleteOne({_id: new ObjectId(id)});
     return result;
@@ -110,7 +115,6 @@ async function getUsersByFirstNameAndLastName(firstName: string, lastName: strin
 }
 
 
-
 export default {
     getOneUser,
     addUser,
@@ -118,6 +122,7 @@ export default {
     getOne,
     getUserById,
     updateUser,
+    updateUserPP,
     deleteUser,
     isRightToken,
     updateToken,

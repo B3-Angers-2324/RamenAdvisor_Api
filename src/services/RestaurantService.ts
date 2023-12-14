@@ -111,6 +111,29 @@ const deleteAllRestaurantsByOwner = async (id: string) => {
     return restaurants;
 }*/
 
+const updateRestaurantImage = async (uid: string, imageNb: string, imageId: string, alreadyHasImage: boolean) => {
+    let result;
+    if(alreadyHasImage){
+        // update the image id
+        result = await collections.restaurant?.updateOne({_id: new ObjectId(uid) }, {$set: {[`images.${imageNb}`]: imageId}});
+    }else{
+        // add the new image id to the array
+        result = await collections.restaurant?.updateOne({_id: new ObjectId(uid) }, {$push: {images: imageId}});
+    }
+    if (result==undefined){
+        throw new Error("Error while updating restaurant");
+    }
+    return result;
+}
+
+const deleteRestaurant = async (id: string) => {
+    let result = await collections.restaurant?.deleteOne({_id: new ObjectId(id)});
+    if (result==undefined){
+        throw new Error("Error while deleting restaurant");
+    }
+    return result;
+}
+
 
 export default {
     queryBestRestaurants,
@@ -121,5 +144,7 @@ export default {
     restaurantExistsById,
     updateRestaurantNote,
     queryRestaurantsWithParam,
-    deleteAllRestaurantsByOwner
+    deleteAllRestaurantsByOwner,
+    updateRestaurantImage,
+    deleteRestaurant
 } as const;

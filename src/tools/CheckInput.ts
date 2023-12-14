@@ -24,6 +24,11 @@ const dateInferiorToToday = (input: Date) => {
     return input < dateLimit;
 }
 
+const validDateFormat = (input: string) => {
+    let regex = new RegExp('^[0-9]{4}-[0-9]{2}-[0-9]{2}$');
+    return regex.test(input);
+}
+
 const isNotEmpty = (input: string) => {
     return input.length > 0;
 }
@@ -38,11 +43,31 @@ const areNotEmpty = (inputs: string[]) => {
     return result;
 }
 
+const isImage = (mimetype: string) => {
+    // test if mimetype is an image (jpg, jpeg, png, gif)
+    return mimetype.match(/image\/(jpg|jpeg|png|gif)/);
+}
+
+const isSvg = (mimetype: string) => {
+    // test if mimetype is an svg
+    return mimetype.match(/image\/svg/);
+}
+
+const isUnder15Mo = (size: number) => {
+    // test if size is under 15Mo
+    return size < 15000000;
+}
+
+
 export default {
     phone,
     email,
     password,
     isNotEmpty,
     areNotEmpty,
-    dateInferiorToToday
+    dateInferiorToToday,
+    validDateFormat,
+    isImage,
+    isSvg,
+    isUnder15Mo
 };

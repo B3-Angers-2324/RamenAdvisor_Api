@@ -7,6 +7,8 @@ import MessageService from "../services/MessageService";
 import HttpStatus from "../constants/HttpStatus";
 import CheckInput from "../tools/CheckInput";
 import MessageController from "./MessageController";
+import ImageContoller from "./ImageContoller";
+import { ObjectId } from "mongodb";
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -71,7 +73,7 @@ async function register(req: Request, res: Response){
             ville: req.body.ville,
             address: req.body.address,
             password: req.body.password,
-            image: "http://thispersondoesnotexist.com/",
+            image: new ObjectId("000000000000000000000000"),
             ban: false
         };
         
@@ -82,6 +84,8 @@ async function register(req: Request, res: Response){
         if (!CheckInput.phone(newUser.phone)) throw new Error("Phone format is not correct");
 
         if(!CheckInput.dateInferiorToToday(newUser.birthDay)) throw new Error("Invalid birth day");
+
+        if(!CheckInput.validDateFormat(req.body.birthDay)) throw new Error("Invalid birth day format");
 
         const user = await UserServices.getOneUser(newUser.email);
         if(user){
@@ -155,6 +159,11 @@ async function updateUserProfile(req: TRequest, res: Response){
             return;
         }
 
+        if(!CheckInput.validDateFormat(req.body.birthDay)){
+            res.status(HttpStatus.BAD_REQUEST).json({"message": "Invalid birth day format"});
+            return;
+        }
+
         let updatedUser : User = {
             firstName: req.body.firstName,
             lastName: req.body.lastName,
@@ -164,7 +173,6 @@ async function updateUserProfile(req: TRequest, res: Response){
             sexe: req.body.sexe,
             ville: req.body.ville,
             address: req.body.address,
-            image: "http://thispersondoesnotexist.com/"
         };
 
         const user = await UserServices.getUserById(id);
@@ -196,6 +204,19 @@ async function deleteUserProfile(req: TRequest, res: Response){
         for(let message of messages){
             // TODO : could be optimized
             const note = await MessageController.deleteNotePercentage(message.restaurant._id.toString(), message.note);
+        }
+
+        // delete profile picture
+        const user = await UserServices.getUserById(id);
+        if(user){
+            if(user.image.toString() != "000000000000000000000000"){
+                // delete old profile picture
+                const result = await ImageContoller.deleteImage(user.image.toString());
+                if(!result){
+                    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
+                    return;
+                }
+            }
         }
 
 
@@ -241,12 +262,57 @@ async function getUserMessage(req: TRequest, res: Response){
     }
 }
 
+async function updateUserPP(req: TRequest, res: Response){
+    if(req.file){
+        try{
+            // test if the image is a jpeg or png or jpg
+            if(!CheckInput.isImage(req.file.mimetype)){
+                res.status(HttpStatus.BAD_REQUEST).json({"message": "Invalid image format (jpg, jpeg, png, gif)"});
+                return;
+            }
+
+            // test if the image is under 15Mo
+            if(!CheckInput.isUnder15Mo(req.file.size)){
+                res.status(HttpStatus.BAD_REQUEST).json({"message": "Image is too big (max 15Mo)"});
+                return;
+            }
+
+
+            // test if user already has a profile picture (image = 000000000000000000000000)
+            const user = await UserServices.getUserById(req.token?._id);
+            if(user){
+                if(user.image.toString() != "000000000000000000000000"){
+                    // delete old profile picture
+                    const result = await ImageContoller.deleteImage(user.image.toString());
+                    if(!result){
+                        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
+                        return;
+                    }
+                }
+            }
+
+            // add image to database
+            ImageContoller.addImage(req.file.buffer, req.file.mimetype).then((imageId) => {
+            
+                const result = UserServices.updateUserPP(req.token?._id, imageId);
+                res.status(HttpStatus.OK).json(result);
+            }).catch((error) => {
+                res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
+            });
+        }catch(error){
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
+        }
+        res.status(HttpStatus.OK);
+    }
+}
+
 export default {
-    login,
+    login, 
     register,
     getAll,
     getUserProfile,
     updateUserProfile,
     deleteUserProfile,
-    getUserMessage
+    getUserMessage,
+    updateUserPP
 };
