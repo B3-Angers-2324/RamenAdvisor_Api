@@ -10,6 +10,8 @@ import CheckInput from '../../src/tools/CheckInput';
 import { TRequest } from '../../src/controllers/types/types';
 
 import dotenv from 'dotenv';
+import User from '../../src/models/UserModel';
+import { promises } from 'dns';
 dotenv.config();
 
 jest.mock('jsonwebtoken');
@@ -154,7 +156,7 @@ describe('UserController - register', () => {
     (CheckInput.password as jest.Mock).mockReturnValue(true);
     (CheckInput.phone as jest.Mock).mockReturnValue(true);
     (CheckInput.dateInferiorToToday as jest.Mock).mockReturnValue(true);
-    (UserServices.getOneUser as jest.Mock).mockResolvedValue(null as never);
+    (UserServices.is_email_used as jest.Mock).mockResolvedValue(false as never);
     (UserServices.addUser as jest.Mock).mockResolvedValue({ insertedId: 'userId' } as never);
     (jwt.sign as jest.Mock).mockReturnValue('generatedToken');
 
@@ -175,7 +177,7 @@ describe('UserController - register', () => {
     expect(CheckInput.phone).toHaveBeenCalledWith(req.body.phone);
     expect(CheckInput.dateInferiorToToday).toHaveBeenCalledWith(req.body.birthDay);
     expect(CheckInput.phone).toHaveBeenCalledWith(req.body.phone);
-    expect(UserServices.getOneUser).toHaveBeenCalledWith(req.body.email);
+    expect(UserServices.is_email_used).toHaveBeenCalledWith(req.body.email);
     expect(UserServices.addUser).toHaveBeenCalledWith(newUser);
     expect(jwt.sign).toHaveBeenCalledWith({ _id: 'userId' }, process.env.JWT_SECRET_USER || 'ASecretPhrase', {
       expiresIn: process.env.JWT_EXPIRES_IN,
@@ -230,7 +232,7 @@ describe('UserController - register', () => {
     (CheckInput.email as jest.Mock).mockReturnValue(true);
     (CheckInput.phone as jest.Mock).mockReturnValue(true);
     (CheckInput.dateInferiorToToday as jest.Mock).mockReturnValue(true);
-    (UserServices.getOneUser as jest.Mock).mockResolvedValue({ _id: 'userId' } as never);
+    (UserServices.is_email_used as jest.Mock).mockResolvedValue(true as never);
 
     await UserController.register(req, res);
 
@@ -248,7 +250,7 @@ describe('UserController - register', () => {
     expect(CheckInput.email).toHaveBeenCalledWith(req.body.email);
     expect(CheckInput.phone).toHaveBeenCalledWith(req.body.phone);
     expect(CheckInput.dateInferiorToToday).toHaveBeenCalledWith(req.body.birthDay);
-    expect(UserServices.getOneUser).toHaveBeenCalledWith(req.body.email);
+    expect(UserServices.is_email_used).toHaveBeenCalledWith(req.body.email);
     expect(res.status).toHaveBeenCalledWith(HttpStatus.CONFLICT);
     expect(res.json).toHaveBeenCalledWith({ message: 'User already exists' });
   });
@@ -258,7 +260,7 @@ describe('UserController - register', () => {
     (CheckInput.email as jest.Mock).mockReturnValue(true);
     (CheckInput.phone as jest.Mock).mockReturnValue(true);
     (CheckInput.dateInferiorToToday as jest.Mock).mockReturnValue(true);
-    (UserServices.getOneUser as jest.Mock).mockRejectedValue(new Error('Some error') as never);
+    (UserServices.is_email_used as jest.Mock).mockRejectedValue(new Error('Some error') as never);
     (UserServices.addUser as jest.Mock).mockResolvedValue(null as never);
 
     await UserController.register(req, res);
@@ -277,7 +279,7 @@ describe('UserController - register', () => {
     expect(CheckInput.email).toHaveBeenCalledWith(req.body.email);
     expect(CheckInput.phone).toHaveBeenCalledWith(req.body.phone);
     expect(CheckInput.dateInferiorToToday).toHaveBeenCalledWith(req.body.birthDay);
-    expect(UserServices.getOneUser).toHaveBeenCalledWith(req.body.email);
+    expect(UserServices.is_email_used).toHaveBeenCalledWith(req.body.email);
     expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
     expect(res.json).toHaveBeenCalledWith({ message: 'Error while adding user, check if all fields are correct' });
   });

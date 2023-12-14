@@ -3,8 +3,16 @@ import { collections } from './Database';
 import User from '../models/UserModel';
 
 async function getOneUser(email: string): Promise<any> {
-    const user = await collections.user?.findOne({email: email});
+    const user = await collections.user?.findOne({email: email, ban: false});
     return user;
+}
+
+async function is_email_used(email: string){
+    const user = await collections.user?.findOne({email: email});
+    if (user != null){
+        return true
+    }
+    return false
 }
 
 async function addUser(user: User): Promise<any> {
@@ -14,7 +22,7 @@ async function addUser(user: User): Promise<any> {
 
 async function getAll(): Promise<User[]> {
     try {
-        const users = await collections.user?.find({}).toArray();
+        const users = await collections.user?.find({ban : false}).toArray();
         if (users) {
             return users.map(element => new User(
                 element.firstName,
@@ -39,7 +47,7 @@ async function getAll(): Promise<User[]> {
 
 async function getOne(id: string): Promise<User | null> {
     try {
-        const user = await collections.user?.findOne({ _id: new ObjectId(id) });
+        const user = await collections.user?.findOne({ _id: new ObjectId(id) , ban : false});
         if (user) {
             return new User(
                 user.firstName,
@@ -64,33 +72,33 @@ async function getOne(id: string): Promise<User | null> {
 }
 
 async function getUserById(id: string): Promise<any> {
-    const user = await collections.user?.findOne({_id: new ObjectId(id)});
+    const user = await collections.user?.findOne({_id: new ObjectId(id), ban : false});
     return user;
 }
 
 async function updateUser(id: string, user: User): Promise<any> {
-    const result = await collections.user?.updateOne({_id: new ObjectId(id)}, {$set: user});
+    const result = await collections.user?.updateOne({_id: new ObjectId(id), ban : false}, {$set: user});
     return result;
 }
 
 async function deleteUser(id: string): Promise<any> {
-    const result = await collections.user?.deleteOne({_id: new ObjectId(id)});
+    const result = await collections.user?.deleteOne({_id: new ObjectId(id), ban : false});
     return result;
 }
 
 async function isRightToken(id: string, token: string): Promise<any> {
     // find one user with id and token
-    const exist = await collections.user?.findOne({_id: new ObjectId(id), token: token});
+    const exist = await collections.user?.findOne({_id: new ObjectId(id), token: token, ban : false});
     return exist;
 }
 
 async function updateToken(email: string, token: string): Promise<any> {
-    const result = await collections.user?.updateOne({email: email}, {$set: {token: token}});
+    const result = await collections.user?.updateOne({email: email, ban : false}, {$set: {token: token}});
     return result;
 }
 
 async function getUsersByFirstName(firstName: string): Promise<any> {
-    const user = await collections.user?.find({firstName: firstName},{}).toArray();
+    const user = await collections.user?.find({firstName: firstName, ban : false},{}).toArray();
     return user;
 }
 
@@ -100,12 +108,12 @@ async function isBan(id: string): Promise<any> {
 }
 
 async function getUsersByLastName(lastName: string): Promise<any> {
-    const user = await collections.user?.find({lastName: lastName},{}).toArray();
+    const user = await collections.user?.find({lastName: lastName, ban : false},{}).toArray();
     return user;
 }
 
 async function getUsersByFirstNameAndLastName(firstName: string, lastName: string): Promise<any> {
-    const user = await collections.user?.find({lastName: lastName, firstName: firstName},{}).toArray();
+    const user = await collections.user?.find({lastName: lastName, firstName: firstName, ban : false},{}).toArray();
     return user;
 }
 
@@ -113,6 +121,7 @@ async function getUsersByFirstNameAndLastName(firstName: string, lastName: strin
 
 export default {
     getOneUser,
+    is_email_used,
     addUser,
     getAll,
     getOne,

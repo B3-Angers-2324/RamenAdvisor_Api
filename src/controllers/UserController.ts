@@ -83,8 +83,8 @@ async function register(req: Request, res: Response){
 
         if(!CheckInput.dateInferiorToToday(newUser.birthDay)) throw new Error("Invalid birth day");
 
-        const user = await UserServices.getOneUser(newUser.email);
-        if(user){
+        const mail_used = await UserServices.is_email_used(newUser.email);
+        if(mail_used){
             throw new Error("User already exists");
         }
         const addedUser = await UserServices.addUser(newUser);
@@ -183,37 +183,41 @@ async function updateUserProfile(req: TRequest, res: Response){
     }
 }
 
+async function removeAllUserMessages(id: string){
+    // get all messages from user
+    const messages = await MessageService.queryMessagesForUser(id, 99999999, 0);
+    if(messages == undefined){
+        throw new CustomError("Error while retriving user Messages", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    // recalculate note for each restaurant
+    for(let message of messages){
+        // TODO : could be optimized
+        const note = await MessageController.deleteNotePercentage(message.restaurant._id.toString(), message.note);
+    }
+
+    // delete all messages from user
+    const messagesDeleted = await MessageService.deleteAllMessagesForUser(id);
+    if(!messagesDeleted){
+        throw new CustomError("Error while deleting messages", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    return true;
+}
+
 async function deleteUserProfile(req: TRequest, res: Response){
     try{
         let id = req.token?._id;
-        // get all messages from user
-        const messages = await MessageService.queryMessagesForUser(id, 99999999, 0);
-        if(messages == undefined){
-            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while deleting user"});
-            return;
-        }
-        // recalculate note for each restaurant
-        for(let message of messages){
-            // TODO : could be optimized
-            const note = await MessageController.deleteNotePercentage(message.restaurant._id.toString(), message.note);
-        }
-
-
         // delete all messages from user
-        const messagesDeleted = await MessageService.deleteAllMessagesForUser(id);
-        if(!messagesDeleted){
-            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while deleting user"});
-            return;
-        }
+        removeAllUserMessages(id);
         // delete user
         const result = await UserServices.deleteUser(id);
         if(result){
             res.status(HttpStatus.OK).json({"message": "User deleted"});
         }else{
-            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while deleting user"});
+            throw new CustomError("Error while deleting user", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-    }catch(error){
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while deleting user"});
+    }catch(error : CustomError | any){
+        console.log(error);
+        res.status(error.code? error.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": error.message? error.message : "Internal server error"});
     }
 }
 
@@ -248,5 +252,6 @@ export default {
     getUserProfile,
     updateUserProfile,
     deleteUserProfile,
-    getUserMessage
+    getUserMessage,
+    removeAllUserMessages
 };

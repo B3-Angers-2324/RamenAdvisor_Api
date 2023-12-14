@@ -9,6 +9,7 @@ import UserService from "../services/UserService";
 import MessageService from "../services/MessageService";
 import Moderator from "../models/ModeratorModel";
 import CheckInput from "../tools/CheckInput";
+import UserController from "./UserController";
 dotenv.config();
 
 async function login(req: Request, res: Response){
@@ -143,6 +144,10 @@ async function banUser(req: TRequest, res: Response){
         user.ban = true;
         const result = await UserService.updateUser(user._id, user );
         if (result == null) throw new CustomError("Error while banning user", HttpStatus.INTERNAL_SERVER_ERROR);
+        
+        // delete all messages from the user
+        UserController.removeAllUserMessages(user._id);
+        
         res.status(HttpStatus.OK).json({"message": "User banned"});
     }catch(e: CustomError | any){
         res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.code? e.message : "Error while banning user"});

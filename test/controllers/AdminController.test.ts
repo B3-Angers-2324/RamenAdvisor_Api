@@ -12,6 +12,7 @@ import { TRequest } from '../../src/controllers/types/types';
 import CheckInput from '../../src/tools/CheckInput';
 import { CustomError } from '../../src/controllers/types/types';
 import User from '../../src/models/UserModel';
+import UserController from '../../src/controllers/UserController';
 import { uptime } from 'process';
 dotenv.config();
 
@@ -19,6 +20,7 @@ jest.mock('jsonwebtoken');
 jest.mock('../../src/services/AdminService');
 jest.mock('../../src/services/UserService');
 jest.mock('../../src/services/MessageService');
+jest.mock('../../src/controllers/UserController')
 
 describe('AdminController - login', () => {
   let req: Request;
@@ -528,6 +530,8 @@ describe("AdminController - banUser", () => {
   });
 
   it("should return a bad request status if no user id is provided", async () => {
+    (UserController.removeAllUserMessages as jest.Mock).mockResolvedValue(true as never)
+
     await AdminControler.banUser(req, res);
 
     expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
@@ -539,6 +543,8 @@ describe("AdminController - banUser", () => {
     req.params.uid = 'userId';
 
     (UserService.getUserById as jest.Mock).mockResolvedValue(user as never);
+    (UserController.removeAllUserMessages as jest.Mock).mockResolvedValue(true as never)
+
 
     await AdminControler.banUser(req, res);
 
@@ -551,6 +557,8 @@ describe("AdminController - banUser", () => {
     req.params.uid = 'userId';
 
     (UserService.getUserById as jest.Mock).mockRejectedValue(new Error('Some error') as never);
+    (UserController.removeAllUserMessages as jest.Mock).mockResolvedValue(true as never)
+
     await AdminControler.banUser(req, res);
 
     expect(UserService.getUserById).toHaveBeenCalledWith(req.params.uid);
@@ -566,6 +574,7 @@ describe("AdminController - banUser", () => {
 
     (UserService.getUserById as jest.Mock).mockResolvedValue(user as never);
     (UserService.updateUser as jest.Mock).mockRejectedValue(new Error('Some error') as never);
+    (UserController.removeAllUserMessages as jest.Mock).mockResolvedValue(true as never)
 
     await AdminControler.banUser(req, res);
 
@@ -583,7 +592,9 @@ describe("AdminController - banUser", () => {
     req.params.uid = 'userId';
 
     (UserService.getUserById as jest.Mock).mockResolvedValue(user as never);
-    (UserService.updateUser as jest.Mock).mockResolvedValue(null as never);
+    (UserService.updateUser as jest.Mock).mockResolvedValue(null as never);    
+    (UserController.removeAllUserMessages as jest.Mock).mockResolvedValue(true as never)
+
 
     await AdminControler.banUser(req, res);
 
@@ -602,6 +613,7 @@ describe("AdminController - banUser", () => {
 
     (UserService.getUserById as jest.Mock).mockResolvedValue(user as never);
     (UserService.updateUser as jest.Mock).mockResolvedValue(user as never);
+    (UserController.removeAllUserMessages as jest.Mock).mockResolvedValue(true as never)
 
     await AdminControler.banUser(req, res);
 
