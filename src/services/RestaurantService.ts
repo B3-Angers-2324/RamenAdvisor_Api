@@ -2,12 +2,26 @@ import { ObjectId } from 'mongodb';
 import { collections } from './Database';
 import Restaurant from '../models/RestaurantModel';
 import { cp } from 'fs';
+import OwnerServices from "../services/OwnerService";
 
 const queryBestRestaurants = async (limit : number) => {
     let restaurants = await collections.restaurant?.find({},{
         sort: { note: -1 },
         limit: limit 
     }).toArray();
+
+    if (restaurants != undefined) {
+        let ownerId = "";
+        let owner;
+        for (let i=0; i<restaurants?.length; i++) {
+            ownerId = restaurants[i].ownerId;
+            owner = await OwnerServices.getOwnerById(ownerId);
+            if (owner != undefined) {
+                if (owner.ban) restaurants.splice(i, 1);
+            }
+        }
+    }
+
     if (restaurants==undefined){
         throw new Error("No restaurants found");
     }

@@ -42,10 +42,14 @@ async function getOwnerNoValidate (req: TRequest, res: Response) {
 
 async function getAllOwner (req: TRequest, res: Response) {
     try{
-        let ownerlist = await OwnerServices.getAll();
-        res.status(HttpStatus.OK).json({"data": ownerlist});
+        let owners = await OwnerServices.getAll();
+        if(owners){
+            res.status(HttpStatus.OK).json({"owners": owners});
+        }else{
+            res.status(HttpStatus.NOT_FOUND).json({"message": "No owners found"});
+        }
     }catch(error){
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"error": error});
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while getting owners"});
     }
 }
 
@@ -97,6 +101,27 @@ async function getRestaurantsByOwner(req: TRequest, res: Response){
     }
 }
 
+async function banOwner (req: TRequest, res: Response) {
+    try{
+        let id = req.params.uid;
+        const owner = await OwnerServices.getOwnerById(id);
+        owner.ban = true;
+
+        if(owner){
+            const result = await OwnerServices.updateOwner(id, owner);
+            if(result){
+                res.status(HttpStatus.OK).json({"message": "Owner information updated"});
+            }else{
+                res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while updating owner information"});
+            }
+        }else{
+            res.status(HttpStatus.NOT_FOUND).json({"message": "Owner not found"});
+        }
+    }catch(error){
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while updating owner information"});
+    }
+}
+
 
 export default {
     login,
@@ -104,5 +129,6 @@ export default {
     getAllOwner,
     validateOwner,
     getOwnerProfile,
-    getRestaurantsByOwner
+    getRestaurantsByOwner,
+    banOwner
 };

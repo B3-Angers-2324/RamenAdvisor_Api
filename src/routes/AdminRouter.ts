@@ -19,5 +19,7 @@ router.get("/owner/profile/:uid", Admin.getOwnerProfile);
 
 router.get("/restaurants/:uid", Admin.getRestaurantsByOwner);
 
+router.patch("/ban/:uid", Admin.banOwner);
+
 
 export default router;

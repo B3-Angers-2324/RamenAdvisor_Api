@@ -177,6 +177,10 @@ db.createCollection(
                 validate: {
                     bsonType: "bool",
                     description: "must be a bool and is required"
+                },
+                ban: {
+                    bsonType: "bool",
+                    description: "must be a bool and is required"
                 }
             }
         }}

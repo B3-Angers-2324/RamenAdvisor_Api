@@ -12,7 +12,7 @@ async function getOneOwner(email: string): Promise<any> {
 }
 
 const queryOwnerNoValidate = async () => {
-    let owners = await collections.owner?.find({}).toArray();
+    let owners = await collections.owner?.find({validate: false}).toArray();
     if (owners==undefined){
         throw new Error("No unvalid owner found");
     }
@@ -39,25 +39,11 @@ async function getOwnerById(id: string): Promise<any> {
 }
 
 async function getAll () {
-    try {
-        const users = await collections.user?.find({}).toArray();
-        if (users) {
-            return users.map(element => new Owner(
-                element.firstName,
-                element.lastName,
-                element.email,
-                element.companyName,
-                element.socialAdresse,
-                element.validate,
-                element.id,
-                element.siret
-            ));
-        } else {
-            return [];
-        }
-    } catch (err) {
-        throw err;
+    let owners = await collections.owner?.find({}).toArray();
+    if (owners==undefined){
+        throw new Error("No unvalid owner found");
     }
+    return owners;
 }
 
 async function updateOwner(id: string, owner: Owner): Promise<any> {
