@@ -12,7 +12,7 @@ async function getOneOwner(email: string): Promise<any> {
 }
 
 const queryOwnerNoValidate = async () => {
-    let owners = await collections.owner?.find({validate: false}).toArray();
+    let owners = await collections.owner?.find({}).toArray();
     if (owners==undefined){
         throw new Error("No unvalid owner found");
     }
@@ -38,6 +38,28 @@ async function getOwnerById(id: string): Promise<any> {
 
 }
 
+async function getAll () {
+    try {
+        const users = await collections.user?.find({}).toArray();
+        if (users) {
+            return users.map(element => new Owner(
+                element.firstName,
+                element.lastName,
+                element.email,
+                element.companyName,
+                element.socialAdresse,
+                element.validate,
+                element.id,
+                element.siret
+            ));
+        } else {
+            return [];
+        }
+    } catch (err) {
+        throw err;
+    }
+}
+
 async function updateOwner(id: string, owner: Owner): Promise<any> {
     try{
         const result = await collections.owner?.updateOne({_id: new ObjectId(id)}, {$set: owner});
@@ -56,14 +78,6 @@ async function deleteOwner(id: string): Promise<any> {
     }
 }
 
-const queryAllOwner = async () => {
-    let owners = await collections.owner?.find({}).toArray();
-    if (owners==undefined){
-        throw new Error("No unvalid owner found");
-    }
-    return owners;
-}
-
 export default {
     getOneOwner,
     addOwner,
@@ -71,5 +85,5 @@ export default {
     updateOwner,
     deleteOwner,
     queryOwnerNoValidate,
-    queryAllOwner
+    getAll
 } as const;

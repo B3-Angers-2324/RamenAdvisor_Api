@@ -19,5 +19,6 @@ router.delete("/profile", Owner.deleteOwnerProfile);
 
 router.get("/restaurants", Owner.getRestaurantsByOwner);
 
+router.get("/allOwner", Owner.getAllOwner);
 
 export default router;

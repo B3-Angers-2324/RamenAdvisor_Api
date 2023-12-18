@@ -11,13 +11,13 @@ router.use(adminMiddleware.adminLoginMiddleware);
 
 router.get("/getValidate", Admin.getOwnerNoValidate);
 
-router.get("/getAll", Admin.getAllOwner);
+router.get("/allOwner", Admin.getAllOwner);
 
-router.get("/getOne", Admin.getOwnerProfile);
+router.patch("/validate/:uid", Admin.validateOwner);
 
-router.patch("/validate", Admin.validateOwner);
+router.get("/owner/profile/:uid", Admin.getOwnerProfile);
 
-router.get("/restaurants", Admin.getRestaurantsByOwner);
+router.get("/restaurants/:uid", Admin.getRestaurantsByOwner);
 
 
 export default router;

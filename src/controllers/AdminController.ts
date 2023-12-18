@@ -4,7 +4,7 @@ import AdminService from "../services/AdminService";
 import jwt from "jsonwebtoken";
 import OwnerServices from "../services/OwnerService";
 import Owner from "../models/OwnerModel";
-import { TRequest } from "./types/types";
+import { CustomError, TRequest } from "./types/types";
 import RestaurantService from "../services/RestaurantService";
 
 
@@ -42,33 +42,16 @@ async function getOwnerNoValidate (req: TRequest, res: Response) {
 
 async function getAllOwner (req: TRequest, res: Response) {
     try{
-        let ownerlist = await OwnerServices.queryAllOwner();
+        let ownerlist = await OwnerServices.getAll();
         res.status(HttpStatus.OK).json({"data": ownerlist});
     }catch(error){
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"error": error});
     }
 }
 
-async function getOwnerProfile(req: TRequest, res: Response) {
-    try{
-        //let id = req.token?._id;
-        let id = "65685b83f28ecabc60b84c57";
-        console.log("Id Owner: ", id);
-        const owner = await OwnerServices.getOwnerById(id);
-        if(owner){
-            res.status(HttpStatus.OK).json({"owner": owner});
-        }else{
-            res.status(HttpStatus.NOT_FOUND).json({"message": "Owner not found"});
-        }
-    }catch(error){
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while getting owner information"});
-    }
-}
-
 async function validateOwner (req: TRequest, res: Response) {
     try{
-        let id = "65685b83f28ecabc60b84c57";
-        // let id = req.token?._id;
+        let id = req.params.uid;
         const owner = await OwnerServices.getOwnerById(id);
         owner.validate = true;
 
@@ -87,10 +70,22 @@ async function validateOwner (req: TRequest, res: Response) {
     }
 }
 
+async function getOwnerProfile(req: TRequest, res: Response){
+    //Just forwards the request to the user controller with the right id
+    try{
+        const ownerId = req.params.uid;
+        if (ownerId == "" || ownerId == undefined) throw new CustomError("No user id provided", HttpStatus.BAD_REQUEST);
+        let owner = await OwnerServices.getOwnerById(ownerId);
+        if (owner == null) throw new CustomError("No user found", HttpStatus.NOT_FOUND);
+        res.status(HttpStatus.OK).json(owner);
+    }catch(error : CustomError | any){
+        res.status(error.code? error.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": error.code? error.message : "Error while getting owners"});
+    }
+}
+
 async function getRestaurantsByOwner(req: TRequest, res: Response){
     try{
-        //let id = req.token?._id;
-        let id = "64a685757acccfac3d045af3";
+        let id = req.params?.uid;
         const restaurants = await RestaurantService.queryRestaurantsByOwner(id);
         if(restaurants){
             res.status(HttpStatus.OK).json({"restaurants": restaurants});
@@ -107,7 +102,7 @@ export default {
     login,
     getOwnerNoValidate,
     getAllOwner,
-    getOwnerProfile,
     validateOwner,
+    getOwnerProfile,
     getRestaurantsByOwner
 };

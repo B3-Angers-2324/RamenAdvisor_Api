@@ -81,6 +81,15 @@ async function getRestaurantsByOwner(req: TRequest, res: Response){
     }
 }
 
+async function getAllOwner (req: TRequest, res: Response) {
+    try{
+        let ownerlist = await OwnerServices.getAll();
+        res.status(HttpStatus.OK).json({"data": ownerlist});
+    }catch(error){
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"error": error});
+    }
+}
+
 async function getOwnerProfile(req: TRequest, res: Response){
     try{
         let id = req.token?._id;
@@ -161,5 +170,6 @@ export default {
     getRestaurantsByOwner,
     getOwnerProfile,
     updateOwnerProfile,
-    deleteOwnerProfile
+    deleteOwnerProfile,
+    getAllOwner
 };
