@@ -158,7 +158,6 @@ const getRestaurantSearch = async (req: Request, res: Response) => {
             obj: restaurant
         });
     }catch(e ){
-        console.log(e);
         if ((e as Error).message=="No restaurants found"){
             res.status(HttpStatus.NOT_FOUND).json({"message": "No restaurants found"});
         }else{
@@ -219,17 +218,13 @@ const deleteRestaurant = async (req: TRequest, res: Response) => {
                 // delete all images
                 for(let i = 0; i < restaurant.images.length; i++){
                     if(restaurant.images[i] != "" && restaurant.images[i] != undefined){
-                        console.log(restaurant.images[i])
                         await ImageContoller.deleteImage(restaurant.images[i]);
-                        console.log("images to delete")
                     }
                 }
             }
-            console.log("images all deleted")
 
             //delete all messages
             await MessageService.deleteAllMessagesForRestaurant(req.params.uid);
-            console.log("messages deleted")
             await Service.deleteRestaurant(req.params.uid);
             res.status(HttpStatus.OK).json({"message": "Restaurant deleted"});
         }catch(e : CustomError|any){

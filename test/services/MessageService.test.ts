@@ -30,7 +30,7 @@ describe('Test all MessageService function', () => {
             restaurantId: new ObjectId('64a685757acccfac3d045aa1'),
             message: "Message 1",
             date: new Date(),
-            note: 30,
+            note: 3,
         },
         {
             _id: new ObjectId('64a685757acccfac3d045aa2'),
@@ -38,7 +38,7 @@ describe('Test all MessageService function', () => {
             restaurantId: new ObjectId('64a685757acccfac3d045aa1'),
             message: "Message 2",
             date: new Date(),
-            note: 50,
+            note: 5,
         },
         {
             _id: new ObjectId('64a685757acccfac3d045aa3'),
@@ -46,7 +46,7 @@ describe('Test all MessageService function', () => {
             restaurantId: new ObjectId('64a685757acccfac3d045aa1'),
             message: "Message 3",
             date: new Date(),
-            note: 40,
+            note: 4,
         },
         {
             _id: new ObjectId('64a685757acccfac3d045aa4'),
@@ -54,7 +54,7 @@ describe('Test all MessageService function', () => {
             restaurantId: new ObjectId('64a685757acccfac3d045aa4'),
             message: "Message 4",
             date: new Date(),
-            note: 30,
+            note: 3,
         },
         {
             _id: new ObjectId('64a685757acccfac3d045aa5'),
@@ -62,7 +62,7 @@ describe('Test all MessageService function', () => {
             restaurantId: new ObjectId('64a685757acccfac3d045aa4'),
             message: "Message 5",
             date: new Date(),
-            note: 50,
+            note: 5,
         }
     ]
 
@@ -84,7 +84,7 @@ describe('Test all MessageService function', () => {
                     ban: false,
                     ville: 'Angers',
                     address: 'test1',
-                    image: 'urlImage1',
+                    image: new ObjectId('64a685757acccfac3d045aa4'),
                 },
                 {
                     _id: new ObjectId('64a685757acccfac3d045aa2'),
@@ -98,7 +98,7 @@ describe('Test all MessageService function', () => {
                     ban: false,
                     ville: 'Angers',
                     address: 'test3',
-                    image: 'urlImage3',
+                    image: new ObjectId('64a685757acccfac3d045aa4'),
                 },
             ];
 
@@ -200,7 +200,7 @@ describe('Test all MessageService function', () => {
                     position: [45, 45],
                     address: 'test1@gmail.com',
                     foodtype: 'test1',
-                    note: 30,
+                    note: 3,
                     images: ['urlImage1', 'urlImage2'],
                 },
                 {
@@ -210,7 +210,7 @@ describe('Test all MessageService function', () => {
                     position: [45, 45],
                     address: 'test4',
                     foodtype: 'test4',
-                    note: 30,
+                    note: 3,
                     images: ['urlImage4', 'urlImage5'],
                 },
             ];

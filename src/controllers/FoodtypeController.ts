@@ -8,8 +8,6 @@ import { ObjectId } from "mongodb";
 import ImageContoller from "./ImageContoller";
 import CheckInput from "../tools/CheckInput";
 
-const fs = require('fs');
-
 async function getAll(req: Request, res: Response){
     try{
         const result = await FoodtypeService.queryAll();

@@ -233,7 +233,7 @@ describe('Test all RestaurantService function', () => {
 
     //         // Call the queryRestaurantsWithParam function
     //         const result = await RestaurantService.queryRestaurantsWithParam("local_food", true, 3, "Restaurant");
-    //         console.log(result);
+    //         
     //         // Assert that the result has the correct length
     //         expect(result.length).toBe(3);
 
