@@ -74,7 +74,10 @@ const getRestaurantById = async (req: Request, res: Response) =>{
 const createRestaurant = (req: TRequest, res: Response) => {
     OwnerMiddleware.ownerLoginMiddleware(req, res, async () => {
         try{
-            if(!CheckInput.areNotEmpty([req.body.name, req.body.address, req.body.city, req.body.foodtype, req.body.position, req.body.accessible])){
+            if(req.body.accessible != undefined && typeof req.body.accessible != "boolean"){
+                throw(new CustomError("Invalid accessible value", HttpStatus.BAD_REQUEST));
+            }
+            if(!CheckInput.areNotEmpty([req.body.name, req.body.address, req.body.city, req.body.foodtype, req.body.position])){
                 throw(new CustomError("Missing parameters", HttpStatus.BAD_REQUEST));
             }
             if(req.body.tel != "" && !CheckInput.phone(req.body.tel)){
@@ -111,7 +114,10 @@ const createRestaurant = (req: TRequest, res: Response) => {
 const updateRestaurant = (req: Request, res: Response) => {
     OwnerMiddleware.ownerLoginMiddleware(req, res, async () => {
         try{
-            if(!CheckInput.areNotEmpty([req.body.name, req.body.address, req.body.city, req.body.foodtype, req.body.position, req.body.accessible])){
+            if(req.body.accessible != undefined && typeof req.body.accessible != "boolean"){
+                throw(new CustomError("Invalid accessible value", HttpStatus.BAD_REQUEST));
+            }
+            if(!CheckInput.areNotEmpty([req.body.name, req.body.address, req.body.city, req.body.foodtype, req.body.position])){
                 throw(new CustomError("Missing parameters", HttpStatus.BAD_REQUEST));
             }
             if(req.body.tel != "" && !CheckInput.phone(req.body.tel)){

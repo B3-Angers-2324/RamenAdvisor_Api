@@ -19,6 +19,6 @@ export default class Restaurant{
         public web?: string,
         public email?: string,
         public terrasse?: boolean,
-        public handicape?: boolean,
+        public accessible?: boolean,
     ){}
 }
