@@ -7,6 +7,7 @@ import RestaurantServices from '../../src/services/RestaurantService';
 import OwnerController from '../../src/controllers/OwnerController';
 import MessageServices from '../../src/services/MessageService';
 import { TRequest } from '../../src/controllers/types/types';
+import ImageContoller from '../../src/controllers/ImageContoller';
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -15,6 +16,7 @@ jest.mock('jsonwebtoken');
 jest.mock('../../src/services/OwnerService');
 jest.mock('../../src/services/RestaurantService');
 jest.mock('../../src/services/MessageService');
+jest.mock('../../src/controllers/ImageContoller');
 
 describe('OwnerController - login', () => {
   let req: Request;
@@ -499,7 +501,7 @@ describe('OwnerController - updateOwnerProfile', () => {
 // ------------------------------------------------------------
 
 describe('OwnerController - deleteOwnerProfile', () => {
-  test('should delete the owner profile and associated restaurants and messages', async () => {
+  test('should delete owner profile and associated restaurants, messages, and images', async () => {
     const req = {
       token: { _id: 'ownerId' },
     } as TRequest;
@@ -508,26 +510,30 @@ describe('OwnerController - deleteOwnerProfile', () => {
       json: jest.fn(),
     } as unknown as Response;
 
-    const restaurants = [{ _id: 'restaurantId1' }, { _id: 'restaurantId2' }];
-    const result = true;
+    const restaurants = [
+      { _id: 'restaurantId1', images: ['image1', 'image2'] },
+      { _id: 'restaurantId2', images: ['image3', 'image4'] },
+    ];
+    const deletedOwner = true;
 
     (RestaurantServices.queryRestaurantsByOwner as jest.Mock).mockResolvedValue(restaurants as never);
     (MessageServices.deleteAllMessagesForRestaurant as jest.Mock).mockResolvedValue(undefined as never);
+    (ImageContoller.deleteImage as jest.Mock).mockResolvedValue(undefined as never);
     (RestaurantServices.deleteAllRestaurantsByOwner as jest.Mock).mockResolvedValue(undefined as never);
-    (OwnerServices.deleteOwner as jest.Mock).mockResolvedValue(result as never);
+    (OwnerServices.deleteOwner as jest.Mock).mockResolvedValue(deletedOwner as never);
 
     await OwnerController.deleteOwnerProfile(req, res);
 
     expect(RestaurantServices.queryRestaurantsByOwner).toHaveBeenCalledWith(req.token?._id);
-    expect(MessageServices.deleteAllMessagesForRestaurant).toHaveBeenCalledWith('restaurantId1');
-    expect(MessageServices.deleteAllMessagesForRestaurant).toHaveBeenCalledWith('restaurantId2');
+    expect(MessageServices.deleteAllMessagesForRestaurant).toHaveBeenCalledTimes(restaurants.length);
+    expect(ImageContoller.deleteImage).toHaveBeenCalledTimes(4);
     expect(RestaurantServices.deleteAllRestaurantsByOwner).toHaveBeenCalledWith(req.token?._id);
     expect(OwnerServices.deleteOwner).toHaveBeenCalledWith(req.token?._id);
     expect(res.status).toHaveBeenCalledWith(HttpStatus.OK);
     expect(res.json).toHaveBeenCalledWith({ message: 'Owner deleted' });
   });
 
-  test('should return internal server error if an error occurs while deleting owner', async () => {
+  test('should return internal server error if an error occurs while deleting owner profile', async () => {
     const req = {
       token: { _id: 'ownerId' },
     } as TRequest;
@@ -537,12 +543,15 @@ describe('OwnerController - deleteOwnerProfile', () => {
     } as unknown as Response;
 
     const error = new Error('Some error');
+    const deletedOwner = false;
 
     (RestaurantServices.queryRestaurantsByOwner as jest.Mock).mockRejectedValue(error as never);
+    (OwnerServices.deleteOwner as jest.Mock).mockResolvedValue(deletedOwner as never);
 
     await OwnerController.deleteOwnerProfile(req, res);
 
     expect(RestaurantServices.queryRestaurantsByOwner).toHaveBeenCalledWith(req.token?._id);
+    expect(OwnerServices.deleteOwner).toHaveBeenCalledWith(req.token?._id);
     expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
     expect(res.json).toHaveBeenCalledWith({ message: 'Error while deleting owner' });
   });

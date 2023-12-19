@@ -129,7 +129,6 @@ async function getUserMessage(req: TRequest, res: Response){
             more: more
         });
     }catch(e : CustomError | any){
-        console.log(e);
         res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.code? e.message : "Error while getting users"});
     }
 }
@@ -163,7 +162,6 @@ async function addModerator(req: TRequest, res: Response){
         if (!CheckInput.email(newModerator.email)) throw new CustomError("Invalid email", HttpStatus.BAD_REQUEST);
 
         // check if the password is valid
-        // console.log(newModerator.password, CheckInput.password(newModerator.password || ""));
         // if (!newModerator.password || !CheckInput.password(newModerator.password)) throw new CustomError("Invalid password", HttpStatus.BAD_REQUEST);
 
         const admin = await AdminService.getOneUser(newModerator.email);

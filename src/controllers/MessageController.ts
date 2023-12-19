@@ -217,7 +217,6 @@ async function computeNotePercentage(restaurantId : string , newNote : number, v
         //update the restaurant in the database
         await RestaurantService.updateRestaurantNote(restaurant._id,newglobalnote,newPercentage);
     }catch(e){
-        // console.log("Error While computing the note : ",e);
     }
 }
 

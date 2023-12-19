@@ -21,7 +21,6 @@ async function getImage(req: Request, res: Response){
             res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal servers error"});
         }
     }catch(error){
-        console.log(error);
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal servers error"});
     }
 }
@@ -63,5 +62,5 @@ async function deleteImage(imageId: string) : Promise<boolean> {
 export default {
     getImage,
     addImage,
-    deleteImage
+    deleteImage,
 } as const;

@@ -171,9 +171,7 @@ async function deleteOwnerProfile(req: TRequest, res: Response){
                 // delete all images
                 for(let i = 0; i < element.images.length; i++){
                     if(element.images[i] != "" && element.images[i] != undefined){
-                        console.log(element.images[i])
                         await ImageContoller.deleteImage(element.images[i]);
-                        console.log("images to delete")
                     }
                 }
             }

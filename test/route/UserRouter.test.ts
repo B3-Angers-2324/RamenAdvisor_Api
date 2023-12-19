@@ -24,7 +24,8 @@ jest.mock('../../src/controllers/UserController', () => ({
     getUserProfile: jest.fn((req, res : Response) => res.json()),
     updateUserProfile: jest.fn((req, res : Response) => res.json()),
     deleteUserProfile: jest.fn((req, res : Response) => res.json()),
-    getUserMessage: jest.fn((req, res : Response) => res.json())
+    getUserMessage: jest.fn((req, res : Response) => res.json()),
+    updateUserPP: jest.fn((req, res : Response) => res.json()),
 }));
 
 describe('Test the /user paths', () => {
@@ -70,5 +71,12 @@ describe('Test the /user paths', () => {
         const response = await request.get(`${base_url}/user/message`);
         // Assert that UserController.getUserMessage was called
         expect(UserController.getUserMessage).toHaveBeenCalled();
+    });
+
+    test('The /profile route should call the patchImage function on the controller', async () => {
+        // Make a PATCH request to the /user/profile endpoint
+        const response = await request.patch(`${base_url}/user/pp`);
+        // Assert that UserController.updateUserPP was called
+        expect(UserController.updateUserPP).toHaveBeenCalled();
     });
 });

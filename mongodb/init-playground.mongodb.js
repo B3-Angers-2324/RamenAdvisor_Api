@@ -50,9 +50,9 @@ db.createCollection(
                     description: "must be a string and is required"
                 }
             }
-        }
+        }}
     }
-});
+);
 
 db.createCollection(
     MessageCollection,

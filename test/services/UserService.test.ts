@@ -36,7 +36,7 @@ describe('Test all UserService function', () => {
             ban: true,
             ville: 'Angers',
             address: 'test1',
-            image: 'urlImage1',
+            image: new ObjectId('64a685757acccfac3d045aa1'),
             token: 'token1',
         },
         {
@@ -50,7 +50,7 @@ describe('Test all UserService function', () => {
             ban: false,
             ville: 'Angers',
             address: 'test3',
-            image: 'urlImage3',
+            image: new ObjectId('64a685757acccfac3d045aa2'),
         },
     ];
 
@@ -129,7 +129,7 @@ describe('Test all UserService function', () => {
             ban: false,
             ville: 'Angers',
             address: 'test1',
-            image: 'urlImage1',
+            image: new ObjectId('64a685757acccfac3d045aa2'),
           };
       
           // Add owner to the collection
@@ -169,7 +169,7 @@ describe('Test all UserService function', () => {
                 ban: true,
                 ville: 'update',
                 address: 'update',
-                image: 'update',
+                image: new ObjectId('64a685757acccfac3d045aa2'),
             };
         
             // Add owner to the collection
@@ -186,7 +186,7 @@ describe('Test all UserService function', () => {
                 ban: false,
                 ville: 'Angers',
                 address: 'test1',
-                image: 'urlImage1',
+                image: new ObjectId('64a685757acccfac3d045aa2'),
             },
             ]);
         
@@ -215,7 +215,7 @@ describe('Test all UserService function', () => {
                 ban: true,
                 ville: 'update',
                 address: 'update',
-                image: 'update',
+                image: new ObjectId('64a685757acccfac3d045aa2'),
             };
         
             const result = await UserService.updateUser(invaliduserId, updatedUser);
@@ -244,7 +244,7 @@ describe('Test all UserService function', () => {
                 ban: false,
                 ville: 'Angers',
                 address: 'test1',
-                image: 'urlImage1',
+                image: new ObjectId('64a685757acccfac3d045aa2'),
             },
             ]);
         
@@ -287,7 +287,7 @@ describe('Test all UserService function', () => {
                     ban: false,
                     ville: 'Angers',
                     address: 'test1',
-                    image: 'urlImage1',
+                    image: new ObjectId('64a685757acccfac3d045aa2'),
                     token: 'token1'
                 }
             ];
@@ -326,7 +326,7 @@ describe('Test all UserService function', () => {
                     ban: false,
                     ville: 'Angers',
                     address: 'test1',
-                    image: 'urlImage1',
+                    image: new ObjectId('64a685757acccfac3d045aa2'),
                 }
             ];
             await db.addDatasToCollection(userCollection, usersData);
@@ -362,7 +362,7 @@ describe('Test all UserService function', () => {
               ban: true,
               ville: 'Angers',
               address: 'test1',
-              image: 'urlImage1',
+              image: new ObjectId('64a685757acccfac3d045aa2'),
             },
             {
               _id: new ObjectId('64a685757acccfac3d045aa2'),
@@ -376,7 +376,7 @@ describe('Test all UserService function', () => {
               ban: false,
               ville: 'Angers',
               address: 'test1',
-              image: 'urlImage1',
+              image: new ObjectId('64a685757acccfac3d045aa2'),
             }
           ];
           await db.addDatasToCollection(userCollection, usersData);
@@ -407,7 +407,7 @@ describe('Test all UserService function', () => {
                   ban: true,
                   ville: 'Angers',
                   address: 'test1',
-                  image: 'urlImage1',
+                  image: new ObjectId('64a685757acccfac3d045aa2'),
                 },
                 {
                   _id: new ObjectId('64a685757acccfac3d045aa2'),
@@ -421,7 +421,7 @@ describe('Test all UserService function', () => {
                   ban: true,
                   ville: 'Angers',
                   address: 'test1',
-                  image: 'urlImage1',
+                  image: new ObjectId('64a685757acccfac3d045aa2'),
                 }
             ];
             await db.addDatasToCollection(userCollection, userData);
@@ -451,7 +451,7 @@ describe('Test all UserService function', () => {
                   ban: true,
                   ville: 'Angers',
                   address: 'test1',
-                  image: 'urlImage1',
+                  image: new ObjectId('64a685757acccfac3d045aa2'),
                 },
                 {
                   _id: new ObjectId('64a685757acccfac3d045aa2'),
@@ -465,7 +465,7 @@ describe('Test all UserService function', () => {
                   ban: true,
                   ville: 'Angers',
                   address: 'test1',
-                  image: 'urlImage1',
+                  image: new ObjectId('64a685757acccfac3d045aa2'),
                 }
             ];
             await db.addDatasToCollection(userCollection, userData);
@@ -494,7 +494,7 @@ describe('Test all UserService function', () => {
                   ban: true,
                   ville: 'Angers',
                   address: 'test1',
-                  image: 'urlImage1',
+                  image: new ObjectId('64a685757acccfac3d045aa2'),
                 },
                 {
                   _id: new ObjectId('64a685757acccfac3d045aa2'),
@@ -508,7 +508,7 @@ describe('Test all UserService function', () => {
                   ban: true,
                   ville: 'Angers',
                   address: 'test1',
-                  image: 'urlImage1',
+                  image: new ObjectId('64a685757acccfac3d045aa2'),
                 }
             ];
             await db.addDatasToCollection(userCollection, userData);
