@@ -49,7 +49,8 @@ async function getFavoriteByUser (id: string) {
                     _id: 0,
                     'restaurant.name': 1,
                     'foodtype.imgId': 1,
-                    'restaurant.note': 1
+                    'restaurant.note': 1,
+                    'restaurant.images': { $arrayElemAt: ['$restaurant.images', 0] }
                 }
             }
         ] as any[];
