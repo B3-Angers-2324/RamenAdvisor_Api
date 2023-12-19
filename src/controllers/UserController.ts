@@ -6,6 +6,7 @@ import UserServices from "../services/UserService";
 import HttpStatus from "../constants/HttpStatus";
 import CheckInput from "../tools/CheckInput";
 import dotenv from 'dotenv';
+import FavoriteService from "../services/FavoriteService";
 dotenv.config();
 
 async function login(req: Request, res: Response){
@@ -184,11 +185,33 @@ async function deleteUserProfile(req: TRequest, res: Response){
     }
 }
 
+async function getFavorite(req: TRequest, res: Response){
+    try{
+        let id = req.token?._id;
+        let favorites = await FavoriteService.getFavoriteByUser(id);
+        res.status(HttpStatus.OK).json(favorites);
+    }catch(error){
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"error": error});
+    }
+    
+}
+
+async function addFavorite(req: TRequest, res: Response){
+    try {
+        let id = req.token?._id;
+        console.log("restaurantId: ", id);
+    }catch(error){
+
+    }
+}
+
 export default {
     login,
     register,
     getAll,
     getUserProfile,
     updateUserProfile,
-    deleteUserProfile
+    deleteUserProfile,
+    getFavorite, 
+    addFavorite
 };

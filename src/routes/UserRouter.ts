@@ -20,5 +20,8 @@ router.patch("/profile", UserController.updateUserProfile);
 
 router.delete("/profile", UserController.deleteUserProfile);
 
+router.get("/getFavorite", UserController.getFavorite);
+
+router.get("/addFavorite", UserController.addFavorite);
 
 export default router;

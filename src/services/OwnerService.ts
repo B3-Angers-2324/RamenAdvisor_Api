@@ -12,11 +12,15 @@ async function getOneOwner(email: string): Promise<any> {
 }
 
 const queryOwnerNoValidate = async () => {
-    let owners = await collections.owner?.find({validate: false}).toArray();
-    if (owners==undefined){
-        throw new Error("No unvalid owner found");
+    try {
+        let owners = await collections.owner?.find({validate: false}).toArray();
+        if (owners==undefined){
+            throw new Error("No unvalid owner found");
+        }
+        return owners;
+    }catch (error){
+        throw error;
     }
-    return owners;
 }
 
 async function addOwner(owner: Owner): Promise<any> {
@@ -39,11 +43,15 @@ async function getOwnerById(id: string): Promise<any> {
 }
 
 async function getAll () {
-    let owners = await collections.owner?.find({}).toArray();
-    if (owners==undefined){
-        throw new Error("No unvalid owner found");
+    try {    
+        let owners = await collections.owner?.find({}).toArray();
+        if (owners==undefined){
+            throw new Error("No unvalid owner found");
+        }
+        return owners;
+    }catch (error) {
+        throw error;
     }
-    return owners;
 }
 
 async function updateOwner(id: string, owner: Owner): Promise<any> {

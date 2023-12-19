@@ -6,6 +6,7 @@ const UserCollection = "users";
 const OwnerCollection = "owners";
 const ModeratorCollection = "moderators";
 const AdminCollection = "admins";
+const FavoriteCollection = "favorites";
 
 use(database);
 
@@ -87,4 +88,9 @@ db.getCollection("reports").insertMany([
   { "_id": ObjectId("64a685757acccaac3d045b05"), "userId": ObjectId("64a685757acccfac3d045ae3"), "restaurantId": ObjectId("64a685757acccfac3d045add"), "messageId": ObjectId("64a685757acccfac3d045ad0") ,"date_first": new Date("2022-01-04") ,"nbReport":1},
   { "_id": ObjectId("64a685757acccaac3d045b06"), "userId": ObjectId("64a685757acccfac3d045ae4"), "restaurantId": ObjectId("64a685757acccfac3d045add"), "messageId": ObjectId("64a685757acccfac3d045ad1") ,"date_first": new Date("2022-01-05") ,"nbReport":1},
   { "_id": ObjectId("64a685757acccaac3d045b07"), "userId": ObjectId("64a685757acccfac3d045ae5"), "restaurantId": ObjectId("64a685757acccfac3d045add"), "messageId": ObjectId("64a685757acccfac3d045ad2") ,"date_first": new Date("2022-01-06") ,"nbReport":1},
+]);
+
+db.getCollection('favorites').insertMany([
+  {"_id": ObjectId("64a685757acccaac3d045b08"), "userId": ObjectId("64a685757acccfac3d045ae0"), "restaurantId": ObjectId("64a685757acccfac3d045ad9")},
+  {"_id": ObjectId("64a685757acccaac3d045b09"), "userId": ObjectId("64a685757acccfac3d045ae1"), "restaurantId": ObjectId("64a685757acccfac3d045ada")}
 ]);

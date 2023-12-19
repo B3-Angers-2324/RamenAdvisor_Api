@@ -8,7 +8,8 @@ export const collections: {
     message?: mongoDB.Collection,
     moderator?: mongoDB.Collection,
     admin?: mongoDB.Collection,
-    report?: mongoDB.Collection
+    report?: mongoDB.Collection,
+    favorite?: mongoDB.Collection
 } = {};
 
 export async function connectToDatabase(){
@@ -24,6 +25,7 @@ export async function connectToDatabase(){
     const moderatorCollection: mongoDB.Collection = db.collection("moderators");
     const adminCollection: mongoDB.Collection = db.collection("admins");
     const reportCollection: mongoDB.Collection = db.collection("reports");
+    const favoriteCollection: mongoDB.Collection = db.collection("favorites");
 
     collections.restaurant = restaurantCollection;
     collections.owner = ownerCollection;
@@ -32,6 +34,7 @@ export async function connectToDatabase(){
     collections.moderator = moderatorCollection;
     collections.admin = adminCollection;
     collections.report = reportCollection;
+    collections.favorite = favoriteCollection;
 
     console.log(`[Server]: Successfully connected to database: ${db.databaseName}`);
 }

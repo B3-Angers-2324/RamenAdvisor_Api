@@ -7,6 +7,7 @@ const OwnerCollection = "owners";
 const ModeratorCollection = "moderators";
 const AdminCollection = "admins";
 const ReportCollection = "reports";
+const FavoriteCollection = "favorites";
 
 use(database);
 
@@ -271,6 +272,26 @@ db.createCollection(
                     description: "The number of report, must be a int and is required"
                 }
             }
+        }}
+    }
+);
+
+db.createCollection(
+    FavoriteCollection,
+    {
+        validator: {$jsonSchema: {
+           bsonType: "object",
+           required: ["userId", "restaurantId"],
+           properties: {
+                userId: {
+                    bsonType: "objectId",
+                    description: "The Id of the user who of the favorite restaurant list"
+                },
+                restaurantId: {
+                    bsonType: "objectId",
+                    description: "The id of the restaurant link to the user"
+                }
+           }
         }}
     }
 );
