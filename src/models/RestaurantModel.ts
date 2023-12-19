@@ -9,12 +9,16 @@ export default class Restaurant{
         public images: any,
         public foodtype: string,
         public id?: ObjectId,
+        public detailNote?: Array<{
+            percentage: number,
+            nbNote: number
+        }>,
         public city?: string,
         public ownerId?: ObjectId,
         public tel?: string,
         public web?: string,
         public email?: string,
         public terrasse?: boolean,
-        public handicape?: boolean,
+        public accessible?: boolean,
     ){}
 }

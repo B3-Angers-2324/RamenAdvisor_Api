@@ -6,5 +6,5 @@ module.exports = {
   collectCoverage: true,
   collectCoverageFrom: ["src/**/*.ts", "!src/**/*.d.ts", "!src/**/*.test.ts"],
   coverageReporters: ['text', 'html'],
-  coverageDirectory: '<rootDir>/coverage/',
+  coverageDirectory: '<rootDir>/coverage/'
 };

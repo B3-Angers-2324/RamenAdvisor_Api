@@ -176,4 +176,70 @@ describe('Test all RestaurantService function', () => {
         });
     });
 
+    describe("Test if restaurantExistsById work correctely", () => {
+        test('restaurantExistsById with valid data', async () => {
+            await db.addDatasToCollection(restaurantCollection, validRestaurantsData);
+
+            // Call the restaurantExistsById function
+            const result = await RestaurantService.restaurantExistsById('64a685757acccfac3d045ad9');
+            
+            // Assert that the result is the expected one
+            expect(result).toBe(true);
+
+            // Test with an invalid id
+            const result2 = await RestaurantService.restaurantExistsById('64a685757acccfac3d045ad8');
+            expect(result2).toBe(false);
+        });
+    });
+
+    describe("Test if updateRestaurantNote work correctely", () => {
+        test('updateRestaurantNote with valid data', async () => {
+            await db.addDatasToCollection(restaurantCollection, validRestaurantsData);
+
+            // Call the updateRestaurantNote function
+            await RestaurantService.updateRestaurantNote(new ObjectId("64a685757acccfac3d045ad9"), 50, [{percentage: 50, nbNote: 1}]);
+            
+            const restaurantUpdated : any= await restaurantCollection.findOne({_id: new ObjectId("64a685757acccfac3d045ad9")});
+
+            // Assert that the result is the expected one
+            expect(restaurantUpdated.note).toEqual(50);
+            expect(restaurantUpdated.detailNote).toEqual([{percentage: 50, nbNote: 1}]);
+        });
+    });
+
+    describe("Test if deleteAllRestaurantsByOwner work correctely", () => {
+        test('deleteAllRestaurantsByOwner with valid data', async () => {
+            await db.addDatasToCollection(restaurantCollection, validRestaurantsData);
+
+            //test if message exist
+            const exist = await restaurantCollection.findOne({ownerId: new ObjectId('64a685757acccfac3d045af9')});
+            expect(exist).not.toBeNull();
+
+            // Call the deleteAllRestaurantsByOwner function
+            await RestaurantService.deleteAllRestaurantsByOwner("64a685757acccfac3d045af9");
+            
+            const result = await restaurantCollection.find({ownerId: new ObjectId("64a685757acccfac3d045af9")}).toArray();
+
+            // Assert that the result has the correct length
+            expect(result.length).toBe(0);
+        });
+    });
+
+    // TODO: Dont work because of the text index dont add the new restaurants
+    // describe("Test if queryRestaurantsWithParam work correctely", () => {
+    //     test('queryRestaurantsWithParam with valid data', async () => {
+    //         await db.addDatasToCollection(restaurantCollection, validRestaurantsData);
+    //         await restaurantCollection.createIndex({name: "text"}, { collation: { locale: "simple" }})
+
+    //         // Call the queryRestaurantsWithParam function
+    //         const result = await RestaurantService.queryRestaurantsWithParam("local_food", true, 3, "Restaurant");
+    //         
+    //         // Assert that the result has the correct length
+    //         expect(result.length).toBe(3);
+
+    //         // Assert that the result is the expected one
+    //         expect(result[0]).toEqual(validRestaurantsData[0]);
+    //     });
+    // });
+
 });

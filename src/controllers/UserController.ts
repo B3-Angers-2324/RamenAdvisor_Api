@@ -1,10 +1,14 @@
 import { Request, Response } from "express";
-import { TRequest } from "../controllers/types/types";
+import { CustomError, TRequest } from "../controllers/types/types";
 import User from "../models/UserModel";
 import jwt from "jsonwebtoken";
 import UserServices from "../services/UserService";
+import MessageService from "../services/MessageService";
 import HttpStatus from "../constants/HttpStatus";
 import CheckInput from "../tools/CheckInput";
+import MessageController from "./MessageController";
+import ImageContoller from "./ImageContoller";
+import { ObjectId } from "mongodb";
 import dotenv from 'dotenv';
 import FavoriteService from "../services/FavoriteService";
 dotenv.config();
@@ -17,8 +21,15 @@ async function login(req: Request, res: Response){
         const user = await UserServices.getOneUser(req.body.email);
         if(user){
             if(user.password === req.body.password){
+
+                const isBan = await UserServices.isBan(user._id?.toString());
+                if(isBan){
+                    throw new Error("You are banned");
+                }
+
                 const secret = process.env.JWT_SECRET_USER || "ASecretPhrase";
                 const token = jwt.sign({_id: user._id?.toString()}, secret, {expiresIn: process.env.JWT_EXPIRES_IN});
+                await UserServices.updateToken(req.body.email, token);
                 res.status(HttpStatus.OK).json({"token": token});
             }else{
                 throw new Error("Wrong password");
@@ -36,6 +47,9 @@ async function login(req: Request, res: Response){
                 break;
             case "User not found":
                 res.status(HttpStatus.NOT_FOUND).json({"message": error.message});
+                break;
+            case "You are banned":
+                res.status(HttpStatus.UNAUTHORIZED).json({"message": error.message});
                 break;
             default:
                 res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while logging in"});
@@ -60,7 +74,7 @@ async function register(req: Request, res: Response){
             ville: req.body.ville,
             address: req.body.address,
             password: req.body.password,
-            image: "http://thispersondoesnotexist.com/",
+            image: new ObjectId("000000000000000000000000"),
             ban: false
         };
         
@@ -72,8 +86,10 @@ async function register(req: Request, res: Response){
 
         if(!CheckInput.dateInferiorToToday(newUser.birthDay)) throw new Error("Invalid birth day");
 
-        const user = await UserServices.getOneUser(newUser.email);
-        if(user){
+        if(!CheckInput.validDateFormat(req.body.birthDay)) throw new Error("Invalid birth day format");
+
+        const mail_used = await UserServices.is_email_used(newUser.email);
+        if(mail_used){
             throw new Error("User already exists");
         }
         const addedUser = await UserServices.addUser(newUser);
@@ -81,6 +97,7 @@ async function register(req: Request, res: Response){
         if(addedUser){
             const secret = process.env.JWT_SECRET_USER || "ASecretPhrase";
             const token = jwt.sign({_id: addedUser.insertedId?.toString()}, secret, {expiresIn: process.env.JWT_EXPIRES_IN});
+            await UserServices.updateToken(req.body.email, token);
             res.status(HttpStatus.CREATED).json({"token": token});
         }else{
             throw new Error("Error while adding user");
@@ -143,6 +160,11 @@ async function updateUserProfile(req: TRequest, res: Response){
             return;
         }
 
+        if(!CheckInput.validDateFormat(req.body.birthDay)){
+            res.status(HttpStatus.BAD_REQUEST).json({"message": "Invalid birth day format"});
+            return;
+        }
+
         let updatedUser : User = {
             firstName: req.body.firstName,
             lastName: req.body.lastName,
@@ -152,7 +174,6 @@ async function updateUserProfile(req: TRequest, res: Response){
             sexe: req.body.sexe,
             ville: req.body.ville,
             address: req.body.address,
-            image: "http://thispersondoesnotexist.com/"
         };
 
         const user = await UserServices.getUserById(id);
@@ -171,17 +192,135 @@ async function updateUserProfile(req: TRequest, res: Response){
     }
 }
 
+async function removeAllUserMessages(id: string){
+    // get all messages from user
+    const messages = await MessageService.queryMessagesForUser(id, 99999999, 0);
+    if(messages == undefined){
+        throw new CustomError("Error while retriving user Messages", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    // recalculate note for each restaurant
+    for(let message of messages){
+        // TODO : could be optimized
+        const note = await MessageController.deleteNotePercentage(message.restaurant._id.toString(), message.note);
+    }
+
+    // delete all messages from user
+    const messagesDeleted = await MessageService.deleteAllMessagesForUser(id);
+    if(!messagesDeleted){
+        throw new CustomError("Error while deleting messages", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    return true;
+}
+
 async function deleteUserProfile(req: TRequest, res: Response){
     try{
         let id = req.token?._id;
+        // get all messages from user
+        const messages = await MessageService.queryMessagesForUser(id, 99999999, 0);
+        if(messages == undefined){
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while deleting user"});
+            return;
+        }
+        // recalculate note for each restaurant
+        for(let message of messages){
+            // TODO : could be optimized
+            const note = await MessageController.deleteNotePercentage(message.restaurant._id.toString(), message.note);
+        }
+
+        // delete profile picture
+        const user = await UserServices.getUserById(id);
+        if(user){
+            if(user.image.toString() != "000000000000000000000000"){
+                // delete old profile picture
+                const result = await ImageContoller.deleteImage(user.image.toString());
+                if(!result){
+                    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
+                    return;
+                }
+            }
+        }
+
+
+        // delete all messages from user
+        removeAllUserMessages(id);
+        // delete user
         const result = await UserServices.deleteUser(id);
         if(result){
             res.status(HttpStatus.OK).json({"message": "User deleted"});
         }else{
-            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while deleting user"});
+            throw new CustomError("Error while deleting user", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-    }catch(error){
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while deleting user"});
+    }catch(error : CustomError | any){
+        console.log(error);
+        res.status(error.code? error.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": error.message? error.message : "Internal server error"});
+    }
+}
+
+async function getUserMessage(req: TRequest, res: Response){
+    try{
+        let id = req.token?._id;
+        if (req.query.limit == undefined || req.query.offset == undefined) throw new CustomError("Missing parameters", HttpStatus.BAD_REQUEST);
+        let limit = parseInt(req.query.limit.toString());
+        let offset = parseInt(req.query.offset.toString());
+        let messages = await MessageService.queryMessagesForUser(id, limit+1, offset);
+        if(messages == undefined) throw new CustomError("No message found", HttpStatus.NOT_FOUND);
+        // check if there is more messages
+        let more = false;
+        if (messages.length > limit) {
+            messages.pop();
+            more = true;
+        }
+        res.status(HttpStatus.OK).json({
+            length: messages.length,
+            messages: messages,
+            more: more
+        });
+    }catch(error : CustomError | any){
+        res.status(error.code? error.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": error.message? error.message : "Internal server error"});
+    }
+}
+
+async function updateUserPP(req: TRequest, res: Response){
+    if(req.file){
+        try{
+            // test if the image is a jpeg or png or jpg
+            if(!CheckInput.isImage(req.file.mimetype)){
+                res.status(HttpStatus.BAD_REQUEST).json({"message": "Invalid image format (jpg, jpeg, png, gif)"});
+                return;
+            }
+
+            // test if the image is under 15Mo
+            if(!CheckInput.isUnder15Mo(req.file.size)){
+                res.status(HttpStatus.BAD_REQUEST).json({"message": "Image is too big (max 15Mo)"});
+                return;
+            }
+
+
+            // test if user already has a profile picture (image = 000000000000000000000000)
+            const user = await UserServices.getUserById(req.token?._id);
+            if(user){
+                if(user.image.toString() != "000000000000000000000000"){
+                    // delete old profile picture
+                    const result = await ImageContoller.deleteImage(user.image.toString());
+                    if(!result){
+                        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
+                        return;
+                    }
+                }
+            }
+
+            // add image to database
+            ImageContoller.addImage(req.file.buffer, req.file.mimetype).then((imageId) => {
+            
+                const result = UserServices.updateUserPP(req.token?._id, imageId);
+                res.status(HttpStatus.OK).json(result);
+            }).catch((error) => {
+                res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
+            });
+        }catch(error){
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
+        }
+        res.status(HttpStatus.OK);
     }
 }
 
@@ -206,12 +345,15 @@ async function addFavorite(req: TRequest, res: Response){
 }
 
 export default {
-    login,
+    login, 
     register,
     getAll,
     getUserProfile,
     updateUserProfile,
     deleteUserProfile,
     getFavorite, 
-    addFavorite
+    addFavorite,
+    getUserMessage,
+    updateUserPP,
+    removeAllUserMessages
 };

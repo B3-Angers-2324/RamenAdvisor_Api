@@ -7,6 +7,8 @@ import dotenv from 'dotenv';
 import RestaurantService from "../services/RestaurantService";
 import { TRequest } from "./types/types";
 import CheckInput from "../tools/CheckInput";
+import MessageService from "../services/MessageService";
+import ImageContoller from "./ImageContoller";
 dotenv.config();
 
 async function login(req: Request, res: Response){
@@ -14,8 +16,22 @@ async function login(req: Request, res: Response){
         const owner = await OwnerServices.getOneOwner(req.body.email);
         if(owner){
             if(owner.password == req.body.password){
+
+                const isBan = await OwnerServices.isBan(owner._id?.toString());
+                if(isBan){
+                    res.status(HttpStatus.UNAUTHORIZED).json({"message": "You are banned"});
+                    return;
+                }
+
+                // const isValidate = await OwnerServices.isValidate(owner._id?.toString());
+                // if(!isValidate){
+                //     res.status(HttpStatus.UNAUTHORIZED).json({"message": "Your account is being validated"});
+                //     return;
+                // }
+
                 const secret = process.env.JWT_SECRET_OWNER || "ASecretPhrase";
                 const token = jwt.sign({_id: owner._id?.toString()}, secret, {expiresIn: process.env.JWT_EXPIRES_IN});
+                await OwnerServices.updateToken(req.body.email, token);
                 res.status(HttpStatus.OK).json({"token": token});
             }else{
                 res.status(HttpStatus.UNAUTHORIZED).json({"message": "Wrong password"});
@@ -58,6 +74,7 @@ async function register(req: Request, res: Response){
         if(addedOwner){
             const secret = process.env.JWT_SECRET_OWNER || "ASecretPhrase";
             const token = jwt.sign({_id: addedOwner.insertedId?.toString()}, secret, {expiresIn: process.env.JWT_EXPIRES_IN});
+            await OwnerServices.updateToken(newOwner.email, token);
             res.status(HttpStatus.CREATED).json({"token": token});
         }else{
             res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while adding owner"});
@@ -152,6 +169,29 @@ async function updateOwnerProfile(req: TRequest, res: Response){
 async function deleteOwnerProfile(req: TRequest, res: Response){
     try{
         let id = req.token?._id;
+        //get all restaurants of the owner
+        const restaurants = await RestaurantService.queryRestaurantsByOwner(id);
+
+        // delete all messages and images of the restaurants
+        restaurants.forEach(async (element) => {
+            // delete all messages of the restaurant
+            await MessageService.deleteAllMessagesForRestaurant(element._id?.toString() || "");
+
+            // delete all images of the restaurant
+            if(element.images.length > 0){
+                // delete all images
+                for(let i = 0; i < element.images.length; i++){
+                    if(element.images[i] != "" && element.images[i] != undefined){
+                        await ImageContoller.deleteImage(element.images[i]);
+                    }
+                }
+            }
+        });
+
+        // delete all restaurants of the owner
+        await RestaurantService.deleteAllRestaurantsByOwner(id);
+
+        // delete the owner
         const result = await OwnerServices.deleteOwner(id);
         if(result){
             res.status(HttpStatus.OK).json({"message": "Owner deleted"});

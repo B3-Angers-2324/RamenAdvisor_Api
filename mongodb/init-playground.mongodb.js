@@ -6,12 +6,54 @@ const UserCollection = "users";
 const OwnerCollection = "owners";
 const ModeratorCollection = "moderators";
 const AdminCollection = "admins";
+const FoodtypeCollection = "foodtypes";
+const ImageCollection = "images";
 const ReportCollection = "reports";
 const FavoriteCollection = "favorites";
 
 use(database);
 
 db.dropDatabase();
+
+db.createCollection(
+    FoodtypeCollection,
+    {
+        validator: { $jsonSchema: {
+            bsonType: "object",
+            required: ["name", "imgId"],
+            properties: {
+                name: {
+                    bsonType: "string",
+                    description: "must be a string and is required"
+                },
+                imgId: {
+                    bsonType: "objectId",
+                    description: "must be a objectId and is required"
+                }
+            }
+        }}
+    }
+);
+
+db.createCollection(
+    ImageCollection,
+    {
+        validator: { $jsonSchema: {
+            bsonType: "object",
+            required: ["binary", "mimetype"],
+            properties: {
+                binary: {
+                    bsonType: "binData",
+                    description: "must be a binData and is required"
+                },
+                mimetype: {
+                    bsonType: "string",
+                    description: "must be a string and is required"
+                }
+            }
+        }}
+    }
+);
 
 db.createCollection(
     MessageCollection,
@@ -34,6 +76,8 @@ db.createCollection(
                 },
                 note: {
                     bsonType: "int",
+                    minimum: 1,
+                    maximum: 5,
                     description: "must be a int and is required"
                 },
                 date: {
@@ -46,47 +90,8 @@ db.createCollection(
 );
 
 db.createCollection(
-    RestaurantCollection,
-    {
-        validator: { $jsonSchema: {
-            bsonType: "object",
-            required: ["ownerId", "name", "position", "address", "foodtype", "note"],
-            properties: {
-                ownerId: {
-                    bsonType: "objectId",
-                    description: "must be a int and is required"
-                },
-                name: {
-                    bsonType: "string",
-                    description: "must be a string and is required"
-                },
-                position: {
-                    bsonType: "array",
-                    description: "must be a array and is required"
-                },
-                address: {
-                    bsonType: "string",
-                    description: "must be a string and is required"
-                },
-                foodtype:{
-                    bsonType: "string",
-                    description: "must be a string and is required"
-                },
-                note: {
-                    bsonType: "int",
-                    minimum: 0,
-                    maximum: 50,
-                    description: "must be a int and is required"
-                },
-                //Need to be changed to Images type
-                images: {
-                    bsonType: "array",
-                    description: "must be a array of string"
-                },
-            }
-        }}
-    }
-);
+    RestaurantCollection
+    );
 
 db.createCollection(
     UserCollection,
@@ -132,9 +137,9 @@ db.createCollection(
                     description: "must be a bool and is required"
                 },
                 image: {
-                    bsonType: "string",
-                    description: "must be a string and is required"
-                }
+                    bsonType: "objectId",
+                    description: "must be a int and is required"
+                },
             }
         }}
     }
@@ -193,16 +198,8 @@ db.createCollection(
     {
         validator: { $jsonSchema: {
             bsonType: "object",
-            required: ["firstName", "lastName", "email", "password"],
+            required: ["email", "password"],
             properties: {
-                firstName: {
-                    bsonType: "string",
-                    description: "must be a string and is required"
-                },
-                lastName: {
-                    bsonType: "string",
-                    description: "must be a string and is required"
-                },
                 email: {
                     bsonType: "string",
                     description: "must be a string and is required"
@@ -221,16 +218,8 @@ db.createCollection(
     {
         validator: { $jsonSchema: {
             bsonType: "object",
-            required: ["firstName", "lastName", "email", "password"],
+            required: ["email", "password"],
             properties: {
-                firstName: {
-                    bsonType: "string",
-                    description: "must be a string and is required"
-                },
-                lastName: {
-                    bsonType: "string",
-                    description: "must be a string and is required"
-                },
                 email: {
                     bsonType: "string",
                     description: "must be a string and is required"

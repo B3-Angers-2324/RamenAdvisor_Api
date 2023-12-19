@@ -22,6 +22,8 @@ export const createMessageCollection = async () : Promise<Collection> => {
                     },
                     note: {
                         bsonType: "int",
+                        minimum: 1,
+                        maximum: 5,
                         description: "must be a int and is required"
                     },
                     date: {
@@ -35,46 +37,8 @@ export const createMessageCollection = async () : Promise<Collection> => {
 }
 
 export const createRestaurantCollection = async () : Promise<Collection> => {
-    await database.createCollection('restaurants',
-        {
-            validator: { $jsonSchema: {
-                bsonType: "object",
-                required: ["ownerId", "name", "position", "address", "foodtype", "note"],
-                properties: {
-                    ownerId: {
-                        bsonType: "objectId",
-                        description: "must be a int and is required"
-                    },
-                    name: {
-                        bsonType: "string",
-                        description: "must be a string and is required"
-                    },
-                    position: {
-                        bsonType: "array",
-                        description: "must be a array and is required"
-                    },
-                    address: {
-                        bsonType: "string",
-                        description: "must be a string and is required"
-                    },
-                    foodtype:{
-                        bsonType: "string",
-                        description: "must be a string and is required"
-                    },
-                    note: {
-                        bsonType: "int",
-                        minimum: 0,
-                        maximum: 50,
-                        description: "must be a int and is required"
-                    },
-                    //Need to be changed to Images type
-                    images: {
-                        bsonType: "array",
-                        description: "must be a array of string"
-                    },
-                }
-            }}
-        });
+    await database.createCollection('restaurants');
+    database.collection('restaurants').createIndex({name: "text"}, { collation: { locale: "simple" }})
     return database.collection('restaurants');
 }
 
@@ -83,7 +47,7 @@ export const createUserCollection = async () : Promise<Collection> => {
         {
             validator: { $jsonSchema: {
                 bsonType: "object",
-                required: ["firstName", "lastName", "birthDay", "email", "phone", "sexe", "password", "ville", "ban"],
+                required: ["firstName", "lastName", "birthDay", "email", "phone", "sexe", "password", "ville", "ban", "image"],
                 properties: {
                     firstName: {
                         bsonType: "string",
@@ -120,7 +84,11 @@ export const createUserCollection = async () : Promise<Collection> => {
                     ban: {
                         bsonType: "bool",
                         description: "must be a bool and is required"
-                    }
+                    },
+                    image: {
+                        bsonType: "objectId",
+                        description: "must be a int and is required"
+                    },
                 }
             }}
         });
@@ -173,16 +141,8 @@ export const createModeratorCollection = async () : Promise<Collection> => {
         {
             validator: { $jsonSchema: {
                 bsonType: "object",
-                required: ["firstName", "lastName", "email", "password"],
+                required: ["email", "password"],
                 properties: {
-                    firstName: {
-                        bsonType: "string",
-                        description: "must be a string and is required"
-                    },
-                    lastName: {
-                        bsonType: "string",
-                        description: "must be a string and is required"
-                    },
                     email: {
                         bsonType: "string",
                         description: "must be a string and is required"
@@ -203,16 +163,8 @@ export const createAdminCollection = async () : Promise<Collection> => {
         {
             validator: { $jsonSchema: {
                 bsonType: "object",
-                required: ["firstName", "lastName", "email", "password"],
+                required: ["email", "password"],
                 properties: {
-                    firstName: {
-                        bsonType: "string",
-                        description: "must be a string and is required"
-                    },
-                    lastName: {
-                        bsonType: "string",
-                        description: "must be a string and is required"
-                    },
                     email: {
                         bsonType: "string",
                         description: "must be a string and is required"
@@ -259,4 +211,46 @@ export const createReportCollection = async () : Promise<Collection> => {
             }}
         });
     return database.collection('reports');
+ }
+
+ export const createFoodTypeCollection = async () : Promise<Collection> => {
+    await database.createCollection('foodtypes', 
+        {
+            validator: { $jsonSchema: {
+                bsonType: "object",
+                required: ["name", "imgId"],
+                properties: {
+                    name: {
+                        bsonType: "string",
+                        description: "must be a string and is required"
+                    },
+                    imgId: {
+                        bsonType: "objectId",
+                        description: "must be a objectId and is required"
+                    }
+                }
+            }}
+        });
+    return database.collection('foodtypes');
+ }
+
+ export const createImageCollection = async () : Promise<Collection> => {
+    await database.createCollection('images', 
+        {
+            validator: { $jsonSchema: {
+                bsonType: "object",
+                required: ["binary", "mimetype"],
+                properties: {
+                    binary: {
+                        bsonType: "binData",
+                        description: "must be a binData and is required"
+                    },
+                    mimetype: {
+                        bsonType: "string",
+                        description: "must be a string and is required"
+                    }
+                }
+            }}
+        });
+    return database.collection('images');
  }

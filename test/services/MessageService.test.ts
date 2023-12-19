@@ -30,7 +30,7 @@ describe('Test all MessageService function', () => {
             restaurantId: new ObjectId('64a685757acccfac3d045aa1'),
             message: "Message 1",
             date: new Date(),
-            note: 30,
+            note: 3,
         },
         {
             _id: new ObjectId('64a685757acccfac3d045aa2'),
@@ -38,7 +38,7 @@ describe('Test all MessageService function', () => {
             restaurantId: new ObjectId('64a685757acccfac3d045aa1'),
             message: "Message 2",
             date: new Date(),
-            note: 50,
+            note: 5,
         },
         {
             _id: new ObjectId('64a685757acccfac3d045aa3'),
@@ -46,7 +46,7 @@ describe('Test all MessageService function', () => {
             restaurantId: new ObjectId('64a685757acccfac3d045aa1'),
             message: "Message 3",
             date: new Date(),
-            note: 40,
+            note: 4,
         },
         {
             _id: new ObjectId('64a685757acccfac3d045aa4'),
@@ -54,7 +54,7 @@ describe('Test all MessageService function', () => {
             restaurantId: new ObjectId('64a685757acccfac3d045aa4'),
             message: "Message 4",
             date: new Date(),
-            note: 30,
+            note: 3,
         },
         {
             _id: new ObjectId('64a685757acccfac3d045aa5'),
@@ -62,7 +62,7 @@ describe('Test all MessageService function', () => {
             restaurantId: new ObjectId('64a685757acccfac3d045aa4'),
             message: "Message 5",
             date: new Date(),
-            note: 50,
+            note: 5,
         }
     ]
 
@@ -84,7 +84,7 @@ describe('Test all MessageService function', () => {
                     ban: false,
                     ville: 'Angers',
                     address: 'test1',
-                    image: 'urlImage1',
+                    image: new ObjectId('64a685757acccfac3d045aa4'),
                 },
                 {
                     _id: new ObjectId('64a685757acccfac3d045aa2'),
@@ -98,7 +98,7 @@ describe('Test all MessageService function', () => {
                     ban: false,
                     ville: 'Angers',
                     address: 'test3',
-                    image: 'urlImage3',
+                    image: new ObjectId('64a685757acccfac3d045aa4'),
                 },
             ];
 
@@ -138,5 +138,95 @@ describe('Test all MessageService function', () => {
             });
         });
 
+    });
+
+
+    describe("Test addMessage function", () => {
+        test('addMessage with valid message', async () => {
+            const result = await MessageService.addMessage(validMessagesData[0]);
+            expect(result).toBeDefined();
+        });
+    });
+
+    describe("Test lasTimeUserSentMessage function", () => {
+        test('lasTimeUserSentMessage with valid userId and restaurantId', async () => {
+            await db.addDatasToCollection(messageCollection, validMessagesData);
+
+            const result = await MessageService.lasTimeUserSentMessage("64a685757acccfac3d045aa1", "64a685757acccfac3d045aa1");
+            expect(result).not.toBeNull();
+        });
+    });
+
+    describe("Test deleteAllMessagesForUser function", () => {
+        test('deleteAllMessagesForUser with valid userId', async () => {
+            await db.addDatasToCollection(messageCollection, validMessagesData);
+
+            //test if message exist
+            const exist = await messageCollection.findOne({userId: new ObjectId('64a685757acccfac3d045aa1')});
+            expect(exist).not.toBeNull();
+
+            await MessageService.deleteAllMessagesForUser("64a685757acccfac3d045aa1");
+
+            const result = await messageCollection.findOne({userId: new ObjectId('64a685757acccfac3d045aa1')});
+            expect(result).toBeNull();
+        });
+    });
+
+    describe("Test deleteAllMessagesForRestaurant function", () => {
+        test('deleteAllMessagesForRestaurant with valid restaurantId', async () => {
+            await db.addDatasToCollection(messageCollection, validMessagesData);
+
+            //test if message exist
+            const exist = await messageCollection.findOne({restaurantId: new ObjectId('64a685757acccfac3d045aa1')});
+            expect(exist).not.toBeNull();
+
+            await MessageService.deleteAllMessagesForRestaurant("64a685757acccfac3d045aa1");
+
+            const result = await messageCollection.findOne({restaurantId: new ObjectId('64a685757acccfac3d045aa1')});
+            expect(result).toBeNull();
+        });
+    });
+
+    describe("Test queryMessagesForUser function", () => {
+        test('queryMessagesForUser with valid userId', async () => {
+            const restaurantCollection = await collectionInit.createRestaurantCollection();
+            collections.restaurant = restaurantCollection as unknown as Collection<Document>;
+
+            const restaurantData = [
+                {
+                    _id: new ObjectId('64a685757acccfac3d045aa1'),
+                    ownerId: new ObjectId('64a685757acccfac3d045aa1'),
+                    name: 'test1',
+                    position: [45, 45],
+                    address: 'test1@gmail.com',
+                    foodtype: 'test1',
+                    note: 3,
+                    images: ['urlImage1', 'urlImage2'],
+                },
+                {
+                    _id: new ObjectId('64a685757acccfac3d045aa4'),
+                    ownerId: new ObjectId('64a685757acccfac3d045aa4'),
+                    name: 'test4',
+                    position: [45, 45],
+                    address: 'test4',
+                    foodtype: 'test4',
+                    note: 3,
+                    images: ['urlImage4', 'urlImage5'],
+                },
+            ];
+
+            await db.addDatasToCollection(restaurantCollection, restaurantData);
+            await db.addDatasToCollection(messageCollection, validMessagesData);
+
+            //test if message exist
+            const result = await MessageService.queryMessagesForUser("64a685757acccfac3d045aa1", 3, 0);
+            expect(result).not.toBeNull();
+            expect((result as any).length).toBe(2);
+
+            //test if message don't exist
+            const result2 = await MessageService.queryMessagesForUser("64a685757acccfac3d045ab1", 3, 0);
+            expect(result2).not.toBeNull();
+            expect((result2 as any).length).toBe(0);
+        });
     });
 });

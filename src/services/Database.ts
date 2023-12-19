@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import * as mongoDB from 'mongodb';
 import dotenv from 'dotenv';
 
@@ -10,6 +12,8 @@ export const collections: {
     admin?: mongoDB.Collection,
     report?: mongoDB.Collection,
     favorite?: mongoDB.Collection
+    foodtype?: mongoDB.Collection,
+    image?: mongoDB.Collection,
 } = {};
 
 export async function connectToDatabase(){
@@ -24,6 +28,8 @@ export async function connectToDatabase(){
     const messageCollection: mongoDB.Collection = db.collection("messages");
     const moderatorCollection: mongoDB.Collection = db.collection("moderators");
     const adminCollection: mongoDB.Collection = db.collection("admins");
+    const foodtypeCollection: mongoDB.Collection = db.collection("foodtypes");
+    const imageCollection: mongoDB.Collection = db.collection("images");
     const reportCollection: mongoDB.Collection = db.collection("reports");
     const favoriteCollection: mongoDB.Collection = db.collection("favorites");
 
@@ -33,8 +39,13 @@ export async function connectToDatabase(){
     collections.message = messageCollection;
     collections.moderator = moderatorCollection;
     collections.admin = adminCollection;
+    collections.foodtype = foodtypeCollection;
+    collections.image = imageCollection;
     collections.report = reportCollection;
     collections.favorite = favoriteCollection;
+
+    // Indexes for restaurants
+    collections.restaurant?.createIndex({name: "text"}, { collation: { locale: "simple" }})
 
     console.log(`[Server]: Successfully connected to database: ${db.databaseName}`);
 }

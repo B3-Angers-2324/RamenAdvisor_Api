@@ -61,8 +61,8 @@ const updateReport = async (report: Report) => {
     return result;
 }
 
-const queryReportedMessages = async (limit: number, offset: number) => {
-    let result = await collections.report?.aggregate([
+const queryReportedMessages = async (limit: number, offset: number, restaurantName:string)  => {
+    let params = [
         { $lookup: { from: 'users', localField: 'userId', foreignField: '_id', as: 'user' } },
         { $unwind: '$user' },
         { $lookup: { from: 'messages', localField: 'messageId', foreignField: '_id', as: 'message' } },
@@ -72,7 +72,9 @@ const queryReportedMessages = async (limit: number, offset: number) => {
         { $sort: { date_first: 1 } },
         { $limit: limit },
         { $skip: offset }
-    ]).toArray();
+    ] as any[];
+    if (restaurantName != "") params = [...params , { $match: { "restaurant.name": { $regex: restaurantName, $options: 'i' } } }]
+    let result = await collections.report?.aggregate(params).toArray();
     return result;
 }
 

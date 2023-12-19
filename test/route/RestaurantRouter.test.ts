@@ -12,7 +12,10 @@ jest.mock('../../src/controllers/RestaurantController', () => ({
     getBestRestaurants: jest.fn((req, res : Response) => res.json()),
     getRestaurantById: jest.fn((req, res : Response) => res.json()),
     createRestaurant: jest.fn((req, res : Response) => res.json()),
-    updateRestaurant: jest.fn((req, res : Response) => res.json())
+    updateRestaurant: jest.fn((req, res : Response) => res.json()),
+    getRestaurantSearch: jest.fn((req, res : Response) => res.json()),
+    updateRestaurantImage: jest.fn((req, res : Response) => res.json()),
+    deleteRestaurant: jest.fn((req, res : Response) => res.json()),
 }));
 
 describe('Test the /restaurant paths', () => {
@@ -39,5 +42,17 @@ describe('Test the /restaurant paths', () => {
         await request.put(`${base_url}/restaurant/id/123`);
         // Assert that UserController.login was called
         expect(RestaurantController.updateRestaurant).toHaveBeenCalled();
+    });
+    test('The /image/:uid route with a patch should call the function on the controller', async () => {
+        // Make a POST request to the /user/login endpoint
+        await request.patch(`${base_url}/restaurant/id/123/1`);
+        // Assert that UserController.login was called
+        expect(RestaurantController.updateRestaurantImage).toHaveBeenCalled();
+    });
+    test('The /id/:uid route with a delete should call the function on the controller', async () => {
+        // Make a POST request to the /user/login endpoint
+        await request.delete(`${base_url}/restaurant/id/123`);
+        // Assert that UserController.login was called
+        expect(RestaurantController.deleteRestaurant).toHaveBeenCalled();
     });
 });

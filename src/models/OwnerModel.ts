@@ -11,6 +11,6 @@ export default class Owner{
         public validate: boolean,
         public ban?: boolean,
         public id?: ObjectId,
-        public siret?: string,
+        public siret?: string
     ){}
 }

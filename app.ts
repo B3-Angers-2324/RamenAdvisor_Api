@@ -35,7 +35,7 @@ if(process.env.NODE_ENV === "dev") {
                 methode = `\x1b[0m ${req.method}`;
                 break;
         }
-        console.log(`[Server]: ${methode}  ${req.path}`);
+        console.log(`${methode} ${req.originalUrl}`);
         next();
     });
 }
