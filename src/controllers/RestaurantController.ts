@@ -89,7 +89,7 @@ const createRestaurant = (req: TRequest, res: Response) => {
                 position: req.body.position,
                 handicap: req.body.handicap,
                 ownerId: new ObjectId(req.token._id),
-                note: 10,
+                note: 0,
                 images: [],
                 detailNote: [{"percentage": 0, "nbNote": 0},{"percentage": 0, "nbNote": 0},{"percentage": 0, "nbNote": 0},{"percentage": 0, "nbNote": 0},{"percentage": 0, "nbNote": 0}]
             }
