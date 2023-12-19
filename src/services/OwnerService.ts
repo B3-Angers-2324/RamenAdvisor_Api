@@ -67,8 +67,8 @@ async function isBan(id: string): Promise<any> {
     return result;
 }
 
-async function isValidate(email: string): Promise<any> {
-    const result = await collections.owner?.findOne({email: email, validate: true});
+async function isValidate(id: string): Promise<any> {
+    const result = await collections.owner?.findOne({_id: new ObjectId(id), validate: true});
     return result;
 }
 
