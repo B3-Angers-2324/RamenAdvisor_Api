@@ -147,6 +147,9 @@ async function banOwner (req: TRequest, res: Response) {
         }
     }catch(error){
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while updating owner information"});
+    }
+}
+
 async function nav(req: TRequest, res: Response){
 
     // TODO: add the content of the navbar
@@ -159,7 +162,7 @@ async function nav(req: TRequest, res: Response){
         responseData["ad"] = true;
     }
     res.status(HttpStatus.OK).json(responseData);
-};
+}
 
 
 async function getUsers(req: TRequest, res: Response){
@@ -328,4 +331,4 @@ export default {
     addModerator,
     deleteModerator,
     getModerators
-};
+}
