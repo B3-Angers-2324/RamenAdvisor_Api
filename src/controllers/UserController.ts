@@ -214,17 +214,6 @@ async function removeAllUserMessages(id: string){
 async function deleteUserProfile(req: TRequest, res: Response){
     try{
         let id = req.token?._id;
-        // get all messages from user
-        const messages = await MessageService.queryMessagesForUser(id, 99999999, 0);
-        if(messages == undefined){
-            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while deleting user"});
-            return;
-        }
-        // recalculate note for each restaurant
-        for(let message of messages){
-            // TODO : could be optimized
-            const note = await MessageController.deleteNotePercentage(message.restaurant._id.toString(), message.note);
-        }
 
         // delete profile picture
         const user = await UserServices.getUserById(id);
@@ -239,9 +228,9 @@ async function deleteUserProfile(req: TRequest, res: Response){
             }
         }
 
-
         // delete all messages from user
         removeAllUserMessages(id);
+
         // delete user
         const result = await UserServices.deleteUser(id);
         if(result){

@@ -3,7 +3,7 @@ import { collections } from './Database';
 import User from '../models/UserModel';
 
 async function getOneUser(email: string): Promise<any> {
-    const user = await collections.user?.findOne({email: email, ban: false});
+    const user = await collections.user?.findOne({email: email});
     return user;
 }
 
