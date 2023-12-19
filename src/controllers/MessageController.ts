@@ -180,11 +180,12 @@ const addMessage = async (req: TRequest, res: Response) => {
 
 // refactor this function to juste update the note percentage and not add a new note
 async function addNotePercentage(restaurantId : string , newNote : number){
-    computeNotePercentage(restaurantId,newNote);
+    await computeNotePercentage(restaurantId,newNote);
 }
 
 async function deleteNotePercentage(restaurantId : string , newNote : number){
-    computeNotePercentage(restaurantId,newNote, -1);
+    await computeNotePercentage(restaurantId,newNote, -1);
+    console.log("delete note percentage :", newNote, "restaurantId :", restaurantId, "value : -1");
 }
 
 async function computeNotePercentage(restaurantId : string , newNote : number, value : number = 1){
@@ -216,6 +217,9 @@ async function computeNotePercentage(restaurantId : string , newNote : number, v
         });
         //update the restaurant in the database
         await RestaurantService.updateRestaurantNote(restaurant._id,newglobalnote,newPercentage);
+        
+        console.log("New note : " + newNote + " value : " + value + " nbNote : " + restaurant.detailNote[newNote-1].nbNote)
+        console.log(restaurant.detailNote)
     }catch(e){
     }
 }
@@ -223,6 +227,7 @@ async function computeNotePercentage(restaurantId : string , newNote : number, v
 async function deleteMessage(req: TRequest, res: Response){
     UserMiddleware.userLoginMiddleware(req,res,async ()=>{
         try{
+            console.log("ZOne delete message")
             let userId = req.token._id;
             if (req.params.uid===undefined) throw new CustomError("No messageID provided", HttpStatus.BAD_REQUEST);
             let messageId = req.params.uid;
