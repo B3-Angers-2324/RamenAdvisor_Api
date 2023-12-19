@@ -74,7 +74,7 @@ const getRestaurantById = async (req: Request, res: Response) =>{
 const createRestaurant = (req: TRequest, res: Response) => {
     OwnerMiddleware.ownerLoginMiddleware(req, res, async () => {
         try{
-            if(!CheckInput.areNotEmpty([req.body.name, req.body.address, req.body.city, req.body.foodtype, req.body.position, req.body.handicap])){
+            if(!CheckInput.areNotEmpty([req.body.name, req.body.address, req.body.city, req.body.foodtype, req.body.position, req.body.accessible])){
                 throw(new CustomError("Missing parameters", HttpStatus.BAD_REQUEST));
             }
             if(req.body.tel != "" && !CheckInput.phone(req.body.tel)){
@@ -87,7 +87,7 @@ const createRestaurant = (req: TRequest, res: Response) => {
                 tel: req.body.tel,
                 foodtype: req.body.foodtype,
                 position: req.body.position,
-                handicap: req.body.handicap,
+                accessible: req.body.accessible,
                 ownerId: new ObjectId(req.token._id),
                 note: 0,
                 images: [],
@@ -111,7 +111,7 @@ const createRestaurant = (req: TRequest, res: Response) => {
 const updateRestaurant = (req: Request, res: Response) => {
     OwnerMiddleware.ownerLoginMiddleware(req, res, async () => {
         try{
-            if(!CheckInput.areNotEmpty([req.body.name, req.body.address, req.body.city, req.body.foodtype, req.body.position, req.body.handicap])){
+            if(!CheckInput.areNotEmpty([req.body.name, req.body.address, req.body.city, req.body.foodtype, req.body.position, req.body.accessible])){
                 throw(new CustomError("Missing parameters", HttpStatus.BAD_REQUEST));
             }
             if(req.body.tel != "" && !CheckInput.phone(req.body.tel)){
