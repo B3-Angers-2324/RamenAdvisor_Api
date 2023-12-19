@@ -26,7 +26,9 @@ router.delete("/profile", UserController.deleteUserProfile);
 
 router.get("/getFavorite", UserController.getFavorite);
 
-router.get("/addFavorite", UserController.addFavorite);
+router.patch("/addOrDeleteFavorite/:restId", UserController.toggleAddOrDeleteFavorite);
+
+router.get("/checkFavorite/:restId", UserController.getOneFavorite);
 
 router.patch("/pp", upload.single('image'), UserController.updateUserPP);
 

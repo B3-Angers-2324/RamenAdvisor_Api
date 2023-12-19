@@ -11,6 +11,11 @@ async function addFavorite(favorite: Favorite): Promise<any> {
     }
 }
 
+async function deleteFavorite(userId: string, restId: string): Promise<any> {
+    const result = await collections.favorite?.deleteOne({userId: new ObjectId(userId), restaurantId: new ObjectId(restId)});
+    return result;
+}
+
 async function getFavoriteByUser (id: string) {
     try {
         let params = [
@@ -29,11 +34,22 @@ async function getFavoriteByUser (id: string) {
                 $unwind: '$restaurant'
             },
             {
+                $lookup: {
+                    from: 'foodtypes', 
+                    localField: 'restaurant.foodtype',
+                    foreignField: 'name',
+                    as: 'foodtype'
+                }
+            },
+            {
+                $unwind: '$foodtype'
+            },
+            {
                 $project: {
                     _id: 0,
                     'restaurant.name': 1,
-                    'restaurant.type': 1,
-                    'restaurant.note': 1 
+                    'foodtype.imgId': 1,
+                    'restaurant.note': 1
                 }
             }
         ] as any[];
@@ -45,7 +61,18 @@ async function getFavoriteByUser (id: string) {
     }
 }
 
+async function getFavoriteExist (userId: string, restaurantId: string) : Promise<any> {
+    try {
+        let favorite = await collections.favorite?.findOne({userId: new ObjectId(userId), restaurantId: new ObjectId(restaurantId)});
+        return favorite;
+    }catch(error){
+        throw error;
+    }
+}
+
 export default {
     addFavorite,
-    getFavoriteByUser
+    deleteFavorite,
+    getFavoriteByUser,
+    getFavoriteExist
 }as const;

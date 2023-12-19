@@ -11,6 +11,7 @@ import ImageContoller from "./ImageContoller";
 import { ObjectId } from "mongodb";
 import dotenv from 'dotenv';
 import FavoriteService from "../services/FavoriteService";
+import Favorite from "../models/FavoriteModel";
 dotenv.config();
 
 async function login(req: Request, res: Response){
@@ -335,12 +336,40 @@ async function getFavorite(req: TRequest, res: Response){
     
 }
 
-async function addFavorite(req: TRequest, res: Response){
+async function toggleAddOrDeleteFavorite(req: TRequest, res: Response){
     try {
-        let id = req.token?._id;
-        console.log("restaurantId: ", id);
-    }catch(error){
+        let userId = req.token?._id;
+        let restId = req.params.restId;
 
+        let testFavorite = await FavoriteService.getFavoriteExist(userId, restId);
+        if (testFavorite == null) {
+            let newFavorite : Favorite = {
+                userId: new ObjectId(userId), 
+                restaurantId: new ObjectId(restId)
+            }
+            await FavoriteService.addFavorite(newFavorite);
+            res.status(HttpStatus.OK).json({data: "add"})
+        }
+        else {
+            await FavoriteService.deleteFavorite(userId, restId);
+            res.status(HttpStatus.OK).json({data: "remove"})
+        }
+    }catch(error){
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
+    }
+}
+
+async function getOneFavorite (req: TRequest, res: Response) {
+    try {   
+        let favorite = await FavoriteService.getFavoriteExist(req.token?._id, req.params.restId);
+        if (favorite != null){
+            res.status(HttpStatus.OK).json({data: "liked"})
+        }
+        else {
+            res.status(HttpStatus.OK).json({data: "unliked"})
+        }
+    }catch (error){
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Internal server error"});
     }
 }
 
@@ -352,8 +381,9 @@ export default {
     updateUserProfile,
     deleteUserProfile,
     getFavorite, 
-    addFavorite,
+    toggleAddOrDeleteFavorite,
     getUserMessage,
     updateUserPP,
-    removeAllUserMessages
+    removeAllUserMessages,
+    getOneFavorite
 };
