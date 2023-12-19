@@ -29,10 +29,11 @@ const ownerLoginMiddleware = async (req: TRequest, res: Response, next: NextFunc
             throw new Error("You are banned");
         }
 
-        // const isValidate = await OwnerService.isValidate(req.token?._id);
-        // if(!isValidate){
-        //     throw new Error("Your account is being validated");
-        // }
+        const isValidate = await OwnerService.isValidate(req.token?._id);
+        if(!isValidate){
+            res.status(HttpStatus.I_AM_A_TEAPOT).json({"message": "Your account is being validated"});
+            return;
+        }
 
         next();
     }catch(error){
