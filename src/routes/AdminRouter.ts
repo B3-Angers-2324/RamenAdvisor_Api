@@ -33,6 +33,7 @@ router.get("/user/message/:uid", Admin.getUserMessage);
 
 router.patch("/user/ban/:uid", Admin.banUser);
 
+router.patch("/deleteOwner/:uid", Admin.deleteOwnerProfile)
 
 // Route for admin only
 
