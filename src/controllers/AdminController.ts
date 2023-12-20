@@ -15,6 +15,7 @@ import Moderator from "../models/ModeratorModel";
 import CheckInput from "../tools/CheckInput";
 import UserController from "./UserController";
 import ImageContoller from "./ImageContoller";
+import OwnerController from "./OwnerController";
 dotenv.config();
 
 async function login(req: Request, res: Response){
@@ -132,6 +133,9 @@ async function getRestaurantsByOwner(req: TRequest, res: Response){
 
 async function banOwner (req: TRequest, res: Response) {
     try{
+        // function only for admin
+        if(!req.admin) res.status(HttpStatus.UNAUTHORIZED).json({"message": "Unauthorized"});
+
         let id = req.params.uid;
         const owner = await OwnerServices.getOwnerById(id);
         owner.ban = true;
@@ -317,38 +321,11 @@ async function getModerators(req: TRequest, res: Response){
 
 async function deleteOwnerProfile(req: TRequest, res: Response){
     try{
-        let id = req.params?.uid;
-        //get all restaurants of the owner
-        const restaurants = await RestaurantService.queryRestaurantsByOwner(id);
+        if(!req.admin) throw new CustomError("Unauthorized", HttpStatus.UNAUTHORIZED);
 
-        // delete all messages and images of the restaurants
-        restaurants.forEach(async (element) => {
-            // delete all messages of the restaurant
-            await MessageService.deleteAllMessagesForRestaurant(element._id?.toString() || "");
-
-            // delete all images of the restaurant
-            if(element.images.length > 0){
-                // delete all images
-                for(let i = 0; i < element.images.length; i++){
-                    if(element.images[i] != "" && element.images[i] != undefined){
-                        await ImageContoller.deleteImage(element.images[i]);
-                    }
-                }
-            }
-        });
-
-        // delete all restaurants of the owner
-        await RestaurantService.deleteAllRestaurantsByOwner(id);
-
-        // delete the owner
-        const result = await OwnerServices.deleteOwner(id);
-        if(result){
-            res.status(HttpStatus.OK).json({"message": "Owner deleted"});
-        }else{
-            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while deleting owner"});
-        }
-    }catch(error){
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while deleting owner"});
+        await OwnerController.deleteOwnerProfileContent(req.params.uid, res);
+    }catch(e: CustomError | any){
+        res.status(e.code? e.code : HttpStatus.INTERNAL_SERVER_ERROR).json({"message": e.code? e.message : "Error while getting moderators"});
     }
 }
 

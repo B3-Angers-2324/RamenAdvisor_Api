@@ -9,6 +9,7 @@ import { TRequest } from "./types/types";
 import CheckInput from "../tools/CheckInput";
 import MessageService from "../services/MessageService";
 import ImageContoller from "./ImageContoller";
+import FavoriteService from "../services/FavoriteService";
 dotenv.config();
 
 async function login(req: Request, res: Response){
@@ -166,38 +167,45 @@ async function updateOwnerProfile(req: TRequest, res: Response){
     }
 }
 
-async function deleteOwnerProfile(req: TRequest, res: Response){
-    try{
-        let id = req.token?._id;
-        //get all restaurants of the owner
-        const restaurants = await RestaurantService.queryRestaurantsByOwner(id);
+async function deleteOwnerProfileContent(id: string, res: Response){
+    //get all restaurants of the owner
+    const restaurants = await RestaurantService.queryRestaurantsByOwner(id);
 
-        // delete all messages and images of the restaurants
-        restaurants.forEach(async (element) => {
-            // delete all messages of the restaurant
-            await MessageService.deleteAllMessagesForRestaurant(element._id?.toString() || "");
+    // delete all messages and images of the restaurants
+    restaurants.forEach(async (element) => {
+        // delete all messages of the restaurant
+        await MessageService.deleteAllMessagesForRestaurant(element._id?.toString() || "");
 
-            // delete all images of the restaurant
-            if(element.images.length > 0){
-                // delete all images
-                for(let i = 0; i < element.images.length; i++){
-                    if(element.images[i] != "" && element.images[i] != undefined){
-                        await ImageContoller.deleteImage(element.images[i]);
-                    }
+        // delete all images of the restaurant
+        if(element.images.length > 0){
+            // delete all images
+            for(let i = 0; i < element.images.length; i++){
+                if(element.images[i] != "" && element.images[i] != undefined){
+                    await ImageContoller.deleteImage(element.images[i]);
                 }
             }
-        });
-
-        // delete all restaurants of the owner
-        await RestaurantService.deleteAllRestaurantsByOwner(id);
-
-        // delete the owner
-        const result = await OwnerServices.deleteOwner(id);
-        if(result){
-            res.status(HttpStatus.OK).json({"message": "Owner deleted"});
-        }else{
-            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while deleting owner"});
         }
+
+        // delete all favorite of the restaurant
+        await FavoriteService.deleteFavoriteByRestaurant(element._id?.toString() || "");
+    });
+
+    // delete all restaurants of the owner
+    await RestaurantService.deleteAllRestaurantsByOwner(id);
+    // delete the owner
+    const result = await OwnerServices.deleteOwner(id);
+    if(result){
+        res.status(HttpStatus.OK).json({"message": "Owner deleted"});
+    }else{
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while deleting owner"});
+    }
+}
+
+async function deleteOwnerProfile(req: TRequest, res: Response){
+    try{
+        let id = req.token?._id || "";
+        
+        deleteOwnerProfileContent(id, res);
     }catch(error){
         res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({"message": "Error while deleting owner"});
     }
@@ -211,5 +219,6 @@ export default {
     getOwnerProfile,
     updateOwnerProfile,
     deleteOwnerProfile,
-    getAllOwner
+    getAllOwner,
+    deleteOwnerProfileContent
 };

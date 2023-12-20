@@ -233,6 +233,9 @@ async function deleteUserProfile(req: TRequest, res: Response){
         // delete all messages from user
         removeAllUserMessages(id);
 
+        // delete all favorites from user
+        await FavoriteService.deleteFavoriteByUser(id);
+
         // delete user
         const result = await UserServices.deleteUser(id);
         if(result){

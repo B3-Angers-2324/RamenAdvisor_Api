@@ -7,6 +7,7 @@ import OwnerMiddleware from "../middleware/OwnerMiddleware";
 import CheckInput from "../tools/CheckInput";
 import ImageContoller from "./ImageContoller";
 import MessageService from "../services/MessageService";
+import FavoriteService from "../services/FavoriteService";
 
 /**
  * Function to get the best restaurants in the database
@@ -214,6 +215,9 @@ const deleteRestaurant = async (req: TRequest, res: Response) => {
                     }
                 }
             }
+
+            // delete all favorite of the restaurant
+            await FavoriteService.deleteFavoriteByRestaurant(req.params.uid);
 
             //delete all messages
             await MessageService.deleteAllMessagesForRestaurant(req.params.uid);

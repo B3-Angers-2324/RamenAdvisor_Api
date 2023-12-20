@@ -33,8 +33,6 @@ router.get("/user/message/:uid", Admin.getUserMessage);
 
 router.patch("/user/ban/:uid", Admin.banUser);
 
-router.patch("/deleteOwner/:uid", Admin.deleteOwnerProfile)
-
 // Route for admin only
 
 router.get("/moderator", Admin.getModerators);
@@ -42,6 +40,8 @@ router.get("/moderator", Admin.getModerators);
 router.post("/moderator", Admin.addModerator);
 
 router.delete("/moderator/:mid", Admin.deleteModerator);
+
+router.delete("/deleteOwner/:uid", Admin.deleteOwnerProfile)
 
 
 export default router;

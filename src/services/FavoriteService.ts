@@ -16,6 +16,16 @@ async function deleteFavorite(userId: string, restId: string): Promise<any> {
     return result;
 }
 
+async function deleteFavoriteByRestaurant(restId: string): Promise<any> {
+    const result = await collections.favorite?.deleteMany({restaurantId: new ObjectId(restId)});
+    return result;
+}
+
+async function deleteFavoriteByUser(userId: string): Promise<any> {
+    const result = await collections.favorite?.deleteMany({userId: new ObjectId(userId)});
+    return result;
+}
+
 async function getFavoriteByUser (id: string) {
     try {
         let params = [
@@ -75,5 +85,7 @@ export default {
     addFavorite,
     deleteFavorite,
     getFavoriteByUser,
-    getFavoriteExist
+    getFavoriteExist,
+    deleteFavoriteByRestaurant,
+    deleteFavoriteByUser
 }as const;
