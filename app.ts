@@ -12,33 +12,31 @@ app.use(cors({
     origin: '*'
 }));
 
-if(process.env.NODE_ENV === "dev") {
-    app.use((req, res, next) => {
-        var methode;
-        switch(req.method){
-            case "GET":
-                methode = `\x1b[1m\x1b[42;1m ${req.method} \x1b[0m`;
-                break;
-            case "POST":
-                methode = `\x1b[1m\x1b[43;1m ${req.method} \x1b[0m`;
-                break;
-            case "PUT":
-                methode = `\x1b[1m\x1b[44;1m ${req.method} \x1b[0m`;
-                break;
-            case "DELETE":
-                methode = `\x1b[1m\x1b[41;1m ${req.method} \x1b[0m`;
-                break;
-            case "PATCH":
-                methode = `\x1b[1m\x1b[45;1m ${req.method} \x1b[0m`;
-                break;
-            default:
-                methode = `\x1b[0m ${req.method}`;
-                break;
-        }
-        console.log(`${methode} ${req.originalUrl}`);
-        next();
-    });
-}
+app.use((req, res, next) => {
+    var methode;
+    switch(req.method){
+        case "GET":
+            methode = `\x1b[1m\x1b[42;1m ${req.method} \x1b[0m`;
+            break;
+        case "POST":
+            methode = `\x1b[1m\x1b[43;1m ${req.method} \x1b[0m`;
+            break;
+        case "PUT":
+            methode = `\x1b[1m\x1b[44;1m ${req.method} \x1b[0m`;
+            break;
+        case "DELETE":
+            methode = `\x1b[1m\x1b[41;1m ${req.method} \x1b[0m`;
+            break;
+        case "PATCH":
+            methode = `\x1b[1m\x1b[45;1m ${req.method} \x1b[0m`;
+            break;
+        default:
+            methode = `\x1b[0m ${req.method}`;
+            break;
+    }
+    console.log(`${methode} ${req.originalUrl}`);
+    next();
+});
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
